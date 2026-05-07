@@ -22,6 +22,7 @@ func SetupRouter() *gin.Engine {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.GET("/health", handler.HealthCheck)
+	r.GET("/ping", handler.Ping)
 
 	registerAPIRoutes(r, "/api")
 	registerAPIRoutes(r, "/api/v1")
