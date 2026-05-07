@@ -8,10 +8,6 @@ on:
       - '.github/workflows/deploy-backend.yml'
   workflow_dispatch:
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/yuanzi-backend
-
 jobs:
   # ============================================================
   # Job 1: Test
@@ -31,103 +27,27 @@ jobs:
         run: go test ./... -v
 
   # ============================================================
-  # Job 2: Build & Push Docker image → ghcr.io
+  # Job 2: Deploy to Cloudflare Containers
   # ============================================================
-  docker:
-    needs: test
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Log in to ghcr.io
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=sha,prefix=,format=short
-            type=ref,event=branch
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: yuanzi-backend
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-  # ============================================================
-  # Job 3: Deploy Go WASM to Cloudflare Workers
-  # ============================================================
-  deploy-worker:
+  deploy:
     needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
+      - name: Install Node
+        uses: actions/setup-node@v4
         with:
-          go-version: '1.24'
+          node-version: '22'
 
-      - name: Build Go WASM
+      - name: Install Worker dependencies
         working-directory: yuanzi-backend
-        run: |
-          mkdir -p dist
-          GOOS=js GOARCH=wasm go build -o dist/backend.wasm ./main.go
-          cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" dist/
+        run: npm install
 
-      - name: Assemble Worker bundle
-        run: |
-          cat > yuanzi-backend/dist/index.js << 'ENDWORKER'
-          // Cloudflare Worker for 小园子 Go WASM backend
-          
-          function uint8ArrayToBase64(arr) {
-            let binary = '';
-            for (let i = 0; i < arr.byteLength; i++) {
-              binary += String.fromCharCode(arr[i]);
-            }
-            return btoa(binary);
-          }
-          
-          export default {
-            async fetch(request, env, ctx) {
-              // For now, return health check
-              // Go WASM integration requires Node.js compatibility
-              // which Cloudflare Workers' V8 isolates don't fully support.
-              // TODO: Migrate to Cloudflare Workers Go SDK or use a
-              // container-based deployment for the Go backend.
-              return new Response(JSON.stringify({
-                status: "ok",
-                service: "yuanzi-backend",
-                version: "go-wasm-worker",
-                timestamp: new Date().toISOString(),
-                endpoints: {
-                  docker: "ghcr.io/ttsths/babygarden/yuanzi-backend:latest"
-                }
-              }), {
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Access-Control-Allow-Origin': '*'
-                }
-              });
-            }
-          };
-          ENDWORKER
-
-      - name: Deploy to Cloudflare Workers
+      - name: Deploy to Cloudflare Containers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --name yuanzi-backend --compatibility-date 2026-05-07 yuanzi-backend/dist/index.js
+          workingDirectory: yuanzi-backend
+          command: deploy
