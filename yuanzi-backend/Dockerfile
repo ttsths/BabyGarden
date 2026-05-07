@@ -43,5 +43,5 @@ RUN mkdir -p logs
 # 暴露端口
 EXPOSE 8080
 
-# 启动应用
-CMD ["./yuanzi-backend"]
+# 启动应用 (CF Containers 只读 ENTRYPOINT，不读 CMD)
+ENTRYPOINT ["./yuanzi-backend"]
