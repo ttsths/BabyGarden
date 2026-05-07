@@ -18,6 +18,7 @@ type JWTClaims struct {
 	UserID   string `json:"user_id"`
 	Phone    string `json:"phone"`
 	Nickname string `json:"nickname"`
+	IsAdmin  bool   `json:"is_admin"`
 	jwt.RegisteredClaims
 }
 

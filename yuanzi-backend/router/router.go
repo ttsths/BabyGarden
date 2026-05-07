@@ -3,6 +3,7 @@ package router
 import (
 	"yuanzi-backend/config"
 	"yuanzi-backend/handler"
+	"yuanzi-backend/handler/admin"
 	"yuanzi-backend/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -26,6 +27,43 @@ func SetupRouter() *gin.Engine {
 
 	registerAPIRoutes(r, "/api")
 	registerAPIRoutes(r, "/api/v1")
+
+	// Admin routes - authenticated with admin middleware
+	adminGroup := r.Group("/api/v1/admin")
+	adminGroup.POST("/login", admin.AdminLogin)
+
+	adminAuth := r.Group("/api/v1/admin")
+	adminAuth.Use(middleware.AdminAuth())
+
+	// User management
+	adminAuth.GET("/users", admin.GetUsers)
+	adminAuth.GET("/users/:id", admin.GetUser)
+	adminAuth.PUT("/users/:id/status", admin.UpdateUserStatus)
+	adminAuth.DELETE("/users/:id", admin.DeleteUser)
+
+	// Family management
+	adminAuth.GET("/families", admin.GetFamilies)
+	adminAuth.GET("/families/:id", admin.GetFamily)
+	adminAuth.DELETE("/families/:id", admin.DeleteFamily)
+
+	// Baby management
+	adminAuth.GET("/babies", admin.GetBabies)
+	adminAuth.GET("/babies/:id", admin.GetBaby)
+	adminAuth.DELETE("/babies/:id", admin.DeleteBaby)
+
+	// Photo management
+	adminAuth.GET("/photos", admin.GetPhotos)
+	adminAuth.GET("/photos/:id", admin.GetPhoto)
+	adminAuth.DELETE("/photos/:id", admin.DeletePhoto)
+
+	// Record management
+	adminAuth.GET("/records", admin.GetRecords)
+	adminAuth.GET("/records/:id", admin.GetRecord)
+	adminAuth.DELETE("/records/:id", admin.DeleteRecord)
+
+	// Statistics
+	adminAuth.GET("/stats/overview", admin.GetStatsOverview)
+	adminAuth.GET("/stats/daily", admin.GetDailyStats)
 
 	return r
 }

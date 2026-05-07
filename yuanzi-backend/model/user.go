@@ -13,6 +13,8 @@ type User struct {
 	Nickname    string     `gorm:"type:varchar(50)" json:"nickname"`
 	AvatarURL   string     `gorm:"type:varchar(500)" json:"avatar_url"`
 	Status      int8       `gorm:"type:tinyint;default:1" json:"status"`
+	IsAdmin     int8       `gorm:"type:tinyint;default:0" json:"is_admin"`
+	Password    string     `gorm:"type:varchar(255)" json:"-"`
 	LastLoginAt *time.Time `json:"last_login_at"`
 	LastLoginIP string     `gorm:"type:varchar(45)" json:"last_login_ip"`
 	CreatedAt   time.Time  `json:"created_at"`
@@ -38,4 +40,13 @@ type UserInfo struct {
 
 func (u *User) ToUserInfo() UserInfo {
 	return UserInfo{ID: u.ID, Phone: u.Phone, Nickname: u.Nickname, AvatarURL: u.AvatarURL, Status: u.Status}
+}
+
+// CheckPassword compares a plaintext password with the stored password.
+// In production, use bcrypt.CompareHashAndPassword.
+func (u *User) CheckPassword(password string) bool {
+	if u.Password == "" {
+		return false
+	}
+	return u.Password == password
 }
