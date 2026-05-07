@@ -1,0 +1,28 @@
+name = "yuanzi-backend"
+main = "src/index.js"
+compatibility_date = "2026-05-07"
+
+# ---- Container 配置 ----
+# 每个容器实例对应一个 Durable Object，Worker 通过 DO 转发请求
+[[containers]]
+class_name = "YuanziBackend"
+image = "./Dockerfile"
+max_instances = 3
+
+# ---- Durable Object 绑定 ----
+# 将容器 DO 绑定为 Worker 可用的 binding
+[[durable_objects.bindings]]
+name = "YUANZI_BACKEND"
+class_name = "YuanziBackend"
+
+# ---- DO Migration ----
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["YuanziBackend"]
+
+# ---- 环境变量 ----
+[vars]
+ENV = "production"
+
+# ---- 路由 ----
+# Workers 子域名: yuanzi-backend.<subdomain>.workers.dev
