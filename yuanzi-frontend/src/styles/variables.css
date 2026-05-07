@@ -1,0 +1,140 @@
+/* 全局 CSS 变量定义 - 匹配 Stitch 设计系统 (stitch_yuanzi_baby_app) */
+:root {
+  /* ========== 品牌色（珊瑚粉） ========== */
+  --color-brand: #ff998a;
+  --color-brand-light: #ffb4a2;
+  --color-brand-dark: #e8887a;
+  --color-brand-soft: #ffeeeb;
+  
+  /* ========== 背景色（暖白色） ========== */
+  --color-bg-primary: #fffbf7;
+  --color-bg-secondary: #ffffff;
+  --color-bg-tertiary: #f4e8e6;
+  
+  /* ========== 文字色 ========== */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #94a3b8;
+  --color-text-disabled: #94a3b8;
+  
+  /* ========== 边框色 ========== */
+  --color-border: #f0e6de;
+  --color-border-light: #f0e6de;
+  
+  /* ========== 辅助色（薄荷绿） ========== */
+  --color-mint: #a2d5c6;
+  --color-mint-light: #e7f3eb;
+  --color-mint-text: #4e9767;
+  --color-accent-positive: #a2d5c6;
+  
+  /* ========== 功能色（图标背景） ========== */
+  --color-blue-100: #dbeafe;
+  --color-orange-100: #fed7aa;
+  --color-indigo-100: #e0e7ff;
+  
+  /* ========== 语义色 ========== */
+  --color-success: #6bcb77;
+  --color-warning: #ffd54f;
+  --color-error: #ff6b6b;
+  --color-info: #4fc3f7;
+  
+  /* ========== 字体 ========== */
+  --font-family-display: "Plus Jakarta Sans", "Noto Sans SC", -apple-system, sans-serif;
+  --font-family-zh: "Plus Jakarta Sans", "Noto Sans SC", -apple-system, sans-serif;
+  --font-family-en: "Plus Jakarta Sans", -apple-system, sans-serif;
+  
+  /* ========== 字号 ========== */
+  --font-size-display: 24px;
+  --font-size-h1: 20px;
+  --font-size-h2: 18px;
+  --font-size-h3: 16px;
+  --font-size-body: 14px;
+  --font-size-caption: 12px;
+  --font-size-small: 10px;
+  
+  /* ========== 间距 ========== */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  --spacing-3xl: 32px;
+  
+  /* ========== 圆角（Stitch 风格：大圆角） ========== */
+  --radius-none: 0;
+  --radius-sm: 6px;
+  --radius-default: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+  
+  /* ========== 阴影 ========== */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.1);
+  --shadow-xl: 0 12px 32px rgba(0,0,0,0.12);
+  --shadow-2xl: 0 16px 48px rgba(0,0,0,0.15);
+  --shadow-primary: 0 4px 14px rgba(255, 153, 138, 0.3);
+}
+
+/* ========== 暗色模式 ========== */
+:root.dark {
+  --color-brand: #ff998a;
+  --color-brand-light: #ffb4a2;
+  --color-brand-dark: #e8887a;
+  
+  --color-bg-primary: #23110f;
+  --color-bg-secondary: #1e1e1e;
+  --color-bg-tertiary: #2d2d2d;
+  
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-disabled: #64748b;
+  
+  --color-border: #334155;
+  --color-border-light: #334155;
+  
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.5);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.6);
+  --shadow-xl: 0 12px 32px rgba(0,0,0,0.7);
+}
+
+/* ========== 祖辈模式（叠加） ========== */
+:root.elderly-mode {
+  /* 字体放大 */
+  --font-size-display: 32px;
+  --font-size-h1: 26px;
+  --font-size-h2: 22px;
+  --font-size-h3: 18px;
+  --font-size-body: 16px;
+  --font-size-caption: 14px;
+  --font-size-small: 12px;
+  
+  /* 高对比度背景 */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8f9fa;
+  --color-bg-tertiary: #e9ecef;
+  
+  /* 加深文字 */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #334155;
+  --color-text-disabled: #64748b;
+  
+  /* 更饱和的品牌色 */
+  --color-brand: #ff7a6a;
+  --color-brand-dark: #e06a5a;
+  
+  /* 放大间距 */
+  --spacing-xs: 6px;
+  --spacing-sm: 10px;
+  --spacing-md: 14px;
+  --spacing-lg: 20px;
+  --spacing-xl: 26px;
+  --spacing-2xl: 34px;
+}

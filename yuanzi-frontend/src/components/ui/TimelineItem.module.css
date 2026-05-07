@@ -1,0 +1,82 @@
+.timelineItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) 0;
+}
+
+.iconWrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.title {
+  font-size: var(--font-size-body);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.time {
+  font-size: var(--font-size-small);
+  color: var(--color-text-tertiary);
+}
+
+.description {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+}
+
+/* 颜色变体 */
+.color-orange {
+  color: #FF9A8B;
+}
+
+.color-green {
+  color: #6BCB77;
+}
+
+.color-purple {
+  color: #D8BFD8;
+}
+
+.color-yellow {
+  color: #FFD54F;
+}
+
+/* 祖辈模式适配 */
+:root.elderly-mode .iconWrapper {
+  width: 48px;
+  height: 48px;
+  font-size: 22px;
+}
+
+:root.elderly-mode .title {
+  font-size: var(--font-size-h3);
+}
+
+:root.elderly-mode .description {
+  font-size: var(--font-size-body);
+}
+
+:root.elderly-mode .time {
+  font-size: var(--font-size-caption);
+}

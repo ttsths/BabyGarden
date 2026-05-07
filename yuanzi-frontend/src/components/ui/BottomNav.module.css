@@ -1,0 +1,85 @@
+.bottomNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 100;
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 60px;
+}
+
+.navItem:active {
+  opacity: 0.7;
+}
+
+.navIcon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.navLabel {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+
+.navItem.active .navIcon {
+  filter: brightness(0) saturate(100%) invert(44%) sepia(89%) saturate(2168%) hue-rotate(326deg) brightness(104%) contrast(97%);
+}
+
+.navItem.active .navLabel {
+  color: var(--color-brand);
+  font-weight: 500;
+}
+
+/* 中间记录按钮突出显示 */
+.navItem.record .navIcon {
+  font-size: 32px;
+  background: var(--color-brand);
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -16px;
+  box-shadow: var(--shadow-md);
+}
+
+/* 祖辈模式适配 */
+:root.elderly-mode .bottomNav {
+  height: 72px;
+}
+
+:root.elderly-mode .navIcon {
+  font-size: 28px;
+}
+
+:root.elderly-mode .navLabel {
+  font-size: 14px;
+}
+
+:root.elderly-mode .navItem.record .navIcon {
+  width: 56px;
+  height: 56px;
+  font-size: 36px;
+}

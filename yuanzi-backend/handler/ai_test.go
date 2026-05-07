@@ -1,0 +1,136 @@
+package handler
+
+import (
+	"bytes"
+	"mime/multipart"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/gin-gonic/gin"
+	"yuanzi-backend/model"
+	"yuanzi-backend/mysql"
+	"yuanzi-backend/pkg/ai"
+	"yuanzi-backend/pkg/gredis"
+)
+
+func TestAIChatSuccess(t *testing.T) {
+	setupFamilyTestDB(t)
+
+	admin := createTestUser(t, uniquePhone("aichat"), "AI用户")
+	family := createTestFamily(t, admin.ID, "AI家庭")
+	member := createTestFamilyMember(t, family.ID, admin.ID, model.FamilyRoleAdmin)
+	baby := createTestBaby(t, family.ID, "AI宝宝")
+	defer cleanupFamilies(t, family.ID)
+	defer cleanupUsers(t, admin.ID)
+	defer cleanupMembers(t, member.ID)
+	defer cleanupAIChatRecords(t, admin.ID)
+	clearAIQuota(t, admin.ID)
+
+	aiChatFunc = func(messages []ai.ChatMessage) (*ai.ChatResponse, error) {
+		resp := &ai.ChatResponse{}
+		resp.Output.Text = "测试回答"
+		resp.Usage.TotalTokens = 12
+		return resp, nil
+	}
+	defer resetAIHandlers()
+
+	body := mustMarshal(t, AIChatRequest{Question: "宝宝喝多少奶?", BabyID: &baby.ID})
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	ctx.Request = httptest.NewRequest(http.MethodPost, "/ai/chat", bytes.NewReader(body))
+	ctx.Request.Header.Set("Content-Type", "application/json")
+	ctx.Set("userId", admin.ID)
+
+	AIChat(ctx)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("AI问答失败: status=%d body=%s", recorder.Code, recorder.Body.String())
+	}
+
+	var response struct {
+		Code int            `json:"code"`
+		Data AIChatResponse `json:"data"`
+	}
+	decodeResponse(t, recorder.Body.Bytes(), &response)
+	if response.Data.Answer != "测试回答" || response.Data.TokensUsed != 12 {
+		t.Fatalf("AI问答响应错误: %+v", response.Data)
+	}
+
+	var record model.AIChatRecord
+	if err := mysql.DB.Where("user_id = ? AND question = ?", admin.ID, "宝宝喝多少奶?").First(&record).Error; err != nil {
+		t.Fatalf("问答记录未保存: %v", err)
+	}
+}
+
+func TestSpeechRecognizeSuccess(t *testing.T) {
+	setupFamilyTestDB(t)
+
+	user := createTestUser(t, uniquePhone("speech"), "语音用户")
+	defer cleanupUsers(t, user.ID)
+	clearAIQuota(t, user.ID)
+
+	speechRecognizeFunc = func(data []byte) (*ai.SpeechResult, error) {
+		return &ai.SpeechResult{Text: "识别结果", Confidence: 0.9}, nil
+	}
+	defer resetAIHandlers()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, _ := writer.CreateFormFile("audio", "test.wav")
+	part.Write([]byte("audio"))
+	writer.Close()
+
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	ctx.Request = httptest.NewRequest(http.MethodPost, "/ai/speech/recognize", body)
+	ctx.Request.Header.Set("Content-Type", writer.FormDataContentType())
+	ctx.Set("userId", user.ID)
+
+	SpeechRecognize(ctx)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("语音识别失败: status=%d body=%s", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestGetAIQuota(t *testing.T) {
+	setupFamilyTestDB(t)
+
+	user := createTestUser(t, uniquePhone("quota"), "配额用户")
+	defer cleanupUsers(t, user.ID)
+	clearAIQuota(t, user.ID)
+
+	_ = gredis.SetEx(quotaKey(user.ID, quotaTypeChat), "3", 3600)
+	_ = gredis.SetEx(quotaKey(user.ID, quotaTypeSpeech), "2", 3600)
+
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	ctx.Request = httptest.NewRequest(http.MethodGet, "/ai/quota", nil)
+	ctx.Set("userId", user.ID)
+
+	GetAIQuota(ctx)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("获取配额失败: status=%d body=%s", recorder.Code, recorder.Body.String())
+	}
+}
+
+func cleanupAIChatRecords(t *testing.T, userIDs ...string) {
+	t.Helper()
+	if len(userIDs) == 0 {
+		return
+	}
+	_ = mysql.DB.Where("user_id IN ?", userIDs).Delete(&model.AIChatRecord{}).Error
+}
+
+func clearAIQuota(t *testing.T, userID string) {
+	t.Helper()
+	_ = gredis.Del(quotaKey(userID, quotaTypeChat))
+	_ = gredis.Del(quotaKey(userID, quotaTypeSpeech))
+}
+
+func resetAIHandlers() {
+	aiChatFunc = defaultChatFunc
+	speechRecognizeFunc = defaultSpeechFunc
+}

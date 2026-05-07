@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff998a",
+                        "background-light": "#FFFBF7",
+                        "background-dark": "#23110f",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "system-ui", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.75rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen text-slate-900 dark:text-slate-100">
+<div class="max-w-md mx-auto min-h-screen flex flex-col relative pb-24">
+<!-- Header -->
+<header class="flex items-center p-4 pt-6 justify-between">
+<div class="text-primary flex size-10 shrink-0 items-center justify-center cursor-pointer">
+<span class="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
+</div>
+<h1 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10">个人中心</h1>
+</header>
+<!-- Baby Info Card -->
+<div class="p-4">
+<div class="flex items-center gap-5 rounded-xl bg-white dark:bg-slate-800 p-6 shadow-sm border border-primary/10">
+<div class="size-20 rounded-full overflow-hidden bg-primary/20 flex-shrink-0 border-2 border-primary/30">
+<img alt="Cute baby smiling" class="w-full h-full object-cover" data-alt="A close up photo of a smiling baby" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeOmxCibrZkbo0u-nJ1m1_KYp5yR8YXI6ymsd92NrHGv5tEomRifyRpvrts8FPVW7VVooWPuKupUM8g_IftRGQsV3ypx5Sy_fmH1hIQOWwfv3XQ3EUF-HTqe-j9vd6JWUPpi0zMvLtkWnMfdJTxpfkuY2lb2qhqvdzvK09uAJNyr1jzXP204uMvaA-tQJCMkbRm-tZ5LQezMV3FJzYfATySwLhnc3Vvs9woyLeyOYfbJCgzq1kUvoqeAi9NZd6qPdrJrDnXQ4k-sY"/>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold">小圆子</h2>
+<span class="material-symbols-outlined text-primary text-lg">child_care</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">6个月 12天</p>
+<button class="mt-2 flex items-center justify-center rounded-lg h-8 px-4 bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors w-fit">
+                        编辑宝宝资料
+                    </button>
+</div>
+</div>
+</div>
+<!-- Settings List -->
+<div class="px-4 py-2 flex flex-col gap-3">
+<!-- Notifications -->
+<div class="flex items-center gap-4 bg-white dark:bg-slate-800 px-4 h-16 rounded-xl shadow-sm border border-primary/5 cursor-pointer">
+<div class="text-white flex items-center justify-center rounded-lg bg-primary shrink-0 size-10">
+<span class="material-symbols-outlined">notifications</span>
+</div>
+<p class="text-slate-900 dark:text-slate-100 text-base font-medium flex-1">消息通知</p>
+<div class="text-slate-400">
+<span class="material-symbols-outlined">chevron_right</span>
+</div>
+</div>
+<!-- Dark Mode -->
+<div class="flex items-center gap-4 bg-white dark:bg-slate-800 px-4 h-16 rounded-xl shadow-sm border border-primary/5">
+<div class="text-white flex items-center justify-center rounded-lg bg-primary shrink-0 size-10">
+<span class="material-symbols-outlined">dark_mode</span>
+</div>
+<p class="text-slate-900 dark:text-slate-100 text-base font-medium flex-1">深色模式</p>
+<div class="shrink-0">
+<!-- Toggle Switch -->
+<div class="w-11 h-6 bg-slate-200 dark:bg-primary rounded-full relative cursor-pointer flex items-center px-1">
+<div class="size-4 bg-white rounded-full shadow-sm ml-auto"></div>
+</div>
+</div>
+</div>
+<!-- Data Export -->
+<div class="flex items-center gap-4 bg-white dark:bg-slate-800 px-4 h-16 rounded-xl shadow-sm border border-primary/5 cursor-pointer">
+<div class="text-white flex items-center justify-center rounded-lg bg-primary shrink-0 size-10">
+<span class="material-symbols-outlined">ios_share</span>
+</div>
+<p class="text-slate-900 dark:text-slate-100 text-base font-medium flex-1">数据导出</p>
+<div class="text-slate-400">
+<span class="material-symbols-outlined">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Logout Button -->
+<div class="mt-auto p-8 flex justify-center">
+<button class="text-primary font-semibold text-base py-2 px-8 rounded-full border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors">
+                退出登录
+            </button>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto border-t border-primary/10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-4 pb-6 pt-2 z-50">
+<div class="flex gap-2">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">home</span>
+</div>
+<p class="text-[10px] font-medium leading-normal">首页</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">calendar_today</span>
+</div>
+<p class="text-[10px] font-medium leading-normal">记录</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">forum</span>
+</div>
+<p class="text-[10px] font-medium leading-normal">社区</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<p class="text-[10px] font-bold leading-normal">我的</p>
+</a>
+</div>
+</nav>
+</div>
+</body></html>

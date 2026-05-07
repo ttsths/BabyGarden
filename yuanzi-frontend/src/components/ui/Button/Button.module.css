@@ -1,0 +1,117 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 类型 */
+.button-primary {
+  background: var(--color-brand);
+  color: #FFFFFF;
+}
+
+.button-primary:hover:not(:disabled) {
+  background: var(--color-brand-dark);
+}
+
+.button-secondary {
+  background: transparent;
+  color: var(--color-brand);
+  border: 2px solid var(--color-brand);
+}
+
+.button-secondary:hover:not(:disabled) {
+  background: var(--color-brand);
+  color: #FFFFFF;
+}
+
+.button-ghost {
+  background: transparent;
+  color: var(--color-brand);
+}
+
+.button-ghost:hover:not(:disabled) {
+  background: var(--color-bg-tertiary);
+}
+
+.button-danger {
+  background: var(--color-error);
+  color: #FFFFFF;
+}
+
+.button-danger:hover:not(:disabled) {
+  background: #FF5252;
+}
+
+/* 尺寸 */
+.button-small {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.button-medium {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 15px;
+}
+
+.button-large {
+  height: 48px;
+  padding: 0 20px;
+  font-size: 16px;
+}
+
+.button-xl {
+  height: 56px;
+  padding: 0 24px;
+  font-size: 18px;
+}
+
+/* 祖辈模式适配 */
+:root.elderly-mode .button--medium {
+  height: 48px;
+  font-size: 18px;
+}
+
+:root.elderly-mode .button--large {
+  height: 56px;
+  font-size: 20px;
+}
+
+/* 全宽 */
+.buttonFullWidth {
+  width: 100%;
+}
+
+/* 加载动画 */
+.loading {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+}

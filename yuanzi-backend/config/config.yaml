@@ -1,0 +1,61 @@
+# Yuanzi 后端配置文件
+# 环境: 开发/测试
+
+server:
+  run_mode: debug
+  http_port: 8080
+  read_timeout: 60
+  write_timeout: 60
+
+database:
+  type: mysql
+  host: 121.43.54.203
+  port: 3306
+  user: root
+  password: "Sin2=cos2=1"
+  name: yuanzi
+  table_prefix: ""
+  max_idle_conn: 20
+  max_open_conn: 100
+
+redis:
+  host: 121.43.54.203
+  port: 31379
+  password: "123456"
+  database: 1
+
+jwt:
+  secret: "yuanzi-jwt-secret-key-change-in-production"
+  expire_duration: 2h
+  refresh_days: 7
+
+oss:
+  region: cn-hangzhou
+  bucket: yuanzi-bucket
+  access_key_id: ""
+  access_key_secret: ""
+  cdn_domain: ""
+  callback_secret: ""
+
+sms:
+  access_key_id: ""
+  access_key_secret: ""
+  sign_name: ""
+  template_code: ""
+
+ai:
+  dashscope_api_key: ""
+  nls_app_key: ""
+  nls_endpoint: ""
+  nls_access_key_id: ""
+  nls_access_key_secret: ""
+
+push:
+  apns:
+    team_id: ""
+    key_id: ""
+    bundle_id: ""
+    key_path: ""
+    use_sandbox: true
+    timeout_seconds: 10
+

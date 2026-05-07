@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff998a",
+                        "background-light": "#fffbf7",
+                        "background-dark": "#23110f",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "system-ui", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.75rem", // 12px as requested
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<title>元子喂奶记录 - Yuanzi Baby App</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative mx-auto max-w-md min-h-screen flex flex-col pb-24">
+<!-- Header -->
+<header class="sticky top-0 z-10 flex items-center justify-between bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md p-4">
+<button class="flex h-10 w-10 items-center justify-center rounded-full hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-300">arrow_back_ios_new</span>
+</button>
+<h1 class="text-lg font-bold text-slate-800 dark:text-slate-100">喂奶记录</h1>
+<button class="flex h-10 w-10 items-center justify-center rounded-full hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-300">more_horiz</span>
+</button>
+</header>
+<!-- Today's Summary Card -->
+<section class="px-4 py-2">
+<div class="bg-white dark:bg-slate-800/50 rounded-xl p-5 shadow-sm border border-primary/10">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary text-xl">insights</span>
+<h2 class="text-base font-bold text-slate-800 dark:text-slate-100">今日统计</h2>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col gap-1 p-3 rounded-lg bg-primary/5 dark:bg-primary/10 border border-primary/5">
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium">总计</p>
+<p class="text-2xl font-bold text-primary">5 <span class="text-sm font-medium">次</span></p>
+</div>
+<div class="flex flex-col gap-1 p-3 rounded-lg bg-primary/5 dark:bg-primary/10 border border-primary/5">
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium">平均</p>
+<div class="flex items-baseline gap-1">
+<p class="text-2xl font-bold text-primary">120</p>
+<span class="text-sm font-medium text-primary">ml</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Time-based Log List -->
+<section class="px-4 mt-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">喂奶明细</h3>
+<span class="text-xs text-primary font-medium">今天</span>
+</div>
+<div class="space-y-3">
+<!-- Entry 1 -->
+<div class="flex items-center gap-4 bg-white dark:bg-slate-800/40 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700/50">
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined fill-1">baby_changing_station</span>
+</div>
+<div class="flex flex-1 flex-col">
+<p class="text-base font-bold text-slate-800 dark:text-slate-100">06:30</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">配方奶</p>
+</div>
+<div class="text-right">
+<p class="text-lg font-bold text-primary">120<span class="text-xs ml-0.5">ml</span></p>
+</div>
+</div>
+<!-- Entry 2 -->
+<div class="flex items-center gap-4 bg-white dark:bg-slate-800/40 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700/50">
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined fill-1">baby_changing_station</span>
+</div>
+<div class="flex flex-1 flex-col">
+<p class="text-base font-bold text-slate-800 dark:text-slate-100">09:15</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">母乳</p>
+</div>
+<div class="text-right">
+<p class="text-lg font-bold text-primary">90<span class="text-xs ml-0.5">ml</span></p>
+</div>
+</div>
+<!-- Entry 3 -->
+<div class="flex items-center gap-4 bg-white dark:bg-slate-800/40 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700/50">
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined fill-1">baby_changing_station</span>
+</div>
+<div class="flex flex-1 flex-col">
+<p class="text-base font-bold text-slate-800 dark:text-slate-100">12:00</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">配方奶</p>
+</div>
+<div class="text-right">
+<p class="text-lg font-bold text-primary">150<span class="text-xs ml-0.5">ml</span></p>
+</div>
+</div>
+<!-- Entry 4 -->
+<div class="flex items-center gap-4 bg-white dark:bg-slate-800/40 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700/50">
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined fill-1">baby_changing_station</span>
+</div>
+<div class="flex flex-1 flex-col">
+<p class="text-base font-bold text-slate-800 dark:text-slate-100">15:30</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">母乳</p>
+</div>
+<div class="text-right">
+<p class="text-lg font-bold text-primary">100<span class="text-xs ml-0.5">ml</span></p>
+</div>
+</div>
+<!-- Entry 5 -->
+<div class="flex items-center gap-4 bg-white dark:bg-slate-800/40 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700/50">
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined fill-1">baby_changing_station</span>
+</div>
+<div class="flex flex-1 flex-col">
+<p class="text-base font-bold text-slate-800 dark:text-slate-100">18:45</p>
+<p class="text-sm text-slate-500 dark:text-slate-400">配方奶</p>
+</div>
+<div class="text-right">
+<p class="text-lg font-bold text-primary">130<span class="text-xs ml-0.5">ml</span></p>
+</div>
+</div>
+</div>
+</section>
+<!-- Floating Action Button -->
+<button class="fixed bottom-24 right-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto flex h-20 items-center justify-around border-t border-primary/10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-4 pb-4">
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-medium">首页</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-1">history_edu</span>
+<span class="text-[10px] font-medium">记录</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="text-[10px] font-medium">统计</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium">我的</span>
+</a>
+</nav>
+</div>
+</body></html>

@@ -1,0 +1,126 @@
+.statsCard {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+}
+
+.title {
+  font-size: var(--font-size-h3);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.viewAll {
+  font-size: var(--font-size-small);
+  color: var(--color-brand);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* 环形进度图 */
+.progressContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.progressRing {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.progressText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.percentage {
+  font-size: var(--font-size-display);
+  font-weight: 600;
+  color: var(--color-brand);
+  line-height: 1;
+}
+
+.label {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+.summary {
+  font-size: var(--font-size-body);
+  color: var(--color-text-secondary);
+}
+
+/* 细分进度 */
+.breakdown {
+  width: 100%;
+  space-y: var(--spacing-md);
+}
+
+.breakdownItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.breakdownLabel {
+  width: 60px;
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+}
+
+.breakdownProgress {
+  flex: 1;
+  height: 8px;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.breakdownBar {
+  height: 100%;
+  background: var(--color-brand);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.breakdownValue {
+  width: 50px;
+  text-align: right;
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}
+
+/* 祖辈模式适配 */
+:root.elderly-mode .progressRing {
+  width: 240px;
+  height: 240px;
+}
+
+:root.elderly-mode .percentage {
+  font-size: 36px;
+}
+
+:root.elderly-mode .breakdownLabel {
+  font-size: var(--font-size-h3);
+}
+
+:root.elderly-mode .breakdownValue {
+  font-size: var(--font-size-body);
+}

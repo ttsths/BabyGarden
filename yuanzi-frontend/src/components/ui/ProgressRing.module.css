@@ -1,0 +1,32 @@
+.progressRing {
+  position: relative;
+  display: inline-block;
+}
+
+.progressRing svg {
+  transform: rotate(-90deg);
+}
+
+.progressRing text {
+  font-family: var(--font-family-zh);
+}
+
+.percentage {
+  font-size: var(--font-size-h1);
+  font-weight: 600;
+  fill: var(--color-text-primary);
+}
+
+.label {
+  font-size: var(--font-size-caption);
+  fill: var(--color-text-secondary);
+}
+
+/* 祖辈模式适配 */
+:root.elderly-mode .percentage {
+  font-size: var(--font-size-h1);
+}
+
+:root.elderly-mode .label {
+  font-size: var(--font-size-body);
+}

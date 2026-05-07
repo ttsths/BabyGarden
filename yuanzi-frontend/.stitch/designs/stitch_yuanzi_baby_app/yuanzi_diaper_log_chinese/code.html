@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff998a",
+                        "background-light": "#fffbf7",
+                        "background-dark": "#23110f",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "system-ui", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.75rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<title>元子宝宝 - 换尿布记录</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<header class="sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 py-4 flex items-center justify-between border-b border-primary/10">
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-primary/10 text-slate-700 dark:text-slate-300 transition-colors">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<h1 class="text-xl font-bold tracking-tight">换尿布记录</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-primary/10 text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined">calendar_month</span>
+</button>
+</header>
+<main class="flex-1 overflow-y-auto px-4 pb-32">
+<div class="mt-6">
+<div class="relative overflow-hidden bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-primary/5">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl"></div>
+<div class="flex justify-between items-start relative z-10">
+<div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">今日更换</p>
+<h2 class="text-4xl font-bold text-primary">8 <span class="text-lg font-semibold text-slate-400">次</span></h2>
+</div>
+<div class="bg-primary/20 p-3 rounded-lg text-primary">
+<span class="material-symbols-outlined !text-3xl">baby_changing_station</span>
+</div>
+</div>
+<div class="mt-4 flex items-center gap-2 text-xs text-slate-400 bg-primary/5 p-2 rounded-lg">
+<span class="material-symbols-outlined !text-sm">info</span>
+<span>相比昨日平均增加 1 次</span>
+</div>
+</div>
+</div>
+<div class="mt-6 flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+<button class="flex-1 py-2 text-sm font-semibold rounded-lg bg-primary text-white shadow-sm transition-all">
+                尿湿
+            </button>
+<button class="flex-1 py-2 text-sm font-medium rounded-lg text-slate-500 dark:text-slate-400 hover:text-primary transition-all">
+                排便
+            </button>
+<button class="flex-1 py-2 text-sm font-medium rounded-lg text-slate-500 dark:text-slate-400 hover:text-primary transition-all">
+                混合
+            </button>
+</div>
+<div class="mt-8 relative">
+<div class="absolute left-[19px] top-4 bottom-0 w-0.5 bg-primary/20 rounded-full"></div>
+<div class="space-y-8 relative">
+<div class="flex gap-4">
+<div class="relative z-10 flex-shrink-0 w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white border-4 border-background-light dark:border-background-dark">
+<span class="material-symbols-outlined !text-xl">water_drop</span>
+</div>
+<div class="flex-1 pt-1">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-bold text-slate-800 dark:text-slate-200">10:15 尿湿</h3>
+<span class="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">刚刚更换</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400">宝宝心情愉快，更换及时。</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="relative z-10 flex-shrink-0 w-10 h-10 bg-orange-400 rounded-full flex items-center justify-center text-white border-4 border-background-light dark:border-background-dark">
+<span class="material-symbols-outlined !text-xl">layers</span>
+</div>
+<div class="flex-1 pt-1">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-bold text-slate-800 dark:text-slate-200">13:40 混合</h3>
+<span class="text-xs font-medium text-slate-400">3小时前</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400">午睡后更换，量中等。</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="relative z-10 flex-shrink-0 w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center text-white border-4 border-background-light dark:border-background-dark">
+<span class="material-symbols-outlined !text-xl">opacity</span>
+</div>
+<div class="flex-1 pt-1">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-bold text-slate-800 dark:text-slate-200">09:30 排便</h3>
+<span class="text-xs font-medium text-slate-400">7小时前</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400">奶后排便，颜色正常。</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="relative z-10 flex-shrink-0 w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white border-4 border-background-light dark:border-background-dark">
+<span class="material-symbols-outlined !text-xl">water_drop</span>
+</div>
+<div class="flex-1 pt-1">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-bold text-slate-800 dark:text-slate-200">07:20 尿湿</h3>
+<span class="text-xs font-medium text-slate-400">9小时前</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400">晨起第一次更换。</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed bottom-24 right-6 z-20">
+<button class="w-16 h-16 bg-primary text-white rounded-full shadow-lg shadow-primary/40 flex items-center justify-center hover:scale-105 transition-transform active:scale-95">
+<span class="material-symbols-outlined !text-3xl">add</span>
+</button>
+</div>
+<nav class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 px-6 py-3 flex justify-between items-center z-10">
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-medium">首页</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined font-variation-fill">history</span>
+<span class="text-[10px] font-medium">记录</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">trending_up</span>
+<span class="text-[10px] font-medium">成长</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-medium">设置</span>
+</a>
+</nav>
+</body></html>

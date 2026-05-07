@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff8a7a",
+                        "background-light": "#f8f6f5",
+                        "background-dark": "#1E1E1E",
+                        "surface-dark": "#2d2d2d",
+                        "border-dark": "#3d3d3d",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="relative flex min-h-screen w-full flex-col max-w-[430px] mx-auto overflow-x-hidden shadow-2xl">
+<header class="flex items-center justify-between p-6 pt-12">
+<div class="flex items-center gap-3">
+<div class="size-12 overflow-hidden rounded-full ring-2 ring-primary/20">
+<img alt="Mother's profile" class="h-full w-full object-cover" data-alt="Soft portrait of a smiling mother" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkT-KMKNyU3X_QS0MM_bwY1gCUTnknvdm-n7p_Zptl0DCi4BU-XANNtYjpZfsbSrtWjPtlmDFBNzzIYr7sj2XF7qLJPJlOEr0Js1y_ZEmlQtfoT7RjeulysrzUUEVC5KCuALSwG3Z9aqZK0q4ovTfYXL8G57OXbQbACqfZYck1OzhS1WVqyeo0yqEygPAYH60xvkK4n83bO-eOwSsBHDFjvVVZmCzAcAIjKhscjuVFrq8hyDODABC8etO_tjN2fow4feRtM4SLho0"/>
+</div>
+<div>
+<h2 class="text-xl font-bold leading-tight tracking-tight text-slate-900 dark:text-slate-100">你好，妈妈</h2>
+<p class="text-sm text-slate-500 dark:text-slate-400">小元宝 已经 3 个月了</p>
+</div>
+</div>
+<button class="flex size-10 items-center justify-center rounded-full bg-slate-100 dark:bg-surface-dark text-slate-600 dark:text-primary">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<section class="px-6 py-2">
+<div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+<div class="flex min-w-[140px] flex-1 flex-col gap-2 rounded-lg p-4 bg-white dark:bg-surface-dark shadow-sm border border-slate-100 dark:border-border-dark">
+<span class="material-symbols-outlined text-primary">child_care</span>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium">上次喂奶</p>
+<p class="text-slate-900 dark:text-slate-100 text-lg font-bold">3小时前</p>
+</div>
+<div class="flex min-w-[140px] flex-1 flex-col gap-2 rounded-lg p-4 bg-white dark:bg-surface-dark shadow-sm border border-slate-100 dark:border-border-dark">
+<span class="material-symbols-outlined text-primary">bedtime</span>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium">睡眠时长</p>
+<p class="text-slate-900 dark:text-slate-100 text-lg font-bold">2h 15m</p>
+</div>
+<div class="flex min-w-[140px] flex-1 flex-col gap-2 rounded-lg p-4 bg-white dark:bg-surface-dark shadow-sm border border-slate-100 dark:border-border-dark">
+<span class="material-symbols-outlined text-primary">baby_changing_station</span>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium">上次换尿布</p>
+<p class="text-slate-900 dark:text-slate-100 text-lg font-bold">1小时前</p>
+</div>
+</div>
+</section>
+<section class="px-6 py-6">
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-6">快速记录</h3>
+<div class="flex justify-between items-start px-2">
+<div class="flex flex-col items-center gap-3">
+<button class="flex size-16 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30">
+<span class="material-symbols-outlined text-3xl">fluid_med</span>
+</button>
+<span class="text-sm font-medium text-slate-600 dark:text-slate-300">喂奶</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<button class="flex size-16 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30">
+<span class="material-symbols-outlined text-3xl">bedtime</span>
+</button>
+<span class="text-sm font-medium text-slate-600 dark:text-slate-300">睡眠</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<button class="flex size-16 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30">
+<span class="material-symbols-outlined text-3xl">baby_changing_station</span>
+</button>
+<span class="text-sm font-medium text-slate-600 dark:text-slate-300">换尿布</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<button class="flex size-16 items-center justify-center rounded-full bg-slate-200 dark:bg-surface-dark text-slate-600 dark:text-slate-400 border border-transparent dark:border-border-dark">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<span class="text-sm font-medium text-slate-600 dark:text-slate-300">更多</span>
+</div>
+</div>
+</section>
+<section class="px-6 py-4 flex-1">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">最近动态</h3>
+<button class="text-sm font-medium text-primary">全部</button>
+</div>
+<div class="space-y-4">
+<div class="flex gap-4 p-4 rounded-lg bg-white dark:bg-surface-dark border border-slate-100 dark:border-border-dark items-center">
+<div class="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">bedtime</span>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold text-slate-900 dark:text-slate-100">午睡结束</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">持续了 1 小时 20 分钟</p>
+</div>
+<span class="text-xs font-medium text-slate-400">14:30</span>
+</div>
+<div class="flex gap-4 p-4 rounded-lg bg-white dark:bg-surface-dark border border-slate-100 dark:border-border-dark items-center">
+<div class="size-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+<span class="material-symbols-outlined">fluid_med</span>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold text-slate-900 dark:text-slate-100">母乳喂养</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">左侧 15 分钟</p>
+</div>
+<span class="text-xs font-medium text-slate-400">12:15</span>
+</div>
+<div class="flex gap-4 p-4 rounded-lg bg-white dark:bg-surface-dark border border-slate-100 dark:border-border-dark items-center">
+<div class="size-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
+<span class="material-symbols-outlined">baby_changing_station</span>
+</div>
+<div class="flex-1">
+<h4 class="text-sm font-bold text-slate-900 dark:text-slate-100">更换尿布</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">干爽状态</p>
+</div>
+<span class="text-xs font-medium text-slate-400">10:45</span>
+</div>
+</div>
+</section>
+<nav class="sticky bottom-0 w-full border-t border-slate-200 dark:border-border-dark bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-6 pb-8 pt-3 flex justify-between items-center">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-icon">home</span>
+<span class="text-[10px] font-bold">首页</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="text-[10px] font-medium">统计</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-[10px] font-medium">社区</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium">我的</span>
+</a>
+</nav>
+</div>
+</body></html>

@@ -1,0 +1,786 @@
+basePath: /api/v1
+definitions:
+  handler.AIChatRequest:
+    properties:
+      baby_id:
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      history:
+        items:
+          $ref: '#/definitions/handler.ChatHistory'
+        type: array
+      question:
+        example: 宝宝三个月应该喝多少奶
+        type: string
+    required:
+    - question
+    type: object
+  handler.AIChatResponse:
+    properties:
+      answer:
+        type: string
+      remaining_quota:
+        type: integer
+      tokens_used:
+        type: integer
+    type: object
+  handler.AIQuotaResponse:
+    properties:
+      ai_chat:
+        $ref: '#/definitions/handler.QuotaDetail'
+      speech:
+        $ref: '#/definitions/handler.QuotaDetail'
+    type: object
+  handler.ChatHistory:
+    properties:
+      content:
+        example: 之前的问题
+        type: string
+      role:
+        example: user
+        type: string
+    type: object
+  handler.CreateRecordRequest:
+    properties:
+      baby_id:
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      content:
+        additionalProperties: true
+        type: object
+      ended_at:
+        example: "2024-03-08T10:15:00Z"
+        type: string
+      note:
+        example: 备注信息
+        type: string
+      started_at:
+        example: "2024-03-08T10:00:00Z"
+        type: string
+      type:
+        enum:
+        - feeding
+        - sleep
+        - diaper
+        - growth
+        example: feeding
+        type: string
+    required:
+    - baby_id
+    - content
+    - started_at
+    - type
+    type: object
+  handler.DailyStatsResponse:
+    properties:
+      diaper:
+        $ref: '#/definitions/handler.DiaperStats'
+      feeding:
+        $ref: '#/definitions/handler.FeedingStats'
+      sleep:
+        $ref: '#/definitions/handler.SleepStats'
+    type: object
+  handler.DiaperStats:
+    properties:
+      count:
+        type: integer
+    type: object
+  handler.FeedingStats:
+    properties:
+      count:
+        type: integer
+      total_amount:
+        type: integer
+    type: object
+  handler.PhotoCallbackRequest:
+    properties:
+      etag:
+        type: string
+      photo_id:
+        type: string
+      size:
+        type: integer
+    required:
+    - etag
+    - photo_id
+    - size
+    type: object
+  handler.PhotoResponse:
+    properties:
+      description:
+        type: string
+      height:
+        type: integer
+      id:
+        type: string
+      taken_at:
+        type: string
+      thumb_url:
+        type: string
+      url:
+        type: string
+      width:
+        type: integer
+    type: object
+  handler.PhotoUploadURLRequest:
+    properties:
+      baby_id:
+        example: 550e8400-e29b-41d4-a716-446655440001
+        type: string
+      content_type:
+        example: image/jpeg
+        type: string
+      filename:
+        example: photo.jpg
+        type: string
+      size:
+        example: 2048000
+        type: integer
+    required:
+    - baby_id
+    - content_type
+    - filename
+    - size
+    type: object
+  handler.PhotoUploadURLResponse:
+    properties:
+      access_url:
+        type: string
+      expires_at:
+        type: integer
+      form_data:
+        additionalProperties:
+          type: string
+        type: object
+      photo_id:
+        type: string
+      thumb_url:
+        type: string
+      upload_url:
+        type: string
+    type: object
+  handler.QuotaDetail:
+    properties:
+      limit:
+        type: integer
+      remaining:
+        type: integer
+      used:
+        type: integer
+    type: object
+  handler.RecordDetailResponse:
+    properties:
+      baby_id:
+        type: string
+      content:
+        additionalProperties: true
+        type: object
+      created_at:
+        type: string
+      created_by:
+        type: string
+      ended_at:
+        type: string
+      id:
+        type: string
+      note:
+        type: string
+      started_at:
+        type: string
+      type:
+        type: string
+    type: object
+  handler.RecordResponse:
+    properties:
+      baby_id:
+        type: string
+      content:
+        additionalProperties: true
+        type: object
+      duration_hours:
+        description: 睡眠记录时长（小时）
+        type: number
+      ended_at:
+        type: string
+      hours_since_last_feed:
+        description: 喂养记录的间隔小时数（无上一次记录时为空）
+        type: integer
+      id:
+        type: string
+      started_at:
+        type: string
+      type:
+        type: string
+    type: object
+  handler.RegisterDeviceRequest:
+    properties:
+      alias:
+        type: string
+      device_token:
+        type: string
+      platform:
+        enum:
+        - ios
+        - android
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+    required:
+    - device_token
+    - platform
+    type: object
+  handler.SleepStats:
+    properties:
+      count:
+        type: integer
+      total_hours:
+        type: number
+    type: object
+  handler.SpeechRecognizeResponse:
+    properties:
+      confidence:
+        type: number
+      remaining_quota:
+        type: integer
+      text:
+        type: string
+    type: object
+  handler.UpdateRecordRequest:
+    properties:
+      content:
+        additionalProperties: true
+        type: object
+      ended_at:
+        type: string
+      note:
+        type: string
+      started_at:
+        type: string
+    type: object
+  handler.WeeklyStatsResponse:
+    properties:
+      dates:
+        items:
+          type: string
+        type: array
+      diaper:
+        items:
+          type: integer
+        type: array
+      feeding:
+        items:
+          type: integer
+        type: array
+      sleep:
+        items:
+          type: number
+        type: array
+    type: object
+  model.ListResponse:
+    properties:
+      list: {}
+      pagination:
+        $ref: '#/definitions/model.Pagination'
+    type: object
+  model.Pagination:
+    properties:
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  model.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      msg:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: 小园子母婴记录应用后端 API (基于 PRD-V1.1)
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Yuanzi API
+  version: "1.0"
+paths:
+  /api/v1/ai/chat:
+    post:
+      consumes:
+      - application/json
+      description: 发送问题给 AI 助手获取回答
+      parameters:
+      - description: 问答请求
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handler.AIChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.AIChatResponse'
+              type: object
+      security:
+      - Bearer: []
+      summary: AI 问答
+      tags:
+      - AI
+  /api/v1/ai/quota:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户当日 AI 使用配额情况
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.AIQuotaResponse'
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取 AI 配额
+      tags:
+      - AI
+  /api/v1/ai/speech/recognize:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 将语音转为文字
+      parameters:
+      - description: 音频文件
+        in: formData
+        name: audio
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.SpeechRecognizeResponse'
+              type: object
+      security:
+      - Bearer: []
+      summary: 语音识别
+      tags:
+      - AI
+  /api/v1/device/register:
+    post:
+      consumes:
+      - application/json
+      description: 注册设备 token，用于推送通知
+      parameters:
+      - description: 设备信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RegisterDeviceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - Bearer: []
+      summary: 注册推送设备
+      tags:
+      - 推送
+  /api/v1/photo:
+    get:
+      consumes:
+      - application/json
+      description: 分页获取指定宝宝的照片列表
+      parameters:
+      - description: 宝宝ID
+        in: query
+        name: baby_id
+        required: true
+        type: string
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/model.ListResponse'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/handler.PhotoResponse'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取照片列表
+      tags:
+      - 照片
+  /api/v1/photo/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定照片
+      parameters:
+      - description: 照片ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - Bearer: []
+      summary: 删除照片
+      tags:
+      - 照片
+  /api/v1/photo/callback:
+    post:
+      consumes:
+      - application/json
+      description: OSS 上传完成后的回调处理
+      parameters:
+      - description: 回调参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handler.PhotoCallbackRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: 照片上传回调
+      tags:
+      - 照片
+  /api/v1/photo/upload-url:
+    post:
+      consumes:
+      - application/json
+      description: 获取阿里云 OSS 直传签名 URL
+      parameters:
+      - description: 请求参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handler.PhotoUploadURLRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.PhotoUploadURLResponse'
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取照片上传 URL
+      tags:
+      - 照片
+  /api/v1/record:
+    get:
+      consumes:
+      - application/json
+      description: 分页获取指定宝宝的记录列表
+      parameters:
+      - description: 宝宝ID
+        in: query
+        name: baby_id
+        required: true
+        type: string
+      - description: '记录类型: feeding/sleep/diaper/growth'
+        in: query
+        name: type
+        type: string
+      - default: 1
+        description: 页码，默认1
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: 每页数量，默认20
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/model.ListResponse'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/handler.RecordResponse'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取记录列表
+      tags:
+      - 记录
+    post:
+      consumes:
+      - application/json
+      description: 创建喂养/睡眠/排泄/成长记录
+      parameters:
+      - description: 记录信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateRecordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RecordResponse'
+              type: object
+      security:
+      - Bearer: []
+      summary: 创建记录
+      tags:
+      - 记录
+  /api/v1/record/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定记录（软删除）
+      parameters:
+      - description: 记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - Bearer: []
+      summary: 删除记录
+      tags:
+      - 记录
+    get:
+      consumes:
+      - application/json
+      description: 获取指定记录的详细信息
+      parameters:
+      - description: 记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RecordDetailResponse'
+              type: object
+      security:
+      - Bearer: []
+      summary: 获取记录详情
+      tags:
+      - 记录
+    put:
+      consumes:
+      - application/json
+      description: 更新指定记录的信息
+      parameters:
+      - description: 记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UpdateRecordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RecordResponse'
+              type: object
+      security:
+      - Bearer: []
+      summary: 更新记录
+      tags:
+      - 记录
+  /api/v1/stats/daily:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定日期的喂养/睡眠/排泄统计
+      parameters:
+      - description: 宝宝ID
+        in: query
+        name: baby_id
+        required: true
+        type: string
+      - description: 日期(YYYY-MM-DD)
+        in: query
+        name: date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.DailyStatsResponse'
+              type: object
+      security:
+      - Bearer: []
+      summary: 日统计
+      tags:
+      - 统计
+  /api/v1/stats/weekly:
+    get:
+      consumes:
+      - application/json
+      description: 获取近7天喂养/睡眠/排泄统计
+      parameters:
+      - description: 宝宝ID
+        in: query
+        name: baby_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.WeeklyStatsResponse'
+              type: object
+      security:
+      - Bearer: []
+      summary: 周统计
+      tags:
+      - 统计
+  /api/v1/sync/stream:
+    get:
+      consumes:
+      - application/json
+      description: 建立服务器发送事件连接，接收家庭数据变更
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: SSE 连接建立
+      security:
+      - Bearer: []
+      summary: SSE 实时同步
+      tags:
+      - 同步
+schemes:
+- http
+- https
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

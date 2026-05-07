@@ -1,0 +1,36 @@
+.card {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.card--none {
+  padding: 0;
+}
+
+.card--small {
+  padding: var(--spacing-sm);
+}
+
+.card--medium {
+  padding: var(--spacing-lg);
+}
+
+.card--large {
+  padding: var(--spacing-xl);
+}
+
+.card:active {
+  background: var(--color-bg-tertiary);
+}
+
+/* 祖辈模式适配 */
+:root.elderly-mode .card--medium {
+  padding: var(--spacing-xl);
+}
+
+:root.elderly-mode .card--large {
+  padding: var(--spacing-2xl);
+}

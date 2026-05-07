@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Log Feeding Session</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff998a",
+                        "background-light": "#f8f6f5",
+                        "background-dark": "#23110f",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="relative flex min-h-screen w-full max-w-[430px] mx-auto flex-col bg-background-light dark:bg-background-dark overflow-x-hidden shadow-2xl">
+<!-- Header -->
+<div class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
+<div class="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-start">
+<span class="material-symbols-outlined cursor-pointer">close</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center">Log Feeding</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex cursor-pointer items-center justify-center rounded-lg h-12 bg-transparent text-primary">
+<span class="material-symbols-outlined">history</span>
+</button>
+</div>
+</div>
+<!-- Feeding Type Selector -->
+<div class="flex px-4 py-4">
+<div class="flex h-12 flex-1 items-center justify-center rounded-xl bg-primary/10 dark:bg-primary/5 p-1.5">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-primary has-[:checked]:text-white text-slate-600 dark:text-slate-400 text-sm font-semibold transition-all">
+<span class="truncate">Breast</span>
+<input checked="" class="hidden" name="feeding-type" type="radio" value="Breast"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-primary has-[:checked]:text-white text-slate-600 dark:text-slate-400 text-sm font-semibold transition-all">
+<span class="truncate">Bottle</span>
+<input class="hidden" name="feeding-type" type="radio" value="Bottle"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-primary has-[:checked]:text-white text-slate-600 dark:text-slate-400 text-sm font-semibold transition-all">
+<span class="truncate">Solid</span>
+<input class="hidden" name="feeding-type" type="radio" value="Solid"/>
+</label>
+</div>
+</div>
+<!-- Breastfeeding Timer Section -->
+<div class="px-4 py-2">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight">Breastfeeding Timer</h3>
+<span class="text-primary text-xs font-bold uppercase tracking-wider">Active Session</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col gap-3 rounded-xl p-5 bg-white dark:bg-slate-800/50 border border-primary/20 dark:border-primary/10 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Left Side</p>
+<span class="material-symbols-outlined text-primary fill-icon text-sm">fiber_manual_record</span>
+</div>
+<p class="text-slate-900 dark:text-slate-100 text-3xl font-bold tracking-tight">05:20</p>
+<button class="mt-2 w-full py-2 bg-primary text-white rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-transform">
+                        Stop
+                    </button>
+</div>
+<div class="flex flex-col gap-3 rounded-xl p-5 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Right Side</p>
+</div>
+<p class="text-slate-400 dark:text-slate-500 text-3xl font-bold tracking-tight">00:00</p>
+<button class="mt-2 w-full py-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg font-bold text-sm active:scale-95 transition-transform">
+                        Start
+                    </button>
+</div>
+</div>
+</div>
+<!-- Bottle Feeding Controls (Conditional-like UI) -->
+<div class="px-4 py-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight">Bottle Amount</h3>
+<span class="text-slate-500 dark:text-slate-400 text-sm font-medium">4.5 oz</span>
+</div>
+<div class="relative w-full h-12 flex items-center px-2 bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800">
+<input class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary" max="10" min="0" step="0.5" type="range" value="4.5"/>
+</div>
+<div class="flex justify-between mt-2 px-1">
+<span class="text-[10px] text-slate-400 font-bold uppercase">0 oz</span>
+<span class="text-[10px] text-slate-400 font-bold uppercase">5 oz</span>
+<span class="text-[10px] text-slate-400 font-bold uppercase">10 oz</span>
+</div>
+</div>
+<!-- Additional Info -->
+<div class="px-4 py-2 space-y-4 mb-32">
+<div class="flex flex-col gap-2">
+<label class="text-slate-900 dark:text-slate-100 text-sm font-bold">Time of Feed</label>
+<div class="flex items-center gap-3 p-4 bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800">
+<span class="material-symbols-outlined text-primary">schedule</span>
+<span class="text-slate-700 dark:text-slate-300 font-medium">Today, 10:45 AM</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-slate-900 dark:text-slate-100 text-sm font-bold">Notes</label>
+<textarea class="w-full p-4 bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 placeholder:text-slate-400 focus:ring-primary focus:border-primary" placeholder="Add any details about the session..." rows="3"></textarea>
+</div>
+</div>
+<!-- Sticky Bottom Actions -->
+<div class="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 p-4 pb-8 flex flex-col gap-4">
+<button class="w-full h-14 bg-primary text-white rounded-xl font-bold text-lg shadow-lg shadow-primary/20 active:scale-[0.98] transition-all">
+                Save Feeding Session
+            </button>
+<!-- Bottom Navigation Bar -->
+<div class="flex gap-2 justify-between">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-icon">restaurant</span>
+<p class="text-[10px] font-bold leading-normal uppercase">Feed</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">bedtime</span>
+<p class="text-[10px] font-bold leading-normal uppercase">Sleep</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">baby_changing_station</span>
+<p class="text-[10px] font-bold leading-normal uppercase">Diaper</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">more_horiz</span>
+<p class="text-[10px] font-bold leading-normal uppercase">More</p>
+</a>
+</div>
+</div>
+</div>
+</body></html>

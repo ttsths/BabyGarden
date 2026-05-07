@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Baby Tracker Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff998a",
+                        "background-light": "#fcfaf9",
+                        "background-dark": "#23110f",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden pb-20">
+<!-- Top Header -->
+<div class="flex items-center bg-background-light dark:bg-background-dark p-4 justify-between sticky top-0 z-10 border-b border-primary/10">
+<div class="flex size-10 shrink-0 items-center">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary" data-alt="Portrait of a smiling baby" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCmmsupke9KVQhQ12nHuAGoR_uXEunB3fa6q4Uh7AHlCkjF_oV1jNaksLYHIeO56tRRivCblxi0-oxep4yxdaNm-9QB_7vXuoZ0CdmiBDpyEpn2YvvWvIFoxDdueHMGC4moTlfdjkuHUXxvEU4TMdFaGVceDRetiXmMEU0QL6dwfQv2D_ozObUuvSUGr6RwQM5mb0kn7JI7fNcTiMzgC2u2kfgLyROqSE9_9sin0MuXAH2Zy0-1-q2QU8mYVxEhLwLoOr1ItSPWY_U");'></div>
+</div>
+<div class="flex flex-col items-center">
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight">Baby Leo</h2>
+<p class="text-primary text-xs font-medium">4 months old</p>
+</div>
+<div class="flex w-10 items-center justify-end">
+<button class="flex size-10 cursor-pointer items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</div>
+<!-- Last Activity Card -->
+<div class="p-4 @container">
+<div class="flex flex-col items-stretch justify-start rounded-xl @xl:flex-row @xl:items-start shadow-lg bg-white dark:bg-primary/5 border border-primary/10">
+<div class="w-full bg-center bg-no-repeat aspect-[16/7] bg-cover rounded-t-xl @xl:rounded-l-xl @xl:rounded-tr-none" data-alt="Baby peacefully sleeping in a crib" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCNvjTIissSvCEjPD8JTI0bhk19cATpQXHZ05eM61ZLBsRpXkhWUXLXZLlU_yw-hFs0DswHWrZpJKvCH6c5cXOo5f67cCy1_sPcRENM8hx_DnuSxytYUnh54uCbMrwwf20iercmRASqvMTcWBnstOVUxOp5EY4IeyBgANxLC6HAv2ksiuQt_BEKTgofv8fbmuzN3YkE5OJeIPnktl9nZQKu7Jp29HZs9k3NNnuMgNtz89FL6N21Hxdm4r77TlkM0_f6vbQ53HBlf2I");'></div>
+<div class="flex w-full min-w-72 grow flex-col items-stretch justify-center gap-2 py-5 px-5">
+<div class="flex items-center gap-2">
+<span class="flex size-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<p class="text-primary text-sm font-semibold uppercase tracking-wider">Currently Napping</p>
+</div>
+<p class="text-slate-900 dark:text-white text-xl font-bold">Last Activities</p>
+<div class="space-y-1">
+<div class="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-sm">
+<span class="material-symbols-outlined text-primary text-lg">baby_changing_station</span>
+<span>Diaper changed 1h ago</span>
+</div>
+<div class="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-sm">
+<span class="material-symbols-outlined text-primary text-lg">nutrition</span>
+<span>Fed 2h 15m ago (120ml)</span>
+</div>
+</div>
+<div class="mt-2">
+<button class="w-full flex cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold shadow-md shadow-primary/20">
+                            View Full Timeline
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Actions -->
+<div class="px-4 py-2">
+<h2 class="text-slate-900 dark:text-white text-xl font-bold pb-4">Quick Actions</h2>
+<div class="grid grid-cols-3 gap-4">
+<div class="flex flex-col gap-3 rounded-xl border border-primary/20 bg-white dark:bg-primary/5 p-4 items-center justify-center text-center shadow-sm">
+<div class="size-14 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-1">
+<span class="material-symbols-outlined text-3xl filled-icon">breastfeeding</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-sm font-bold">Feed</h2>
+</div>
+<div class="flex flex-col gap-3 rounded-xl border border-primary/20 bg-white dark:bg-primary/5 p-4 items-center justify-center text-center shadow-sm">
+<div class="size-14 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-1">
+<span class="material-symbols-outlined text-3xl filled-icon">bedtime</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-sm font-bold">Sleep</h2>
+</div>
+<div class="flex flex-col gap-3 rounded-xl border border-primary/20 bg-white dark:bg-primary/5 p-4 items-center justify-center text-center shadow-sm">
+<div class="size-14 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-1">
+<span class="material-symbols-outlined text-3xl filled-icon">child_care</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-sm font-bold">Diaper</h2>
+</div>
+</div>
+</div>
+<!-- Stats Chart Section -->
+<div class="p-4 mt-4">
+<div class="bg-white dark:bg-primary/5 rounded-xl p-5 border border-primary/20 shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-slate-900 dark:text-white font-bold">Daily Summary</h3>
+<select class="bg-transparent border-none text-primary font-bold text-sm focus:ring-0 cursor-pointer">
+<option>Last 7 Days</option>
+<option>Last 30 Days</option>
+</select>
+</div>
+<div class="flex items-end justify-between h-32 gap-2 px-2">
+<div class="flex flex-col items-center flex-1 gap-2">
+<div class="w-full bg-primary/20 rounded-t-full relative flex items-end overflow-hidden h-24">
+<div class="w-full bg-primary rounded-t-full" style="height: 65%;"></div>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Mon</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-2">
+<div class="w-full bg-primary/20 rounded-t-full relative flex items-end overflow-hidden h-24">
+<div class="w-full bg-primary rounded-t-full" style="height: 85%;"></div>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Tue</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-2">
+<div class="w-full bg-primary/20 rounded-t-full relative flex items-end overflow-hidden h-24">
+<div class="w-full bg-primary rounded-t-full" style="height: 45%;"></div>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Wed</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-2">
+<div class="w-full bg-primary/20 rounded-t-full relative flex items-end overflow-hidden h-24">
+<div class="w-full bg-primary rounded-t-full" style="height: 95%;"></div>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Thu</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-2">
+<div class="w-full bg-primary/20 rounded-t-full relative flex items-end overflow-hidden h-24">
+<div class="w-full bg-primary rounded-t-full" style="height: 70%;"></div>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Fri</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-2">
+<div class="w-full bg-primary/20 rounded-t-full relative flex items-end overflow-hidden h-24">
+<div class="w-full bg-primary rounded-t-full" style="height: 60%;"></div>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Sat</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-2">
+<div class="w-full bg-primary/20 rounded-t-full relative flex items-end overflow-hidden h-24">
+<div class="w-full bg-primary rounded-t-full" style="height: 50%;"></div>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Sun</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-primary/10">
+<div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Total Milk Intake</p>
+<p class="text-xl font-bold text-slate-900 dark:text-white">840<span class="text-xs font-normal ml-1">ml</span></p>
+</div>
+<div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Total Sleep</p>
+<p class="text-xl font-bold text-slate-900 dark:text-white">14.5<span class="text-xs font-normal ml-1">hrs</span></p>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation -->
+<div class="fixed bottom-0 left-0 right-0 z-50 bg-background-light dark:bg-background-dark border-t border-primary/10 px-4 pb-6 pt-2">
+<div class="flex gap-2 max-w-lg mx-auto">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined filled-icon">grid_view</span>
+</div>
+<p class="text-[10px] font-bold leading-normal tracking-wide uppercase">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">bar_chart</span>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-wide uppercase">Analysis</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">forum</span>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-wide uppercase">Advice</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">account_circle</span>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-wide uppercase">Profile</p>
+</a>
+</div>
+</div>
+</div>
+</body></html>

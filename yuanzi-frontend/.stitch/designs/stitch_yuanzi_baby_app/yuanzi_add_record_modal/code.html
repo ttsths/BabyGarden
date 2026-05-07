@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff998a",
+                        "background-light": "#f8f6f5",
+                        "background-dark": "#23110f",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>Yuanzi Add Record Modal</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-slate-900 font-display">
+<!-- Screen Overlay / Background Mockup -->
+<div class="relative mx-auto max-w-[375px] h-[812px] bg-background-light overflow-hidden shadow-2xl">
+<!-- Dashboard Background Content -->
+<div class="p-6 pt-12">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h2 class="text-slate-400 text-sm">你好, 父母</h2>
+<h1 class="text-2xl font-bold text-slate-900">袁子宝宝</h1>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">child_care</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-white p-4 rounded-xl shadow-sm border border-primary/10">
+<span class="material-symbols-outlined text-primary mb-2">baby_changing_station</span>
+<p class="text-xs text-slate-500">最近换尿布</p>
+<p class="font-bold">2小时前</p>
+</div>
+<div class="bg-white p-4 rounded-xl shadow-sm border border-primary/10">
+<span class="material-symbols-outlined text-primary mb-2">bedtime</span>
+<p class="text-xs text-slate-500">最近睡眠</p>
+<p class="font-bold">45分钟</p>
+</div>
+</div>
+</div>
+<!-- Semi-transparent Overlay -->
+<div class="absolute inset-0 bg-black/40 backdrop-blur-sm z-10"></div>
+<!-- Bottom Sheet Modal -->
+<div class="absolute inset-x-0 bottom-0 z-20 bg-background-light rounded-t-xl shadow-2xl flex flex-col max-h-[90%]">
+<!-- BottomSheetHandle -->
+<button class="flex h-6 w-full items-center justify-center pt-2">
+<div class="h-1.5 w-12 rounded-full bg-primary/30"></div>
+</button>
+<div class="flex-1 overflow-y-auto pb-8">
+<h1 class="text-slate-900 text-xl font-bold leading-tight px-6 pt-4 pb-6 text-center">添加记录</h1>
+<!-- Record Type Selector -->
+<div class="grid grid-cols-3 gap-4 px-6 mb-8">
+<!-- Feeding -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-full aspect-square bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/20 ring-4 ring-primary/10">
+<span class="material-symbols-outlined text-white text-3xl">medical_services</span>
+</div>
+<p class="text-slate-900 text-sm font-semibold">喂奶</p>
+</div>
+<!-- Sleep -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-full aspect-square bg-white border-2 border-primary/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-3xl">bedtime</span>
+</div>
+<p class="text-slate-500 text-sm font-medium">睡眠</p>
+</div>
+<!-- Diaper -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-full aspect-square bg-white border-2 border-primary/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-3xl">baby_changing_station</span>
+</div>
+<p class="text-slate-500 text-sm font-medium">换尿布</p>
+</div>
+</div>
+<!-- Input Fields Section -->
+<div class="space-y-4 px-6">
+<!-- Time Picker -->
+<div class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-primary/5">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl">schedule</span>
+<p class="text-slate-900 text-base font-medium">时间</p>
+</div>
+<div class="px-3 py-1 bg-primary/10 rounded-lg">
+<p class="text-primary font-bold">10:30 AM</p>
+</div>
+</div>
+<!-- Slider for Amount -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-primary/5">
+<div class="flex w-full items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-xl">opacity</span>
+<p class="text-slate-900 text-base font-medium">奶量 (ml)</p>
+</div>
+<p class="text-primary font-bold text-lg">120</p>
+</div>
+<div class="relative flex h-6 w-full items-center">
+<div class="h-2 flex-1 rounded-full bg-primary/20">
+<div class="h-full w-[45%] rounded-full bg-primary relative">
+<div class="absolute right-0 -top-2 size-6 rounded-full bg-white border-2 border-primary shadow-md"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Notes Field -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-primary/5">
+<div class="flex items-center gap-3 mb-3">
+<span class="material-symbols-outlined text-primary text-xl">edit_note</span>
+<p class="text-slate-900 text-base font-medium">备注</p>
+</div>
+<textarea class="w-full bg-background-light border-none rounded-lg p-3 text-sm focus:ring-1 focus:ring-primary/50 text-slate-700 h-20 resize-none" placeholder="写下点什么..."></textarea>
+</div>
+</div>
+<!-- Submit Button -->
+<div class="px-6 mt-10">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/30 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">save</span>
+                        保存记录
+                    </button>
+<!-- Spacer for iOS home indicator -->
+<div class="h-4"></div>
+</div>
+</div>
+</div>
+</div>
+</body></html>
