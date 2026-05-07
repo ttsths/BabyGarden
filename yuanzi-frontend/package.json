@@ -15,10 +15,13 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.2.2",
     "@tanstack/react-query": "^5.90.21",
+    "antd": "^6.3.7",
     "antd-mobile": "^5.42.3",
     "axios": "^1.16.0",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.20",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-lazy-load-image-component": "^1.6.3",

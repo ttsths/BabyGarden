@@ -1,6 +1,8 @@
+import { Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
 import { HomePage } from './pages/HomePage';
 import { AddRecordModal } from './components/AddRecordModal';
+import { AdminRouter } from './admin/router';
 
 // 主应用 - 整合所有组件
 function App() {
@@ -65,7 +67,13 @@ function App() {
 
   return (
     <div className="App">
-      <HomePage
+      <Routes>
+        <Route path="/admin/*" element={<AdminRouter />} />
+        <Route
+          path="*"
+          element={
+            <>
+              <HomePage
         userName="Mommy"
         date="Monday, October 23rd"
         stats={stats}
@@ -80,6 +88,10 @@ function App() {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveRecord}
       />
+            </>
+          }
+        />
+      </Routes>
     </div>
   );
 }
