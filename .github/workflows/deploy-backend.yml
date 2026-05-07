@@ -66,8 +66,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
   # ============================================================
   # Job 3: Deploy Go WASM to Cloudflare Workers
@@ -132,4 +130,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --name yuanzi-backend yuanzi-backend/dist/index.js
+          command: deploy --name yuanzi-backend --compatibility-date 2026-05-07 yuanzi-backend/dist/index.js
