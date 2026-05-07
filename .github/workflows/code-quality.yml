@@ -34,12 +34,20 @@ jobs:
         working-directory: yuanzi-backend
         run: go vet ./...
 
-      - name: go test
+      - name: go test with coverage
         working-directory: yuanzi-backend
-        run: go test ./... -v -count=1
+        run: go test ./... -v -count=1 -coverprofile=coverage.out -covermode=atomic
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: yuanzi-backend/coverage.out
+          flags: backend
+          fail_ci_if_error: false
 
   # ============================================================
-  # 前端: ESLint + TypeScript Check + Test
+  # 前端: ESLint + TypeScript Check
   # ============================================================
   frontend:
     runs-on: ubuntu-latest

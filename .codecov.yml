@@ -1,0 +1,32 @@
+# Codecov 配置
+# https://docs.codecov.com/docs/codecov-yaml
+
+coverage:
+  precision: 2
+  round: down
+  range: "60...90"
+
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 5%         # 覆盖率下降不超过 5% 不失败
+    patch:
+      default:
+        target: auto
+        threshold: 10%
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false     # 覆盖率无变化也发评论
+
+flags:
+  backend:
+    paths:
+      - yuanzi-backend/
+    carryforward: false
+
+ignore:
+  - "yuanzi-backend/e2e/"    # E2E 测试不计入覆盖率
+  - "yuanzi-backend/**/*_test.go"
