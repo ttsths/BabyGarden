@@ -1,9 +1,6 @@
 package router
 
 import (
-	"net/http"
-	"time"
-
 	"yuanzi-backend/config"
 	"yuanzi-backend/handler"
 	"yuanzi-backend/middleware"
@@ -24,16 +21,7 @@ func SetupRouter() *gin.Engine {
 	r.Use(middleware.CORS())
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    200,
-			"message": "success",
-			"data": gin.H{
-				"status": "ok",
-				"time":   time.Now().Format(time.RFC3339),
-			},
-		})
-	})
+	r.GET("/health", handler.HealthCheck)
 
 	registerAPIRoutes(r, "/api")
 	registerAPIRoutes(r, "/api/v1")
