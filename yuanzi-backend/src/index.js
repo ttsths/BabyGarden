@@ -29,3 +29,15 @@ export class YuanziBackend extends Container {
     }
   }
 }
+
+/**
+ * Worker entry — 必须 default export 才能以 ES Module 格式运行
+ * 这样 DO binding 和 [[containers]] 才能被 wrangler 4.x 正确识别
+ */
+export default {
+  async fetch(request, env) {
+    const id = env.YUANZI_BACKEND.idFromName('default');
+    const stub = env.YUANZI_BACKEND.get(id);
+    return stub.fetch(request);
+  },
+};
