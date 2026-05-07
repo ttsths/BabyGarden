@@ -103,3 +103,36 @@ test('3. 用户管理 → 列表加载 → 搜索', async ({ page }) => {
     await page.waitForTimeout(1500);
   }
 });
+
+// Smoke 4: 宝宝管理 → 列表 → 搜索
+test('4. 宝宝管理 → 列表加载 → 搜索', async ({ page }) => {
+  test.setTimeout(45000);
+  await loginAsAdmin(page);
+
+  await page.getByText('宝宝管理').click();
+  await expect(page).toHaveURL(/\/admin\/babies/, { timeout: 5000 });
+  await page.waitForTimeout(2000);
+
+  const table = page.locator('.ant-table');
+  await expect(table).toBeVisible({ timeout: 10000 });
+
+  const searchInput = page.locator('input[placeholder*="搜索"]');
+  if ((await searchInput.count()) > 0) {
+    await searchInput.first().fill('圆');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(1500);
+    await expect(table).toBeVisible();
+  }
+});
+
+// Smoke 5: 宝宝管理 → 页面加载
+test('5. 宝宝管理 → 页面加载', async ({ page }) => {
+  test.setTimeout(45000);
+  await loginAsAdmin(page);
+
+  await page.getByText('宝宝管理').click();
+  await expect(page).toHaveURL(/\/admin\/babies/, { timeout: 5000 });
+
+  await expect(page.getByText('宝宝管理')).toBeVisible({ timeout: 5000 });
+  await expect(page.locator('.ant-table')).toBeVisible({ timeout: 10000 });
+});
