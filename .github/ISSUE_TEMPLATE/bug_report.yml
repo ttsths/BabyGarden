@@ -1,0 +1,55 @@
+name: 🐛 Bug Report
+description: 提交 Bug 报告，Agent 自动修复
+title: "[Bug] "
+labels: [bug, agent]
+body:
+  - type: input
+    id: severity
+    attributes:
+      label: 严重程度
+      placeholder: critical / high / medium / low
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: 影响模块
+      options:
+        - 后端 API (yuanzi-backend)
+        - 前端 (yuanzi-frontend)
+        - 数据库 (MySQL)
+        - CI/CD
+        - 基础设施
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 访问 /admin/login
+        2. 输入手机号和密码
+        3. 点击登录
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+      placeholder: 应该跳转到管理后台首页
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为（含错误信息）
+      placeholder: |
+        返回 405 Method Not Allowed
+        Request URL: https://babygarden.pages.dev/api/v1/admin/login
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 相关日志/截图
+      placeholder: 粘贴 CI 日志、浏览器 Console、Network 面板截图等
