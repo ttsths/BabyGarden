@@ -33,7 +33,7 @@ func SetupRouter() *gin.Engine {
 	adminGroup.POST("/login", admin.AdminLogin)
 
 	adminAuth := r.Group("/api/v1/admin")
-	adminAuth.Use(middleware.AdminAuth())
+	adminAuth.Use(middleware.JWT(), middleware.AdminAuth())
 
 	// User management
 	adminAuth.GET("/users", admin.GetUsers)
