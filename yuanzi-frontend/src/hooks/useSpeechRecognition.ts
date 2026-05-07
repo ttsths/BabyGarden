@@ -6,35 +6,50 @@ interface UseSpeechRecognitionOptions {
   lang?: string;
 }
 
-interface SpeechRecognitionEvent {
-  resultIndex: number;
-  results: Array<Array<{ transcript: string; isFinal: boolean }>>;
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
 }
 
-interface SpeechRecognitionError {
+interface SpeechRecognitionResult {
+  readonly isFinal: boolean;
+  readonly length: number;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionEvent {
+  readonly resultIndex: number;
+  readonly results: {
+    readonly length: number;
+    [index: number]: SpeechRecognitionResult;
+  };
+}
+
+interface SpeechRecognitionErrorEvent {
   error: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const WindowWithSpeech = window as Record<string, any>;
-
-const getSpeechRecognition = (): new () => {
+interface SpeechRecognitionInstance {
   start: () => void;
   stop: () => void;
   lang: string;
   continuous: boolean;
   interimResults: boolean;
-  onstart: (() => void) | null;
-  onresult: ((event: SpeechRecognitionEvent) => void) | null;
-  onerror: ((event: SpeechRecognitionError) => void) | null;
-  onend: (() => void) | null;
-} | undefined => {
+  onstart: ((this: SpeechRecognitionInstance) => void) | null;
+  onresult: ((this: SpeechRecognitionInstance, event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((this: SpeechRecognitionInstance, event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: ((this: SpeechRecognitionInstance) => void) | null;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const WindowWithSpeech = window as Record<string, any>;
+
+function getSpeechRecognitionConstructor(): new () => SpeechRecognitionInstance | undefined {
   return WindowWithSpeech.SpeechRecognition || WindowWithSpeech.webkitSpeechRecognition;
-};
+}
 
 /**
  * 语音识别 Hook (Web Speech API)
- * @param options 配置选项
  */
 export function useSpeechRecognition({
   onResult,
@@ -43,11 +58,11 @@ export function useSpeechRecognition({
 }: UseSpeechRecognitionOptions = {}) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [isSupported] = useState(() => !!getSpeechRecognition());
+  const [isSupported] = useState(() => !!getSpeechRecognitionConstructor());
 
   const startListening = useCallback(() => {
-    const SpeechRecognitionClass = getSpeechRecognition();
-    
+    const SpeechRecognitionClass = getSpeechRecognitionConstructor();
+
     if (!SpeechRecognitionClass) {
       onError?.(new Error('浏览器不支持语音识别'));
       return;
@@ -67,8 +82,9 @@ export function useSpeechRecognition({
       let interimTranscript = '';
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
+        const result = event.results[i];
+        const transcript = result[0].transcript;
+        if (result.isFinal) {
           finalTranscript += transcript;
         } else {
           interimTranscript += transcript;
@@ -80,7 +96,7 @@ export function useSpeechRecognition({
       onResult?.(currentTranscript);
     };
 
-    recognition.onerror = (event: SpeechRecognitionError) => {
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       const error = new Error(event.error || '语音识别错误');
       onError?.(error);
       setIsListening(false);
@@ -94,8 +110,8 @@ export function useSpeechRecognition({
   }, [lang, onResult, onError]);
 
   const stopListening = useCallback(() => {
-    const SpeechRecognitionClass = getSpeechRecognition();
-    
+    const SpeechRecognitionClass = getSpeechRecognitionConstructor();
+
     if (!SpeechRecognitionClass) return;
 
     const recognition = new SpeechRecognitionClass();

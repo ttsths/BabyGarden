@@ -195,7 +195,7 @@ func TestExists(t *testing.T) {
 	}
 
 	// 清理
-	Del(key)
+	_ = Del(key)
 
 	t.Log("Exists 测试通过")
 }
@@ -244,7 +244,7 @@ func TestHash(t *testing.T) {
 	}
 
 	// 清理
-	Del(key)
+	_ = Del(key)
 
 	t.Log("Hash 测试通过")
 }
@@ -303,7 +303,7 @@ func TestList(t *testing.T) {
 	}
 
 	// 清理
-	Del(key)
+	_ = Del(key)
 
 	t.Log("List 测试通过")
 }
