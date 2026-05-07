@@ -33,13 +33,17 @@ func Setup() {
 	})
 
 	if err != nil {
-		logger.Fatal("Failed to connect to database", logger.Err(err))
+		logger.Error("Failed to connect to database", logger.Err(err))
+		DB = nil
+		return
 	}
 
 	// 配置连接池
 	sqlDB, err := DB.DB()
 	if err != nil {
-		logger.Fatal("Failed to get sql.DB", logger.Err(err))
+		logger.Error("Failed to get sql.DB", logger.Err(err))
+		DB = nil
+		return
 	}
 
 	sqlDB.SetMaxIdleConns(cfg.MaxIdleConn)
@@ -55,6 +59,18 @@ func Setup() {
 // GetDB 获取数据库连接
 func GetDB() *gorm.DB {
 	return DB
+}
+
+// IsConnected 检查数据库是否已连接
+func IsConnected() bool {
+	if DB == nil {
+		return false
+	}
+	sqlDB, err := DB.DB()
+	if err != nil {
+		return false
+	}
+	return sqlDB.Ping() == nil
 }
 
 // Close 关闭数据库连接

@@ -8,6 +8,7 @@ compatibility_date = "2026-05-07"
 class_name = "YuanziBackend"
 image = "./Dockerfile"
 max_instances = 3
+instance_type = "basic"
 
 # ---- Durable Object 绑定 ----
 # 将容器 DO 绑定为 Worker 可用的 binding
