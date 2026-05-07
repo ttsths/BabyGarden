@@ -1,0 +1,44 @@
+name: PR Agent (DeepSeek)
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+  issue_comment:
+    types: [created]
+
+jobs:
+  pr_agent_job:
+    if: ${{ github.event.sender.type != 'Bot' }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
+    steps:
+      - name: PR Agent action step
+        uses: the-pr-agent/pr-agent@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEEPSEEK.KEY: ${{ secrets.DEEPSEEK_KEY }}
+          config.model: "deepseek/deepseek-chat"
+          config.fallback_models: '["deepseek/deepseek-chat"]'
+
+          # 自动触发
+          github_action_config.auto_review: "true"
+          github_action_config.auto_describe: "true"
+          github_action_config.auto_improve: "true"
+          github_action_config.pr_actions: '["opened", "reopened", "ready_for_review", "synchronize"]'
+
+          # 审查配置
+          PR_REVIEWER.EXTRA_INSTRUCTIONS: |
+            审查重点:
+            1. 安全漏洞（SQL注入、XSS、认证绕过）
+            2. 逻辑错误和边界条件
+            3. Go 代码需符合标准项目布局
+            4. TypeScript/React 代码需符合 hooks 规范
+            5. 敏感信息泄露
+          PR_REVIEWER.REQUIRE_TESTS_REVIEW: "true"
+          PR_REVIEWER.INLINE_CODE_COMMENTS: "true"
+
+          # 代码建议
+          PR_CODE_SUGGESTIONS.NUM_CODE_SUGGESTIONS: "5"
