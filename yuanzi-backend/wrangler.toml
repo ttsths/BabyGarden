@@ -11,7 +11,6 @@ enabled = true
 [[containers]]
 class_name = "YuanziBackend"
 image = "./Dockerfile"
-command = "./yuanzi-backend"
 max_instances = 3
 instance_type = "basic"
 
