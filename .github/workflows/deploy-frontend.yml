@@ -37,6 +37,8 @@ jobs:
 
       - name: Build
         working-directory: yuanzi-frontend
+        env:
+          VITE_API_BASE_URL: https://yuanzi-backend.shentuhaisan.workers.dev/api/v1
         run: npm run build
 
       - name: Deploy to Cloudflare Pages
