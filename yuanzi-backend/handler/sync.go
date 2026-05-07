@@ -68,6 +68,8 @@ func SSEStream(c *gin.Context) {
 	ticker := time.NewTicker(syncHeartbeatInterval)
 	defer ticker.Stop()
 
+	clientGone := c.Request.Context().Done()
+
 	pubsub := gredis.Subscribe(syncChannel(familyID))
 	if pubsub == nil {
 		// Redis 未连接，只用心跳保持连接
@@ -83,8 +85,6 @@ func SSEStream(c *gin.Context) {
 	}
 	defer pubsub.Close()
 	messages := pubsub.Channel()
-
-	clientGone := c.Request.Context().Done()
 
 	for {
 		select {
