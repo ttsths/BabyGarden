@@ -7,6 +7,9 @@
 import { Container } from '@cloudflare/containers';
 
 export class YuanziBackend extends Container {
+  // 容器监听端口（对应 Dockerfile EXPOSE 8080）
+  defaultPort = 8080;
+
   /**
    * 处理所有进入容器的 HTTP 请求
    * containerFetch 自动发现容器的 EXPOSE 端口并转发
