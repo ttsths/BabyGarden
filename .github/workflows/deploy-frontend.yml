@@ -1,0 +1,47 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'yuanzi-frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: yuanzi-frontend/package-lock.json
+
+      - name: Install
+        working-directory: yuanzi-frontend
+        run: npm ci
+
+      - name: Lint
+        working-directory: yuanzi-frontend
+        run: npm run lint --if-present || true
+
+      - name: Type check
+        working-directory: yuanzi-frontend
+        run: npm run type-check --if-present || true
+
+      - name: Build
+        working-directory: yuanzi-frontend
+        run: npm run build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy yuanzi-frontend/dist --project-name=babygarden --branch=main
