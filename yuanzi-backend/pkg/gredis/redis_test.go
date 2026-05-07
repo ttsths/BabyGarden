@@ -339,7 +339,7 @@ func TestIncrDecr(t *testing.T) {
 	}
 
 	// 清理
-	Del(key)
+	_ = Del(key)
 
 	t.Log("Incr/Decr 测试通过")
 }
