@@ -45,7 +45,7 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
     // TODO: 调用 API 登录
     await new Promise(resolve => setTimeout(resolve, 1000));
-    login('test-user-id');
+    login('test-token', 'test-refresh-token');
     setLoading(false);
     navigate('/');
   };

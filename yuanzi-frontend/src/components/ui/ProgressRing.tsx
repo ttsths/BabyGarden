@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './ProgressRing.module.css';
 
-interface ProgressRingProps {
+export interface ProgressRingProps {
   percentage: number;
   size?: number;
   strokeWidth?: number;

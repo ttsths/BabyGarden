@@ -5,23 +5,40 @@ type ThemeMode = 'light' | 'dark' | 'elderly';
 
 interface ThemeState {
   mode: ThemeMode;
+  isDarkMode: boolean;
+  isElderMode: boolean;
   setMode: (mode: ThemeMode) => void;
-  toggleElderlyMode: () => void;
+  toggleDarkMode: () => void;
+  toggleElderMode: () => void;
 }
 
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
       mode: 'light',
+      isDarkMode: false,
+      isElderMode: false,
 
       setMode: (mode) => {
-        set({ mode });
+        set({
+          mode,
+          isDarkMode: mode === 'dark',
+          isElderMode: mode === 'elderly',
+        });
         applyTheme(mode);
       },
 
-      toggleElderlyMode: () => {
-        const newMode = get().mode === 'elderly' ? 'light' : 'elderly';
-        set({ mode: newMode });
+      toggleDarkMode: () => {
+        const isDark = get().mode === 'dark';
+        const newMode = isDark ? 'light' : 'dark';
+        set({ mode: newMode, isDarkMode: !isDark, isElderMode: false });
+        applyTheme(newMode);
+      },
+
+      toggleElderMode: () => {
+        const isElder = get().mode === 'elderly';
+        const newMode = isElder ? 'light' : 'elderly';
+        set({ mode: newMode, isElderMode: !isElder, isDarkMode: false });
         applyTheme(newMode);
       },
     }),

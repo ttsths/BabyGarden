@@ -124,6 +124,7 @@ export const StatsPage: React.FC = () => {
   };
 
   const currentStat = stats[statType];
+  const currentData = currentStat.data as { average: number; unit: string; trend: number[]; labels: string[] };
 
   return (
     <div className="min-h-screen bg-background-primary pb-20">
@@ -197,13 +198,13 @@ export const StatsPage: React.FC = () => {
             <>
               <div className="mb-6">
                 <span className="text-3xl font-bold text-neutral-text-primary">
-                  {currentStat.data.average}
+                  {currentData.average}
                 </span>
                 <span className="text-neutral-text-secondary ml-2">
-                  {currentStat.data.unit}
+                  {currentData.unit}
                 </span>
               </div>
-              {renderChart(currentStat.data)}
+              {renderChart(currentData)}
             </>
           )}
         </Card>

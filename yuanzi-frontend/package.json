@@ -17,6 +17,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.90.21",
     "antd-mobile": "^5.42.3",
+    "axios": "^1.16.0",
     "clsx": "^2.1.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

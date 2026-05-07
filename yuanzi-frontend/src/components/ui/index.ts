@@ -28,7 +28,6 @@ export type { TimelineItemProps } from './TimelineItem';
 
 // BottomNav 底部导航
 export { BottomNav } from './BottomNav';
-export type { BottomNavProps } from './BottomNav';
 
 // Toast 提示
 export { Toast } from './Toast';

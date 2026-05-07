@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { HomePage } from './pages/HomePage';
 import { AddRecordModal } from './components/AddRecordModal';
 
@@ -7,13 +7,13 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 示例数据（按实际设计稿）
-  const [stats] = useState({
+  const [stats, setStats] = useState({
     feedingCount: 5,
     sleepHours: 12,
     diaperCount: 8,
   });
 
-  const [recentRecords] = useState([
+  const [recentRecords, setRecentRecords] = useState([
     {
       id: '1',
       type: 'feeding' as const,

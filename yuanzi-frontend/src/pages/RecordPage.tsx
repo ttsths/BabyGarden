@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
-import { RECORD_TYPES, RecordType } from '../types';
+import { RECORD_TYPES } from '../types';
+import type { RecordType } from '../types';
 
 interface RecordPageProps {
   onSave: (record: any) => void;
@@ -197,7 +198,7 @@ const FeedTypeButton: React.FC<{
   type: 'breast' | 'formula';
   active?: boolean;
   onClick: () => void;
-}> = ({ label, type, active, onClick }) => (
+}> = ({ label, type: _type, active, onClick }) => (
   <button
     onClick={onClick}
     className={`

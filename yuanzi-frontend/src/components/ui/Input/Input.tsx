@@ -1,12 +1,13 @@
-import { FC, InputHTMLAttributes, forwardRef } from 'react';
+import { forwardRef } from 'react';
+import type { InputHTMLAttributes } from 'react';
 import styles from './Input.module.css';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  type?: 'text' | 'number' | 'password' | 'tel' | 'email';
+  type?: 'text' | 'number' | 'password' | 'tel' | 'email' | 'date';
   label?: string;
   error?: string;
   fullWidth?: boolean;
-  size?: 'small' | 'medium' | 'large';
+  inputSize?: 'small' | 'medium' | 'large';
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(({
@@ -14,7 +15,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
   label,
   error,
   fullWidth = false,
-  size = 'medium',
+  inputSize = 'medium',
   className = '',
   ...props
 }, ref) => {
@@ -26,7 +27,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
 
   const inputClasses = [
     styles.input,
-    styles['input-' + size],
+    styles['input-' + inputSize],
     error ? styles.inputError : ''
   ].filter(Boolean).join(' ');
 

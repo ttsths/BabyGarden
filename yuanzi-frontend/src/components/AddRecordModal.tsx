@@ -18,8 +18,8 @@ export const AddRecordModal: React.FC<AddRecordModalProps> = ({
   onSave,
 }) => {
   const [selectedType, setSelectedType] = useState<'feeding' | 'sleep' | 'diaper'>('feeding');
-  const [time, setTime] = useState('10:30 AM');
-  const [amount, setAmount] = useState(120);
+  const [time] = useState('10:30 AM');
+  const [amount] = useState(120);
   const [note, setNote] = useState('');
 
   if (!isOpen) return null;
