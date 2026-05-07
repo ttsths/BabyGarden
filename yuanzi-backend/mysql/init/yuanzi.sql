@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS users (
     nickname VARCHAR(50) COMMENT '昵称',
     avatar_url VARCHAR(500) COMMENT '头像URL',
     status TINYINT DEFAULT 1 COMMENT '状态: 0-禁用 1-正常',
+    is_admin TINYINT DEFAULT 0 COMMENT '是否管理员: 0-否 1-是',
+    password VARCHAR(255) COMMENT '管理员密码',
     last_login_at DATETIME(3) COMMENT '最后登录时间',
     last_login_ip VARCHAR(45) COMMENT '最后登录IP',
     created_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
@@ -159,8 +161,8 @@ CREATE TABLE IF NOT EXISTS push_devices (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='推送设备表';
 
 -- 创建示例用户和家庭
-INSERT INTO users (id, phone, nickname) VALUES 
-('100e8400-e29b-41d4-a716-446655440000', '13800138000', '妈妈'),
+INSERT INTO users (id, phone, nickname, is_admin, password) VALUES 
+('100e8400-e29b-41d4-a716-446655440000', '13800138000', '妈妈', 1, 'admin123'),
 ('100e8400-e29b-41d4-a716-446655440010', '139001390010', '奶奶');
 
 -- 创建示例家庭
