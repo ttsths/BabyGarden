@@ -35,3 +35,5 @@ coverage
 # Temporary files
 *.tmp
 *.temp
+e2e-results.json
+test-results/
