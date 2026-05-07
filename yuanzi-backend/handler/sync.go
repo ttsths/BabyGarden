@@ -127,16 +127,16 @@ func syncChannel(familyID string) string {
 // writeSSEEvent 写入 SSE 事件
 func writeSSEEvent(w http.ResponseWriter, event string, data interface{}) {
 	if data != nil {
-		w.Write([]byte("event: " + event + "\n"))
-		w.Write([]byte("data: " + toJSON(data) + "\n\n"))
+		_, _ = w.Write([]byte("event: " + event + "\n"))
+		_, _ = w.Write([]byte("data: " + toJSON(data) + "\n\n"))
 		return
 	}
-	w.Write([]byte(": ping\n\n"))
+	_, _ = w.Write([]byte(": ping\n\n"))
 }
 
 func writeSSEEventRaw(w http.ResponseWriter, event string, data string) {
-	w.Write([]byte("event: " + event + "\n"))
-	w.Write([]byte("data: " + data + "\n\n"))
+	_, _ = w.Write([]byte("event: " + event + "\n"))
+	_, _ = w.Write([]byte("data: " + data + "\n\n"))
 }
 
 // toJSON 转换为 JSON

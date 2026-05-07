@@ -15,7 +15,7 @@ export function LoginPage() {
       await login(values.phone, values.password);
       message.success('登录成功');
       navigate('/admin/dashboard');
-    } catch (err) {
+    } catch {
       message.error('登录失败，请检查账号密码');
     } finally {
       setLoading(false);

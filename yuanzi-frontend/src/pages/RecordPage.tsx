@@ -5,7 +5,7 @@ import { RECORD_TYPES } from '../types';
 import type { RecordType } from '../types';
 
 interface RecordPageProps {
-  onSave: (record: any) => void;
+  onSave: (record: Record<string, unknown>) => void;
   onCancel: () => void;
 }
 
@@ -198,7 +198,7 @@ const FeedTypeButton: React.FC<{
   type: 'breast' | 'formula';
   active?: boolean;
   onClick: () => void;
-}> = ({ label, type: _type, active, onClick }) => (
+}> = ({ label, active, onClick }) => (
   <button
     onClick={onClick}
     className={`

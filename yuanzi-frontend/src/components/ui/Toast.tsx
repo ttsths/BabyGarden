@@ -51,6 +51,7 @@ export const Toast: React.FC<ToastProps> = ({
 // Toast 管理器
 let toastContainer: HTMLElement | null = null;
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const showToast = (message: string, type: ToastType = 'info', duration?: number) => {
   if (!toastContainer) {
     toastContainer = document.createElement('div');

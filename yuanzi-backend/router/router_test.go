@@ -51,7 +51,7 @@ func TestAdminRoutesRequireJWT(t *testing.T) {
 
 			if w.Code != tt.wantStatus {
 				var resp map[string]interface{}
-				json.Unmarshal(w.Body.Bytes(), &resp)
+				_ = json.Unmarshal(w.Body.Bytes(), &resp)
 				t.Errorf("%s %s: expected %d, got %d (msg: %v)",
 					tt.method, tt.path, tt.wantStatus, w.Code, resp["msg"])
 			}
@@ -77,7 +77,7 @@ func TestAdminRoutesRejectNonAdminToken(t *testing.T) {
 	// Regular user should get 403 Forbidden (not admin)
 	if w.Code != http.StatusForbidden {
 		var resp map[string]interface{}
-		json.Unmarshal(w.Body.Bytes(), &resp)
+		_ = json.Unmarshal(w.Body.Bytes(), &resp)
 		t.Errorf("Non-admin token: expected 403, got %d (msg: %v)", w.Code, resp["msg"])
 	}
 }

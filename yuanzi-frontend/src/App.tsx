@@ -44,7 +44,7 @@ function App() {
     setIsModalOpen(true);
   };
 
-  const handleSaveRecord = (record: any) => {
+  const handleSaveRecord = (record: { type: 'feeding' | 'sleep' | 'diaper'; time: string; amount?: number; note?: string }) => {
     console.log('Saving record:', record);
     // 添加记录逻辑
     const newRecord = {

@@ -70,33 +70,33 @@ export const api = {
       apiClient.get(ENDPOINTS.BABY.LIST),
     getDetail: (id: string) => 
       apiClient.get(ENDPOINTS.BABY.DETAIL(id)),
-    create: (data: any) => 
+    create: (data: Record<string, unknown>) => 
       apiClient.post(ENDPOINTS.BABY.CREATE, data),
-    update: (id: string, data: any) => 
+    update: (id: string, data: Record<string, unknown>) => 
       apiClient.put(ENDPOINTS.BABY.UPDATE(id), data),
   },
   
   // 记录
   record: {
-    getList: (babyId: string, params?: any) => 
+    getList: (babyId: string, params?: Record<string, unknown>) => 
       apiClient.get(ENDPOINTS.RECORD.LIST, { params: { babyId, ...params } }),
     getDetail: (id: string) => 
       apiClient.get(ENDPOINTS.RECORD.DETAIL(id)),
-    create: (data: any) => 
+    create: (data: Record<string, unknown>) => 
       apiClient.post(ENDPOINTS.RECORD.CREATE, data),
-    update: (id: string, data: any) => 
+    update: (id: string, data: Record<string, unknown>) => 
       apiClient.put(ENDPOINTS.RECORD.UPDATE(id), data),
     delete: (id: string) => 
       apiClient.delete(ENDPOINTS.RECORD.DELETE(id)),
-    getStats: (babyId: string, range: any) => 
+    getStats: (babyId: string, range: Record<string, string>) => 
       apiClient.get(ENDPOINTS.RECORD.STATS, { params: { babyId, ...range } }),
   },
   
   // 照片
   photo: {
-    getList: (babyId: string, params?: any) => 
+    getList: (babyId: string, params?: Record<string, unknown>) => 
       apiClient.get(ENDPOINTS.PHOTO.LIST, { params: { babyId, ...params } }),
-    getUploadUrl: (data: any) => 
+    getUploadUrl: (data: Record<string, unknown>) => 
       apiClient.post(ENDPOINTS.PHOTO.UPLOAD_URL, data),
     confirmUpload: (id: string) => 
       apiClient.post(ENDPOINTS.PHOTO.CONFIRM(id)),
@@ -108,7 +108,7 @@ export const api = {
   
   // AI
   ai: {
-    chat: (message: string, context?: any) => 
+    chat: (message: string, context?: Record<string, unknown>) => 
       apiClient.post(ENDPOINTS.AI.CHAT, { message, context }),
     speech: (audioBlob: Blob) => {
       const formData = new FormData();

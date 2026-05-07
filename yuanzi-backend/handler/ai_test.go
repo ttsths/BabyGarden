@@ -78,7 +78,7 @@ func TestSpeechRecognizeSuccess(t *testing.T) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	part, _ := writer.CreateFormFile("audio", "test.wav")
-	part.Write([]byte("audio"))
+	_, _ = part.Write([]byte("audio"))
 	writer.Close()
 
 	recorder := httptest.NewRecorder()
