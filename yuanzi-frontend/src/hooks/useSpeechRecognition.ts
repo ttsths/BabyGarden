@@ -42,11 +42,7 @@ interface SpeechRecognitionInstance {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const WindowWithSpeech = window as Record<string, any>;
-
-function getSpeechRecognitionConstructor(): new () => SpeechRecognitionInstance | undefined {
-  return WindowWithSpeech.SpeechRecognition || WindowWithSpeech.webkitSpeechRecognition;
-}
+const win = window as Record<string, any>;
 
 /**
  * 语音识别 Hook (Web Speech API)
@@ -131,4 +127,9 @@ export function useSpeechRecognition({
     stopListening,
     resetTranscript,
   };
+}
+
+function getSpeechRecognitionConstructor(): (new () => SpeechRecognitionInstance) | undefined {
+  return (win.SpeechRecognition || win.webkitSpeechRecognition) as
+    (new () => SpeechRecognitionInstance) | undefined;
 }
