@@ -3,6 +3,8 @@
 > 母婴成长记录社区平台 — 记录宝宝每一个珍贵瞬间
 
 [![Go Version](https://img.shields.io/badge/Go-1.24-00ADD8?logo=go)](https://go.dev/)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ttsths/BabyGarden)](https://goreportcard.com/report/github.com/ttsths/BabyGarden)
+[![Last Commit](https://img.shields.io/github/last-commit/ttsths/BabyGarden)](https://github.com/ttsths/BabyGarden)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Deploy](https://github.com/ttsths/BabyGarden/actions/workflows/deploy-backend.yml/badge.svg)](https://github.com/ttsths/BabyGarden/actions/workflows/deploy-backend.yml)
 
