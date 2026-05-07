@@ -2,11 +2,16 @@ name = "yuanzi-backend"
 main = "src/index.js"
 compatibility_date = "2026-05-07"
 
+# ---- 容器日志 ----
+[observability]
+enabled = true
+
 # ---- Container 配置 ----
 # 每个容器实例对应一个 Durable Object，Worker 通过 DO 转发请求
 [[containers]]
 class_name = "YuanziBackend"
 image = "./Dockerfile"
+command = "./yuanzi-backend"
 max_instances = 3
 instance_type = "basic"
 
