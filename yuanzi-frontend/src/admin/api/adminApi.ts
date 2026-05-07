@@ -14,8 +14,10 @@ import type {
   PaginatedResponse,
 } from '@/admin/types/admin';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+
 const adminClient: AxiosInstance = axios.create({
-  baseURL: '/api/v1/admin',
+  baseURL: `${API_BASE}/admin`,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
