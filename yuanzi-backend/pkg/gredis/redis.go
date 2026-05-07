@@ -2,15 +2,28 @@ package gredis
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 	"yuanzi-backend/config"
+	"yuanzi-backend/logger"
 
 	"github.com/redis/go-redis/v9"
 )
 
 var RedisClient *redis.Client
 var Ctx = context.Background()
+var ErrRedisNotConnected = errors.New("redis: not connected")
+
+// connected 检查 Redis 是否已连接
+func connected() bool {
+	return RedisClient != nil
+}
+
+// IsConnected 公开的连接检查，供外部使用
+func IsConnected() bool {
+	return connected()
+}
 
 // Setup 初始化 Redis 连接
 func Setup() {
@@ -22,51 +35,81 @@ func Setup() {
 
 	_, err := RedisClient.Ping(Ctx).Result()
 	if err != nil {
-		panic(fmt.Sprintf("Redis connect failed: %v", err))
+		logger.Error("Redis connect failed", logger.Err(err))
+		RedisClient = nil
+		return
 	}
+	logger.Info("Redis connected successfully",
+		logger.String("host", config.GlobalConfig.Redis.Host),
+		logger.Int("port", config.GlobalConfig.Redis.Port),
+	)
 }
 
 // === String 操作 ===
 
 // Set 设置键值
 func Set(key string, value interface{}, expiration int) error {
+	if !connected() {
+		return ErrRedisNotConnected
+	}
 	ttl := time.Duration(expiration) * time.Second
 	return RedisClient.Set(Ctx, key, value, ttl).Err()
 }
 
 // Get 获取键值
 func Get(key string) (string, error) {
+	if !connected() {
+		return "", ErrRedisNotConnected
+	}
 	return RedisClient.Get(Ctx, key).Result()
 }
 
 // Del 删除键
 func Del(key string) error {
+	if !connected() {
+		return ErrRedisNotConnected
+	}
 	return RedisClient.Del(Ctx, key).Err()
 }
 
 // Exists 检查键是否存在
 func Exists(key string) (bool, error) {
+	if !connected() {
+		return false, ErrRedisNotConnected
+	}
 	n, err := RedisClient.Exists(Ctx, key).Result()
 	return n > 0, err
 }
 
 // SetEx 设置键值并指定过期时间（秒）
 func SetEx(key string, value interface{}, seconds int) error {
+	if !connected() {
+		return ErrRedisNotConnected
+	}
 	return RedisClient.SetEx(Ctx, key, value, time.Duration(seconds)*time.Second).Err()
 }
 
 // Incr 自增
 func Incr(key string) (int64, error) {
+	if !connected() {
+		return 0, ErrRedisNotConnected
+	}
 	return RedisClient.Incr(Ctx, key).Result()
 }
 
 // Decr 自减
 func Decr(key string) (int64, error) {
+	if !connected() {
+		return 0, ErrRedisNotConnected
+	}
 	return RedisClient.Decr(Ctx, key).Result()
 }
 
 // Expire 设置过期时间
 func Expire(key string, seconds int) error {
+	if !connected() {
+		return ErrRedisNotConnected
+	}
 	return RedisClient.Expire(Ctx, key, time.Duration(seconds)*time.Second).Err()
 }
 
@@ -187,10 +230,16 @@ func RemoveTokenFromBlacklist(jti string) error {
 
 // Publish 发布消息
 func Publish(channel string, message string) error {
+	if !connected() {
+		return ErrRedisNotConnected
+	}
 	return RedisClient.Publish(Ctx, channel, message).Err()
 }
 
 // Subscribe 订阅频道
 func Subscribe(channel string) *redis.PubSub {
+	if !connected() {
+		return nil
+	}
 	return RedisClient.Subscribe(Ctx, channel)
 }

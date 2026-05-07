@@ -43,6 +43,7 @@ func registerAPIRoutes(r *gin.Engine, base string) {
 
 	authorized := api.Group("")
 	authorized.Use(middleware.JWT())
+	authorized.Use(middleware.RequireDB())
 
 	user := authorized.Group("/user")
 	user.GET("/profile", handler.GetUserProfile)

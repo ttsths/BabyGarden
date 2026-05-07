@@ -69,6 +69,18 @@ func SSEStream(c *gin.Context) {
 	defer ticker.Stop()
 
 	pubsub := gredis.Subscribe(syncChannel(familyID))
+	if pubsub == nil {
+		// Redis 未连接，只用心跳保持连接
+		for {
+			select {
+			case <-ticker.C:
+				writeSSEEvent(c.Writer, "ping", nil)
+				flusher.Flush()
+			case <-clientGone:
+				return
+			}
+		}
+	}
 	defer pubsub.Close()
 	messages := pubsub.Channel()
 
