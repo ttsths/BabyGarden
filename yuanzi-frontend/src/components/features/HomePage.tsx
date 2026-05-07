@@ -1,9 +1,9 @@
 import React from 'react';
 import { babyInfo, todayProgress, todayStats, recentTimeline } from '@/data/mockData';
-import { StatsCard } from './StatsCard';
-import { QuickStatCard } from './QuickStatCard';
-import { TimelineItem } from './TimelineItem';
-import { BottomNav } from './BottomNav';
+import { StatsCard } from '../ui/StatsCard';
+import { QuickStatCard } from '../ui/QuickStatCard';
+import { TimelineItem } from '../ui/TimelineItem';
+import { BottomNav } from '../ui/BottomNav';
 
 interface HomePageProps {
   // 预留自定义配置接口

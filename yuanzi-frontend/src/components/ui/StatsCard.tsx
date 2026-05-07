@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './StatsCard.module.css';
 
-interface StatsCardProps {
+export interface StatsCardProps {
   completed: number;
   total: number;
   percentage: number;

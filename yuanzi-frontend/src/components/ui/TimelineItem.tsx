@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './TimelineItem.module.css';
 
-interface TimelineItemProps {
+export interface TimelineItemProps {
   icon: string;
   title: string;
   description?: string;

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AxiosInstance, AxiosError } from 'axios';
+import type { AxiosInstance, AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import { ENDPOINTS, API_BASE } from '@/constants/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 
@@ -14,26 +14,24 @@ const apiClient: AxiosInstance = axios.create({
 
 // 请求拦截器
 apiClient.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
     const token = useAuthStore.getState().token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
+  (error: AxiosError) => {
     return Promise.reject(error);
   }
 );
 
 // 响应拦截器
 apiClient.interceptors.response.use(
-  (response) => {
-    return response.data;
+  (response: AxiosResponse) => {
+    return response;
   },
   async (error: AxiosError) => {
-    const originalRequest = error.config;
-
     // 401 未授权，跳转登录
     if (error.response?.status === 401) {
       useAuthStore.getState().logout();

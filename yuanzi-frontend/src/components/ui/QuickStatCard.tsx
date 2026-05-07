@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './QuickStatCard.module.css';
 
-interface QuickStatCardProps {
+export interface QuickStatCardProps {
   icon: string;
   label: string;
   value: string;
