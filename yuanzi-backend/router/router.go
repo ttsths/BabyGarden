@@ -104,7 +104,6 @@ func registerAPIRoutes(r *gin.Engine, base string) {
 
 	photo := authorized.Group("/photo")
 	photo.POST("/upload-url", handler.GetPhotoUploadURL)
-	photo.POST("/confirm", handler.PhotoUploadConfirm)
 	photo.GET("", handler.ListPhotos)
 	photo.DELETE("/:id", handler.DeletePhoto)
 

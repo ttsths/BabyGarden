@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"path"
 	"time"
@@ -13,7 +12,6 @@ import (
 	"yuanzi-backend/model"
 	"yuanzi-backend/mysql"
 	"yuanzi-backend/pkg/oss"
-	"yuanzi-backend/pkg/storage"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,16 +20,6 @@ const (
 	photoUploadExpireSeconds = 300
 	photoThumbWidth          = 300
 )
-
-// getStorageProvider returns the configured storage Provider (OSS or R2).
-func getStorageProvider() storage.Provider {
-	provider, err := storage.NewProviderFromConfig()
-	if err != nil {
-		// Fallback to OSS if config resolution fails.
-		return storage.NewOSSProvider()
-	}
-	return provider
-}
 
 // GetPhotoUploadURL 获取照片上传 URL
 // @Summary 获取照片上传 URL
@@ -81,8 +69,8 @@ func GetPhotoUploadURL(c *gin.Context) {
 	filename := path.Base(req.Filename)
 	objectKey := buildPhotoObjectKey(family.ID, baby.ID, filename)
 
-	provider := getStorageProvider()
-	sig, err := provider.GetUploadSignature(objectKey, req.Size, photoUploadExpireSeconds)
+	client := oss.NewClient()
+	signature, uploadURL, err := client.GetPostSignature(objectKey, req.Size, photoUploadExpireSeconds)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "生成签名失败"})
 		return
@@ -104,17 +92,14 @@ func GetPhotoUploadURL(c *gin.Context) {
 		return
 	}
 
-	formData := sig.FormData
-	if formData == nil {
-		formData = make(map[string]string)
+	formData := map[string]string{
+		"OSSAccessKeyId": signature.OSSAccessKeyID,
+		"policy":         signature.Policy,
+		"signature":      signature.Signature,
+		"key":            objectKey,
 	}
 	if req.ContentType != "" {
 		formData["Content-Type"] = req.ContentType
-	}
-
-	expiresAt := sig.ExpiresAt
-	if expiresAt == 0 {
-		expiresAt = time.Now().Add(photoUploadExpireSeconds * time.Second).Unix()
 	}
 
 	c.JSON(http.StatusOK, model.Response{
@@ -122,16 +107,16 @@ func GetPhotoUploadURL(c *gin.Context) {
 		Msg:  "获取成功",
 		Data: PhotoUploadURLResponse{
 			PhotoID:   photo.ID,
-			UploadURL: sig.UploadURL,
-			AccessURL: sig.AccessURL,
-			ThumbURL:  provider.GetThumbnailURL(objectKey, photoThumbWidth),
-			ExpiresAt: expiresAt,
+			UploadURL: uploadURL,
+			AccessURL: client.GetURL(objectKey),
+			ThumbURL:  client.GetThumbnailURL(objectKey, photoThumbWidth),
+			ExpiresAt: time.Now().Add(photoUploadExpireSeconds * time.Second).Unix(),
 			FormData:  formData,
 		},
 	})
 }
 
-// PhotoUploadCallback 照片上传回调（OSS 服务端回调）
+// PhotoUploadCallback 照片上传回调
 // @Summary 照片上传回调
 // @Description OSS 上传完成后的回调处理
 // @Tags 照片
@@ -165,73 +150,27 @@ func PhotoUploadCallback(c *gin.Context) {
 		return
 	}
 
-	if err := confirmUploadedPhoto(req.PhotoID, req.Size); err != nil {
-		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, model.Response{
-		Code: model.SUCCESS,
-		Msg:  "处理成功",
-	})
-}
-
-// PhotoUploadConfirm 照片上传确认（R2 / 客户端主动确认）
-// @Summary 照片上传确认
-// @Description 客户端完成直传后确认上传（用于 R2 等无服务端回调的存储后端）
-// @Tags 照片
-// @Accept json
-// @Produce json
-// @Security Bearer
-// @Param data body PhotoConfirmRequest true "请求参数"
-// @Success 200 {object} model.Response
-// @Router /api/v1/photo/confirm [post]
-func PhotoUploadConfirm(c *gin.Context) {
-	var req PhotoConfirmRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "请求参数错误"})
-		return
-	}
-	if req.PhotoID == "" {
-		c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "照片ID不能为空"})
-		return
-	}
-
 	var photo model.Photo
 	if err := mysql.DB.Where("id = ?", req.PhotoID).First(&photo).Error; err != nil {
 		c.JSON(http.StatusNotFound, model.Response{Code: model.ERROR_NOT_FUND, Msg: "照片不存在"})
 		return
 	}
 
-	// 权限校验：仅上传者本人或管理员可确认
-	userID := middleware.GetUserIDOrZero(c)
-	if photo.UploadedBy != userID {
-		var member model.FamilyMember
-		if err := mysql.DB.Where("family_id = ? AND user_id = ?", photo.FamilyID, userID).First(&member).Error; err != nil || !member.IsAdmin() {
-			c.JSON(http.StatusForbidden, model.Response{Code: model.ERROR_FORBID, Msg: "无权确认"})
-			return
-		}
+	updates := map[string]interface{}{
+		"size":        req.Size,
+		"status":      model.PhotoStatusActive,
+		"uploaded_at": time.Now(),
 	}
-
-	if photo.Status != model.PhotoStatusPending {
-		c.JSON(http.StatusConflict, model.Response{Code: model.ERROR, Msg: "照片已确认或状态异常"})
+	if err := mysql.DB.Model(&model.Photo{}).Where("id = ?", photo.ID).Updates(updates).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "更新照片失败"})
 		return
 	}
 
-	// 使用请求中提供的文件大小，若未提供则保持原有值
-	confirmedSize := req.Size
-	if confirmedSize <= 0 {
-		confirmedSize = photo.Size
-	}
-
-	if err := confirmUploadedPhoto(req.PhotoID, confirmedSize); err != nil {
-		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: err.Error()})
-		return
-	}
+	go submitPhotoThumbnailTask(photo.ID)
 
 	c.JSON(http.StatusOK, model.Response{
 		Code: model.SUCCESS,
-		Msg:  "确认成功",
+		Msg:  "处理成功",
 	})
 }
 
@@ -292,13 +231,13 @@ func ListPhotos(c *gin.Context) {
 		return
 	}
 
-	provider := getStorageProvider()
+	client := oss.NewClient()
 	list := make([]PhotoResponse, 0, len(photos))
 	for _, photo := range photos {
 		list = append(list, PhotoResponse{
 			ID:          photo.ID,
-			URL:         provider.GetURL(photo.OSSKey),
-			ThumbURL:    provider.GetThumbnailURL(photo.OSSKey, photoThumbWidth),
+			URL:         client.GetURL(photo.OSSKey),
+			ThumbURL:    client.GetThumbnailURL(photo.OSSKey, photoThumbWidth),
 			Width:       derefInt(photo.Width),
 			Height:      derefInt(photo.Height),
 			TakenAt:     formatTime(photo.TakenAt),
@@ -347,7 +286,7 @@ func DeletePhoto(c *gin.Context) {
 		return
 	}
 
-	go deletePhotoFromStorage(photo)
+	go deletePhotoFromOSS(photo)
 
 	c.JSON(http.StatusOK, model.Response{
 		Code: model.SUCCESS,
@@ -377,12 +316,6 @@ type PhotoCallbackRequest struct {
 	PhotoID string `json:"photo_id" binding:"required"`
 	Size    int64  `json:"size" binding:"required"`
 	ETag    string `json:"etag" binding:"required"`
-}
-
-type PhotoConfirmRequest struct {
-	PhotoID string `json:"photo_id" binding:"required"`
-	Size    int64  `json:"size"`
-	ETag    string `json:"etag"`
 }
 
 type PhotoResponse struct {
@@ -445,26 +378,6 @@ func derefInt(value *int) int {
 	return *value
 }
 
-// confirmUploadedPhoto updates photo status from pending to active.
-func confirmUploadedPhoto(photoID string, size int64) error {
-	var photo model.Photo
-	if err := mysql.DB.Where("id = ?", photoID).First(&photo).Error; err != nil {
-		return fmt.Errorf("照片不存在")
-	}
-
-	updates := map[string]interface{}{
-		"size":        size,
-		"status":      model.PhotoStatusActive,
-		"uploaded_at": time.Now(),
-	}
-	if err := mysql.DB.Model(&model.Photo{}).Where("id = ?", photo.ID).Updates(updates).Error; err != nil {
-		return fmt.Errorf("更新照片失败")
-	}
-
-	go submitPhotoThumbnailTask(photo.ID)
-	return nil
-}
-
 func submitPhotoThumbnailTask(photoID string) {
 	if photoID == "" {
 		return
@@ -472,17 +385,20 @@ func submitPhotoThumbnailTask(photoID string) {
 	logger.Info("提交缩略图生成任务", logger.String("photo_id", photoID))
 }
 
-func deletePhotoFromStorage(photo *model.Photo) {
+func deletePhotoFromOSS(photo *model.Photo) {
 	if photo == nil || photo.OSSKey == "" {
 		return
 	}
-	provider := getStorageProvider()
-	if err := provider.DeleteObject(photo.OSSKey); err != nil {
-		logger.Warn("删除存储文件失败", logger.Err(err), logger.String("key", photo.OSSKey))
+	if config.GlobalConfig.OSS.AccessKeyID == "" || config.GlobalConfig.OSS.AccessKeySecret == "" {
+		return
 	}
-	if photo.ThumbnailKey != "" && photo.ThumbnailKey != photo.OSSKey {
-		if err := provider.DeleteObject(photo.ThumbnailKey); err != nil {
-			logger.Warn("删除存储缩略图失败", logger.Err(err), logger.String("key", photo.ThumbnailKey))
+	client := oss.NewClient()
+	if err := client.DeleteObject(photo.OSSKey); err != nil {
+		logger.Warn("删除 OSS 文件失败", logger.Err(err), logger.String("oss_key", photo.OSSKey))
+	}
+	if photo != nil && photo.ThumbnailKey != "" && photo.ThumbnailKey != photo.OSSKey {
+		if err := client.DeleteObject(photo.ThumbnailKey); err != nil {
+			logger.Warn("删除 OSS 缩略图失败", logger.Err(err), logger.String("oss_key", photo.ThumbnailKey))
 		}
 	}
 }
