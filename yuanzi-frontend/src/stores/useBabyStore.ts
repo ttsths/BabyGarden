@@ -11,8 +11,8 @@ interface BabyState {
   // 动作
   fetchBabies: () => Promise<void>;
   selectBaby: (babyId: string) => void;
-  addBaby: (baby: any) => Promise<void>;
-  updateBaby: (babyId: string, baby: any) => Promise<void>;
+  addBaby: (baby: Omit<Baby, 'id'>) => Promise<void>;
+  updateBaby: (babyId: string, baby: Partial<Baby>) => Promise<void>;
   getCurrentBaby: () => Baby | null;
 }
 

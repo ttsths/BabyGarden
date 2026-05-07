@@ -89,7 +89,7 @@ func TestSetGet(t *testing.T) {
 	}
 
 	// 清理
-	Del(key)
+	_ = Del(key)
 
 	t.Log("Set/Get 测试通过")
 }
@@ -138,7 +138,7 @@ func TestDel(t *testing.T) {
 	value := "test_del_value"
 
 	// 先设置
-	SetEx(key, value, 60)
+	_ = SetEx(key, value, 60)
 
 	// 验证存在
 	exists, err := Exists(key)
@@ -183,7 +183,7 @@ func TestExists(t *testing.T) {
 	}
 
 	// 设置键
-	SetEx(key, "value", 60)
+	_ = SetEx(key, "value", 60)
 
 	// 测试存在的键
 	exists, err = Exists(key)

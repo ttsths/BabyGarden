@@ -56,7 +56,7 @@ export const StatsPage: React.FC = () => {
     },
   };
 
-  const renderChart = (data: any) => {
+  const renderChart = (data: { trend: number[]; labels: string[] }) => {
     const maxValue = Math.max(...data.trend);
     
     return (

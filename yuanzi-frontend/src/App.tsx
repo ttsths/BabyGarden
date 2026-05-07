@@ -44,7 +44,7 @@ function App() {
     setIsModalOpen(true);
   };
 
-  const handleSaveRecord = (record: any) => {
+  const handleSaveRecord = (record: Record<string, unknown>) => {
     console.log('Saving record:', record);
     // 添加记录逻辑
     const newRecord = {

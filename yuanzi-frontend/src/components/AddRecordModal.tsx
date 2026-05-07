@@ -9,7 +9,7 @@ import { cn } from '../utils/cn';
 interface AddRecordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (record: any) => void;
+  onSave: (record: Record<string, unknown>) => void;
 }
 
 export const AddRecordModal: React.FC<AddRecordModalProps> = ({

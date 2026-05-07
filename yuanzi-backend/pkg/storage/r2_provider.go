@@ -14,16 +14,17 @@ import (
 
 // R2Provider implements Provider using Cloudflare R2 (S3-compatible).
 type R2Provider struct {
-	client     *s3.Client
-	presigner  *s3.PresignClient
-	bucket     string
-	publicURL  string
-	accountID  string
+	client    *s3.Client
+	presigner *s3.PresignClient
+	bucket    string
+	publicURL string
+	accountID string
 }
 
 // NewR2Provider creates a Provider backed by Cloudflare R2.
 // Configuration is read from environment variables:
-//   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_ACCESS_KEY_SECRET, R2_BUCKET, R2_PUBLIC_URL.
+//
+//	R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_ACCESS_KEY_SECRET, R2_BUCKET, R2_PUBLIC_URL.
 func NewR2Provider() (Provider, error) {
 	accountID := os.Getenv("R2_ACCOUNT_ID")
 	accessKeyID := os.Getenv("R2_ACCESS_KEY_ID")

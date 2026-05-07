@@ -28,12 +28,12 @@ func NewProviderFromConfig() (Provider, error) {
 // UploadSignature holds the information needed for a client to upload an object
 // directly to the storage backend.
 type UploadSignature struct {
-	FormData      map[string]string // for OSS multipart POST
-	PresignedURL  string            // for R2 presigned PUT
-	UploadURL     string            // upload endpoint URL
-	AccessURL     string            // final access URL
-	ThumbnailURL  string            // thumbnail access URL
-	ExpiresAt     int64             // unix timestamp
+	FormData     map[string]string // for OSS multipart POST
+	PresignedURL string            // for R2 presigned PUT
+	UploadURL    string            // upload endpoint URL
+	AccessURL    string            // final access URL
+	ThumbnailURL string            // thumbnail access URL
+	ExpiresAt    int64             // unix timestamp
 }
 
 // Provider defines the common interface for storage backends.
