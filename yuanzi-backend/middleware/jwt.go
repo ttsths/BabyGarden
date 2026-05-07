@@ -42,10 +42,11 @@ func JWT() gin.HandlerFunc {
 }
 
 type Claims struct {
-	UserID string `json:"user_id"`
-	Phone  string `json:"phone"`
-	JTI    string `json:"jti"`
-	Type   string `json:"type"`
+	UserID  string `json:"user_id"`
+	Phone   string `json:"phone"`
+	IsAdmin bool   `json:"is_admin"`
+	JTI     string `json:"jti"`
+	Type    string `json:"type"`
 	jwt.RegisteredClaims
 }
 
