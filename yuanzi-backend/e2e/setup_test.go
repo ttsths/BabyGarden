@@ -150,3 +150,33 @@ func seedRegularUser(t *testing.T) (model.User, func()) {
 	}
 	return user, cleanup
 }
+
+// seedFamily creates a family and its admin member for E2E testing.
+func seedFamily(t *testing.T, userID string) (model.Family, func()) {
+	t.Helper()
+	setupE2E(t)
+
+	family := model.Family{
+		Name:       "E2E测试家庭",
+		InviteCode: "E2E" + model.NewID()[:4],
+		CreatedBy:  userID,
+	}
+	if err := mysql.DB.Create(&family).Error; err != nil {
+		t.Fatalf("创建E2E家庭失败: %v", err)
+	}
+
+	member := model.FamilyMember{
+		FamilyID: family.ID,
+		UserID:   userID,
+		Role:     model.FamilyRoleAdmin,
+	}
+	if err := mysql.DB.Create(&member).Error; err != nil {
+		t.Fatalf("创建E2E家庭成员失败: %v", err)
+	}
+
+	cleanup := func() {
+		mysql.DB.Where("family_id = ?", family.ID).Delete(&model.FamilyMember{})
+		mysql.DB.Where("id = ?", family.ID).Delete(&model.Family{})
+	}
+	return family, cleanup
+}
