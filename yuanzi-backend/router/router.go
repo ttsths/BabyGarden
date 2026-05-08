@@ -61,6 +61,8 @@ func SetupRouter() *gin.Engine {
 	// Photo management
 	adminAuth.GET("/photos", admin.GetPhotos)
 	adminAuth.GET("/photos/:id", admin.GetPhoto)
+	adminAuth.POST("/photos/upload-url", admin.GetPhotoUploadURL)
+	adminAuth.POST("/photos/confirm", admin.PhotoUploadConfirm)
 	adminAuth.DELETE("/photos/:id", admin.DeletePhoto)
 
 	// Record management

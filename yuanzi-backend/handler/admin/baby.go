@@ -143,7 +143,7 @@ func CreateBaby(c *gin.Context) {
 	})
 }
 
-// UpdateBaby updates baby info.
+// UpdateBaby admin 更新宝宝信息
 // PUT /api/v1/admin/babies/:id
 func UpdateBaby(c *gin.Context) {
 	id := c.Param("id")
@@ -155,7 +155,7 @@ func UpdateBaby(c *gin.Context) {
 
 	var req struct {
 		Name      string `json:"name" binding:"omitempty"`
-		Gender    *int8  `json:"gender" binding:"omitempty,oneof=1 2"`
+		Gender    string `json:"gender" binding:"omitempty,oneof=male female unknown"`
 		Birthday  string `json:"birthday" binding:"omitempty"`
 		AvatarURL string `json:"avatar_url" binding:"omitempty"`
 	}
@@ -167,8 +167,12 @@ func UpdateBaby(c *gin.Context) {
 	if req.Name != "" {
 		baby.Name = req.Name
 	}
-	if req.Gender != nil {
-		baby.Gender = *req.Gender
+	if req.Gender != "" {
+		// 字符串映射到 int8
+		genderMap := map[string]int8{"male": 1, "female": 2, "unknown": 0}
+		if g, ok := genderMap[req.Gender]; ok {
+			baby.Gender = g
+		}
 	}
 	if req.Birthday != "" {
 		birthday, err := time.Parse("2006-01-02", req.Birthday)

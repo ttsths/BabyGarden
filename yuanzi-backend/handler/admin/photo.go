@@ -2,8 +2,10 @@ package admin
 
 import (
 	"net/http"
+	"time"
 	"yuanzi-backend/model"
 	"yuanzi-backend/mysql"
+	"yuanzi-backend/pkg/storage"
 
 	"github.com/gin-gonic/gin"
 )
@@ -58,6 +60,116 @@ func GetPhotos(c *gin.Context) {
 			},
 		},
 	})
+}
+
+// GetPhotoUploadURL admin 获取照片上传 URL
+// POST /api/v1/admin/photos/upload-url
+func GetPhotoUploadURL(c *gin.Context) {
+	var req struct {
+		BabyID      string `json:"baby_id" binding:"required"`
+		Filename    string `json:"filename" binding:"required"`
+		ContentType string `json:"content_type" binding:"required"`
+		Size        int64  `json:"size" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "请求参数错误"})
+		return
+	}
+
+	var baby model.Baby
+	if err := mysql.DB.Where("id = ?", req.BabyID).First(&baby).Error; err != nil {
+		c.JSON(http.StatusNotFound, model.Response{Code: model.ERROR_NOT_FUND, Msg: "宝宝不存在"})
+		return
+	}
+
+	provider, err := storage.NewProviderFromConfig()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "存储配置错误"})
+		return
+	}
+	filename := req.Filename
+	if filename == "" {
+		filename = "photo.jpg"
+	}
+	objectKey := buildPhotoObjectKey(baby.FamilyID, baby.ID, filename)
+
+	sig, err := provider.GetUploadSignature(objectKey, req.Size, 300)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "获取上传签名失败"})
+		return
+	}
+
+	photo := model.Photo{
+		BabyID:      baby.ID,
+		FamilyID:    baby.FamilyID,
+		OSSKey:      objectKey,
+		Size:        req.Size,
+		ContentType: req.ContentType,
+		UploadedBy:  "admin",
+		UploadedAt:  time.Now(),
+		Status:      model.PhotoStatusPending,
+	}
+	if err := mysql.DB.Create(&photo).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "创建照片记录失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.Response{
+		Code: model.SUCCESS,
+		Msg:  "获取成功",
+		Data: gin.H{
+			"photo_id":   photo.ID,
+			"upload_url": sig.UploadURL,
+			"access_url": sig.AccessURL,
+		},
+	})
+}
+
+// PhotoUploadConfirm admin 确认照片上传
+// POST /api/v1/admin/photos/confirm
+func PhotoUploadConfirm(c *gin.Context) {
+	var req struct {
+		PhotoID string `json:"photo_id" binding:"required"`
+		Size    int64  `json:"size"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "请求参数错误"})
+		return
+	}
+
+	var photo model.Photo
+	if err := mysql.DB.Where("id = ?", req.PhotoID).First(&photo).Error; err != nil {
+		c.JSON(http.StatusNotFound, model.Response{Code: model.ERROR_NOT_FUND, Msg: "照片不存在"})
+		return
+	}
+
+	if photo.Status != model.PhotoStatusPending {
+		c.JSON(http.StatusConflict, model.Response{Code: model.ERROR, Msg: "照片已确认或状态异常"})
+		return
+	}
+
+	confirmedSize := req.Size
+	if confirmedSize <= 0 {
+		confirmedSize = photo.Size
+	}
+
+	updates := map[string]interface{}{
+		"status": model.PhotoStatusActive,
+		"size":   confirmedSize,
+	}
+	if err := mysql.DB.Model(&photo).Updates(updates).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "确认失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.Response{
+		Code: model.SUCCESS,
+		Msg:  "确认成功",
+	})
+}
+
+func buildPhotoObjectKey(familyID, babyID, filename string) string {
+	return familyID + "/" + babyID + "/" + filename
 }
 
 // GetPhoto returns photo detail.
