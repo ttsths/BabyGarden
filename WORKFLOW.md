@@ -1,8 +1,3 @@
-# 小园子的数字花园 — Bug Fix 工作流 (WORKFLOW.md)
-
-> 本文件定义了 BabyGarden 项目的自动 Bug 修复策略。
-> Symphony-inspired: 仓库内配置，版本随代码演进。
-
 ---
 tracker:
   kind: github
@@ -79,6 +74,12 @@ observability:
   log_retention_days: 7
   # 工作区审计
   audit_workspaces: true
+
+  # ── 仓库元信息 ──
+  title: "小园子的数字花园 — Bug Fix 工作流"
+  description: >
+    本文件定义了 BabyGarden 项目的自动 Bug 修复策略。
+    Symphony-inspired: 仓库内配置，版本随代码演进。
 ---
 
 # BabyGarden Bug Fix Agent
