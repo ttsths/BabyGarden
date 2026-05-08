@@ -133,7 +133,7 @@ export function PhotosPage() {
           size: file.size,
         });
         const { upload_url, photo_id } = urlRes.data.data;
-
+        
         updateTask(taskId, { progress: 40 });
 
         await axios.put(upload_url, file, {
@@ -150,6 +150,7 @@ export function PhotosPage() {
 
         updateTask(taskId, { status: 'confirming', progress: 85 });
 
+        // R2 需要手动确认上传成功
         await confirmPhotoUpload({
           photo_id: photo_id,
           size: file.size,
