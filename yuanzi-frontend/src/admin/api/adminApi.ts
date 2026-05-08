@@ -137,6 +137,10 @@ export function addFamilyMember(id: string, data: AddFamilyMemberRequest) {
   return adminClient.post<ApiResult<unknown>>(`/families/${id}/members`, data);
 }
 
+export function removeFamilyMember(id: string, userId: string) {
+  return adminClient.delete<ApiResult<unknown>>(`/families/${id}/members/${userId}`);
+}
+
 export function deleteFamily(id: string) {
   return adminClient.delete<ApiResult<unknown>>(`/families/${id}`);
 }
