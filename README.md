@@ -59,12 +59,23 @@
 - `GET /ping` — 存活检查
 - `GET /health` — 数据库/Redis 连接状态
 
-### 🤖 自主编码流水线
-- **Tier 1**: OpenClaw 直接编码（小改动）
-- **Tier 2**: PI Agent 编码（中大型任务）
-- **Tier 3**: GitHub Issue → Webhook → PI → PR（全自动）
-- Guardrails 安全护栏（规模检查、速率限制、关键文件保护）
-- CI 状态自动巡检
+### 🤖 自主编码流水线 (Symphony-style)
+
+基于 **OpenAI Symphony** 设计哲学，仓库内配置驱动的目标导向 Bug 修复流水线。
+
+**4-Phase 架构：**
+
+| Phase | 特性 | 说明 |
+|-------|------|------|
+| **1** | 仓库内配置 | `WORKFLOW.md` (YAML + prompt 模板)，随代码演进 |
+| **2** | 指数退避 + 状态核对 | 重试 10s→40s→160s，每个 tick 核对 Issue 状态 |
+| **3** | 目标驱动 | analyze+fix+test 合并为 PI K2P6 智能循环 |
+| **4** | 热加载 + 多轮续接 | 检测配置变化自动重载，同线程多轮运行 |
+
+**5 步流水线：**
+```
+Reconcile → Implement (目标驱动) → Approve 🔒 → Create PR → Notify
+```
 
 ---
 
@@ -393,30 +404,34 @@ main       — 生产分支（已部署）
 3. CI 必须通过才能合并
 4. 需要至少 1 人 Review
 
-### 自主编码流水线
+### 自主编码流水线 (Symphony-style)
 
-本项目支持 AI 辅助编码流水线，三级架构：
+本项目集成 **Symphony 风格** 目标驱动 Bug 修复流水线。
 
-```
-Tier 1: OpenClaw 直接编码 (小改动，1-3 文件)
-Tier 2: PI Agent (中型任务，5+ 文件)
-Tier 3: Issue → Webhook → PI → PR (全自动)
-```
+**仓库内策略：** [`WORKFLOW.md`](WORKFLOW.md) — YAML front matter 定义 tracker/agent/retry 配置，Markdown body 是 prompt 模板。
 
-**手动触发编码：**
+**5 步 Lobster 流水线：**
 ```
-pi: implement #<issue-number>    # 实现指定 Issue
-pi: review PR #<pr-number>       # 审查 PR
-pi: fix #<issue-number>          # 修复 bug
+1. Reconcile  — 加载配置 + 核对 Issue 状态 + 创建工作区
+2. Implement  — PI K2P6 目标驱动修复 (analyze→fix→test 智能循环)
+3. Approve 🔒 — 人工审批代码变更
+4. Create PR  — 创建分支、提交、推送、生成 PR
+5. Notify     — 汇报结果 + 归档日志 + 延迟清理工作区
 ```
 
-**自动触发：** 创建带 `agent` 标签的 Issue → 自动通知 → 启动流水线。
+**触发方式：**
+
+| 触发 | 方式 |
+|------|------|
+| 自动 | 创建 `bug` + `agent` 标签 Issue，Scanner 每 15min 扫描 |
+| 手动 | `pi: implement #N` |
 
 **安全护栏：**
-- 任务规模检查（>15 文件或 >500 行需人工确认）
-- 速率限制（最多 2 个 PI 实例并行）
-- 关键文件保护（wrangler.toml, Dockerfile, go.mod 等）
-- CI 失败自动重试 + 通知
+- ✅ 人工审批门禁（Step 3 强制 approve）
+- ✅ Per-issue 工作区隔离（`/tmp/bug-workspaces/`）
+- ✅ 指数退避重试（3 次失败停止）
+- ✅ 关键文件保护（WORKFLOW.md、CI 配置不可修改）
+- ✅ Reconciliation 状态核对（Issue 关闭 → 自动 Released）
 
 ### 项目看板
 
@@ -437,7 +452,7 @@ GitHub Issues/PRs 自动同步到 Obsidian Kanban：
 | **数据库** | ✅ MySQL 连接正常 |
 | **缓存** | ✅ Redis 连接正常 |
 | **前端** | 🚧 待开发 |
-| **Tier 3 流水线** | ✅ 已就绪 |
+| **Symphony 流水线** | ✅ Phase 1-4 改造完成 |
 
 ---
 
