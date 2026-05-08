@@ -1,15 +1,18 @@
-# 小园子的数字花园 — Bug Fix 工作流 (WORKFLOW.md)
+# 小园子的数字花园 — 自动化工作流 (WORKFLOW.md)
 
-> 本文件定义了 BabyGarden 项目的自动 Bug 修复策略。
+> 本文件定义了 BabyGarden 项目的自动化工作流策略。
+> 包含：Bug Fix 流水线 + Feature 开发流水线
 > Symphony-inspired: 仓库内配置，版本随代码演进。
 
 ---
 tracker:
   kind: github
   repo: ttsths/BabyGarden
-  # Issue 需要同时有这两个标签才触发
-  required_labels: [bug, agent]
-  # 只有 OPEN 状态的 Issue 才派发
+  # Bug Fix 触发标签
+  bug_labels: [bug, agent]
+  # Feature 开发触发标签
+  feature_labels: [feature, agent]
+  # 只有 OPEN 状态的 Issue 才触发
   active_states: [OPEN]
   # 这些状态的 Issue 会被清理工作区
   terminal_states: [CLOSED, MERGED]
@@ -23,7 +26,7 @@ poll:
 agent:
   # 最大并发数（防止同时起太多 Agent）
   max_concurrent_agents: 2
-  # 单个 Issue 最大修复轮次
+  # 单个 Issue 最大轮次
   max_turns: 10
   # 单轮最大耗时（毫秒）
   turn_timeout_ms: 600000
@@ -33,6 +36,8 @@ agent:
   coding_provider: kimi-coding
   coding_model: k2p6
   # 审批策略：always / on_change / never
+  # Bug Fix: always（每次修复后需审批）
+  # Feature Dev: on_change（设计阶段需审批，编码后可选）
   approval_policy: always
 
 retry:
@@ -79,6 +84,51 @@ observability:
   log_retention_days: 7
   # 工作区审计
   audit_workspaces: true
+
+---
+
+# Feature 开发流水线
+
+## 触发条件
+- **标签**: `feature` + `agent`
+- **手动触发**: `lobster run feature-dev --issue N`
+
+## 步骤
+
+### 1. preflight — 环境检查
+- 检查 Issue 状态（open）
+- 创建隔离工作区 `/tmp/feature-workspaces/issue-N/`
+- 克隆仓库，切换到 main
+- 检查必要 secrets/环境变量
+
+### 2. design — AI 设计评审（审批门禁）
+- 读取 WORKFLOW.md 中的 feature 设计模板
+- PI 分析需求，输出技术方案
+- 生成 DESIGN.md（架构决策、API 设计、数据模型）
+- **哥哥确认设计后继续**
+
+### 3. implement — PI 编码实现
+- 基于 DESIGN.md 实现代码
+- 遵循项目代码规范
+- 运行本地测试（编译/单元测试）
+- **重试策略**: 指数退避 10s → 40s → 160s，最多 3 次
+
+### 4. review — 代码审查
+- Codex CLI review --base main
+- 检查：规范、类型安全、测试覆盖
+- 关键问题阻塞，非关键问题记录
+
+### 5. create-pr — 创建 PR
+- 推送分支 `feat/issue-N-feature-name`
+- 创建 PR 到 main
+- PR 描述包含：设计摘要、测试说明、截图（如有 UI）
+- **关联 Issue #N**
+- **持续监控 CI checks，必须全部通过**
+
+### 6. notify — 通知完成
+- 发送汇报消息（Telegram）
+- 更新 pending-tasks.md
+
 ---
 
 # BabyGarden Bug Fix Agent

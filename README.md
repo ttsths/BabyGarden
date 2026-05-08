@@ -61,7 +61,21 @@
 
 ### 🤖 自主编码流水线 (Symphony-style)
 
-基于 **OpenAI Symphony** 设计哲学，仓库内配置驱动的目标导向 Bug 修复流水线。
+基于 **OpenAI Symphony** 设计哲学，仓库内配置驱动的自动化流水线。
+
+**双流水线架构：**
+
+| 流水线 | 触发标签 | 关键步骤 | 审批门禁 |
+|--------|----------|----------|----------|
+| **Bug Fix** | `bug` + `agent` | preflight → analyze → fix → test → review → **approve** → create-pr → notify | 每次修复后 |
+| **Feature Dev** | `feature` + `agent` | preflight → **design** → implement → review → create-pr → **CI监控** → notify | 设计阶段 |
+
+**核心特性：**
+- **审批门禁**: Bug 修复每次需确认，Feature 设计阶段需确认
+- **CI 监控**: Feature PR 创建后持续监控 checks，必须全部通过
+- **指数退避**: 测试失败自动重试（10s → 40s → 160s）
+- **热加载**: WORKFLOW.md 修改自动生效
+- **隔离工作区**: 每 Issue 独立目录
 
 **4-Phase 架构：**
 
@@ -71,11 +85,6 @@
 | **2** | 指数退避 + 状态核对 | 重试 10s→40s→160s，每个 tick 核对 Issue 状态 |
 | **3** | 目标驱动 | analyze+fix+test 合并为 PI K2P6 智能循环 |
 | **4** | 热加载 + 多轮续接 | 检测配置变化自动重载，同线程多轮运行 |
-
-**5 步流水线：**
-```
-Reconcile → Implement (目标驱动) → Approve 🔒 → Create PR → Notify
-```
 
 ---
 
