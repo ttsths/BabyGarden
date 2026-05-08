@@ -34,6 +34,7 @@ func GetStatsOverview(c *gin.Context) {
 }
 
 // GetDailyStats returns daily new user/baby/record counts for last 30 days.
+// Queries are parallelized to avoid cumulative latency exceeding CF Workers timeout.
 // GET /api/v1/admin/stats/daily
 func GetDailyStats(c *gin.Context) {
 	days := 30
@@ -53,25 +54,70 @@ func GetDailyStats(c *gin.Context) {
 		Cnt  int64  `gorm:"column:cnt"`
 	}
 
-	var userCounts, babyCounts, recordCounts []dateCount
+	type queryResult struct {
+		counts []dateCount
+		err    error
+	}
 
-	mysql.DB.Model(&model.User{}).
-		Select("DATE(created_at) as date, COUNT(*) as cnt").
-		Where("created_at >= ? AND created_at < ?", startDate, endDate).
-		Group("DATE(created_at)").
-		Scan(&userCounts)
+	// Parallelize the 3 aggregation queries to reduce worst-case latency
+	// from 3×T (sequential) to max(T) (parallel).
+	ctx := c.Request.Context()
+	userCh := make(chan queryResult, 1)
+	babyCh := make(chan queryResult, 1)
+	recordCh := make(chan queryResult, 1)
 
-	mysql.DB.Model(&model.Baby{}).
-		Select("DATE(created_at) as date, COUNT(*) as cnt").
-		Where("created_at >= ? AND created_at < ?", startDate, endDate).
-		Group("DATE(created_at)").
-		Scan(&babyCounts)
+	go func() {
+		var rows []dateCount
+		err := mysql.DB.WithContext(ctx).
+			Model(&model.User{}).
+			Select("DATE(created_at) as date, COUNT(*) as cnt").
+			Where("created_at >= ? AND created_at < ?", startDate, endDate).
+			Group("DATE(created_at)").
+			Scan(&rows).Error
+		userCh <- queryResult{rows, err}
+	}()
 
-	mysql.DB.Model(&model.Record{}).
-		Select("DATE(created_at) as date, COUNT(*) as cnt").
-		Where("created_at >= ? AND created_at < ?", startDate, endDate).
-		Group("DATE(created_at)").
-		Scan(&recordCounts)
+	go func() {
+		var rows []dateCount
+		err := mysql.DB.WithContext(ctx).
+			Model(&model.Baby{}).
+			Select("DATE(created_at) as date, COUNT(*) as cnt").
+			Where("created_at >= ? AND created_at < ?", startDate, endDate).
+			Group("DATE(created_at)").
+			Scan(&rows).Error
+		babyCh <- queryResult{rows, err}
+	}()
+
+	go func() {
+		var rows []dateCount
+		err := mysql.DB.WithContext(ctx).
+			Model(&model.Record{}).
+			Select("DATE(created_at) as date, COUNT(*) as cnt").
+			Where("created_at >= ? AND created_at < ?", startDate, endDate).
+			Group("DATE(created_at)").
+			Scan(&rows).Error
+		recordCh <- queryResult{rows, err}
+	}()
+
+	// Collect results; all 3 queries run concurrently so total wait ≈ max(query time)
+	userRes, babyRes, recordRes := <-userCh, <-babyCh, <-recordCh
+
+	if userRes.err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "查询用户统计失败"})
+		return
+	}
+	if babyRes.err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "查询宝宝统计失败"})
+		return
+	}
+	if recordRes.err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "查询记录统计失败"})
+		return
+	}
+
+	userCounts := userRes.counts
+	babyCounts := babyRes.counts
+	recordCounts := recordRes.counts
 
 	userMap := make(map[string]int64, len(userCounts))
 	for _, r := range userCounts {

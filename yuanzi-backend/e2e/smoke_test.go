@@ -187,11 +187,11 @@ func TestSmoke_NonAdminTokenReturns403(t *testing.T) {
 	}
 }
 
-// Smoke 5: 管理员登录 + 家庭详情接口
+// Smoke 5: 管理员登录 + 创建家庭 + 获取家庭详情（自给自足，不依赖预存数据）
 func TestSmoke_AdminLoginAndFamilyDetail(t *testing.T) {
 	r := e2eRouter(t)
-	admin, cleanup := seedAdminUser(t)
-	defer cleanup()
+	admin, cleanupAdmin := seedAdminUser(t)
+	defer cleanupAdmin()
 
 	// Step 1: 登录
 	loginW := postJSON(t, r, "/api/v1/admin/login", map[string]string{
@@ -201,7 +201,11 @@ func TestSmoke_AdminLoginAndFamilyDetail(t *testing.T) {
 	loginData := parseResponse(t, loginW).Data.(map[string]interface{})
 	token := loginData["token"].(string)
 
-	// Step 2: 获取家庭列表
+	// Step 2: 创建测试家庭（确保数据自给自足）
+	family, cleanupFamily := seedFamily(t, admin.ID)
+	defer cleanupFamily()
+
+	// Step 3: 获取家庭列表，验证新创建的家庭存在
 	familiesW := getJSON(t, r, "/api/v1/admin/families?page=1&size=10", map[string]string{
 		"Authorization": "Bearer " + token,
 	})
@@ -210,30 +214,13 @@ func TestSmoke_AdminLoginAndFamilyDetail(t *testing.T) {
 	familiesResp := parseResponse(t, familiesW)
 	assertCode(t, familiesResp, model.SUCCESS, "家庭列表")
 
-	// Step 3: 如果有家庭，获取第一个家庭的详情
-	familiesData, ok := familiesResp.Data.(map[string]interface{})
-	if !ok {
-		t.Fatal("家庭列表 data 格式错误")
-	}
-	list, ok := familiesData["list"].([]interface{})
-	if !ok || len(list) == 0 {
-		t.Log("无家庭数据，跳过家庭详情测试")
-		return
-	}
-
-	first := list[0].(map[string]interface{})
-	familyID, ok := first["id"].(string)
-	if !ok || familyID == "" {
-		t.Fatal("家庭缺少 id 字段")
-	}
-
-	// Step 4: 获取家庭详情
-	detailW := getJSON(t, r, "/api/v1/admin/families/"+familyID, map[string]string{
+	// Step 4: 获取新创建家庭的详情（用我们自己的 family ID）
+	detailW := getJSON(t, r, "/api/v1/admin/families/"+family.ID, map[string]string{
 		"Authorization": "Bearer " + token,
 	})
-	assertStatus(t, detailW, http.StatusOK, "家庭详情: "+familyID)
+	assertStatus(t, detailW, http.StatusOK, "家庭详情")
 	detailResp := parseResponse(t, detailW)
 	assertCode(t, detailResp, model.SUCCESS, "家庭详情")
 
-	t.Logf("家庭详情: id=%s", familyID)
+	t.Logf("家庭详情: id=%s, name=%s", family.ID, family.Name)
 }
