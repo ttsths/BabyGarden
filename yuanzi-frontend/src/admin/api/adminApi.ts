@@ -67,7 +67,6 @@ export function getDailyStats(days = 30) {
   return adminClient.get<ApiResult<DailyStat[]>>('/stats/daily', { params: { days } });
 }
 
-// User management
 export function getUsers(page = 1, pageSize = 20, keyword?: string) {
   return adminClient.get<ApiResult<PaginatedResponse<AdminUser>>>('/users', {
     params: { page, page_size: pageSize, keyword },
@@ -94,7 +93,6 @@ export function deleteUser(id: string) {
   return adminClient.delete<ApiResult<unknown>>(`/users/${id}`);
 }
 
-// Baby management
 export function getBabies(page = 1, pageSize = 20) {
   return adminClient.get<ApiResult<PaginatedResponse<AdminBaby>>>('/babies', {
     params: { page, page_size: pageSize },
@@ -117,7 +115,6 @@ export function deleteBaby(id: string) {
   return adminClient.delete<ApiResult<unknown>>(`/babies/${id}`);
 }
 
-// Family management
 export function getFamilies(page = 1, pageSize = 20) {
   return adminClient.get<ApiResult<PaginatedResponse<AdminFamily>>>('/families', {
     params: { page, page_size: pageSize },
@@ -144,7 +141,6 @@ export function deleteFamily(id: string) {
   return adminClient.delete<ApiResult<unknown>>(`/families/${id}`);
 }
 
-// Photo management
 export function getPhotos(page = 1, pageSize = 20) {
   return adminClient.get<ApiResult<PaginatedResponse<AdminPhoto>>>('/photos', {
     params: { page, page_size: pageSize },
@@ -159,15 +155,14 @@ export function deletePhoto(id: string) {
   return adminClient.delete<ApiResult<unknown>>(`/photos/${id}`);
 }
 
-export function getPhotoUploadUrl(data: { filename: string; content_type: string }) {
-  return adminClient.post<ApiResult<{ upload_url: string; download_url: string }>>('/photo/upload-url', data);
+export function getPhotoUploadUrl(data: { baby_id: string; filename: string; content_type: string; size: number }) {
+  return axios.post('/api/v1/photo/upload-url', data);
 }
 
-export function confirmPhotoUpload(data: { filename: string; url: string; family_id: string; baby_id?: string }) {
-  return adminClient.post<ApiResult<AdminPhoto>>('/photo/confirm', data);
+export function confirmPhotoUpload(data: { photo_id: string; size?: number }) {
+  return axios.post('/api/v1/photo/confirm', data);
 }
 
-// Record management
 export function getRecords(page = 1, pageSize = 20) {
   return adminClient.get<ApiResult<PaginatedResponse<AdminRecord>>>('/records', {
     params: { page, page_size: pageSize },
