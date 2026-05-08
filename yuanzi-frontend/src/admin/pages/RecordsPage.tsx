@@ -27,7 +27,7 @@ import {
   getFamilies,
   getBabies,
 } from '@/admin/api/adminApi';
-import type { AdminRecord, CreateRecordRequest, UpdateRecordRequest } from '@/admin/types/admin';
+import type { AdminRecord, AdminFamily, AdminBaby, CreateRecordRequest, UpdateRecordRequest } from '@/admin/types/admin';
 import dayjs from 'dayjs';
 
 export function RecordsPage() {
@@ -55,11 +55,11 @@ export function RecordsPage() {
     },
   });
 
-  const familyMap = Object.fromEntries((familiesData || []).map((f: any) => [f.id, f.name]));
-  const babyMap = Object.fromEntries((babiesData || []).map((b: any) => [b.id, b.name]));
+  const familyMap = Object.fromEntries((familiesData || []).map((f: AdminFamily) => [f.id, f.name]));
+  const babyMap = Object.fromEntries((babiesData || []).map((b: AdminBaby) => [b.id, b.name]));
 
-  const familyOptions = (familiesData || []).map((f: any) => ({ label: f.name, value: f.id }));
-  const babyOptions = (babiesData || []).map((b: any) => ({ label: b.name, value: b.id }));
+  const familyOptions = (familiesData || []).map((f: AdminFamily) => ({ label: f.name, value: f.id }));
+  const babyOptions = (babiesData || []).map((b: AdminBaby) => ({ label: b.name, value: b.id }));
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin', 'records', page, pageSize],
