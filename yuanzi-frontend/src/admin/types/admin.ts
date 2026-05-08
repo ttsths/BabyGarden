@@ -47,6 +47,7 @@ export interface AdminFamily {
   member_count?: number;
   storage_quota: number;
   storage_used: number;
+  status: number;
   created_at: string;
   updated_at: string;
 }
@@ -151,6 +152,7 @@ export interface CreateRecordRequest {
   baby_id: string;
   family_id: string;
   started_at: string;
+  ended_at?: string;
   note?: string;
 }
 
@@ -159,5 +161,6 @@ export interface UpdateRecordRequest {
   baby_id?: string;
   family_id?: string;
   started_at?: string;
+  ended_at?: string;
   note?: string;
 }

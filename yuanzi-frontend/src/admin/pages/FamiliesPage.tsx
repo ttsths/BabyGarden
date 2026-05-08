@@ -25,8 +25,9 @@ import {
   createFamily,
   updateFamily,
   addFamilyMember,
+  getUsers,
 } from '@/admin/api/adminApi';
-import type { AdminFamily, AdminFamilyMember, CreateFamilyRequest, UpdateFamilyRequest, AddFamilyMemberRequest } from '@/admin/types/admin';
+import type { AdminFamily, AdminFamilyMember, AdminUser, CreateFamilyRequest, UpdateFamilyRequest, AddFamilyMemberRequest } from '@/admin/types/admin';
 import dayjs from 'dayjs';
 
 export function FamiliesPage() {
@@ -40,6 +41,16 @@ export function FamiliesPage() {
   const [currentFamilyId, setCurrentFamilyId] = useState<string | null>(null);
   const [form] = Form.useForm();
   const [memberForm] = Form.useForm();
+
+  const { data: usersData } = useQuery({
+    queryKey: ['admin', 'users', 'all'],
+    queryFn: async () => {
+      const res = await getUsers(1, 1000);
+      return res.data.data?.list || [];
+    },
+  });
+
+  const userOptions = (usersData || []).map((u: AdminUser) => ({ label: `${u.nickname || u.phone} (${u.phone})`, value: u.id }));
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin', 'families', page, pageSize],
@@ -180,8 +191,18 @@ export function FamiliesPage() {
       render: (v: number) => v ?? '-',
     },
     {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: number) =>
+        status === 1 ? (
+          <Tag color="green">启用</Tag>
+        ) : (
+          <Tag color="red">禁用</Tag>
+        ),
+    },
+    {
       title: '创建时间',
-      dataIndex: 'created_at',
       key: 'created_at',
       render: (value: string) => dayjs(value).format('YYYY-MM-DD HH:mm'),
     },
@@ -373,10 +394,16 @@ export function FamiliesPage() {
         <Form form={memberForm} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item
             name="user_id"
-            label="用户ID"
-            rules={[{ required: true, message: '请输入用户ID' }]}
+            label="选择用户"
+            rules={[{ required: true, message: '请选择用户' }]}
           >
-            <Input placeholder="请输入用户ID" />
+            <Select
+              placeholder="搜索并选择用户"
+              options={userOptions}
+              showSearch
+              optionFilterProp="label"
+              loading={!usersData}
+            />
           </Form.Item>
           <Form.Item
             name="role"

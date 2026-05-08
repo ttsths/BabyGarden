@@ -132,6 +132,7 @@ export function RecordsPage() {
       family_id: record.family_id,
       note: record.note || '',
       started_at: record.started_at ? dayjs(record.started_at) : null,
+      ended_at: record.data?.ended_at ? dayjs(record.data.ended_at as string) : null,
     });
     setIsModalOpen(true);
   };
@@ -142,6 +143,7 @@ export function RecordsPage() {
       const payload = {
         ...values,
         started_at: values.started_at ? values.started_at.format('YYYY-MM-DDTHH:mm:ssZ') : undefined,
+        ended_at: values.ended_at ? values.ended_at.format('YYYY-MM-DDTHH:mm:ssZ') : undefined,
       };
       if (editingRecord) {
         updateMutation.mutate({ id: editingRecord.id, data: payload });
@@ -213,9 +215,14 @@ export function RecordsPage() {
       render: (createdBy: string) => createdBy,
     },
     {
+      title: '结束时间',
+      dataIndex: 'data',
+      key: 'ended_at',
+      render: (data: Record<string, unknown>) => data?.ended_at ? dayjs(data.ended_at as string).format('YYYY-MM-DD HH:mm') : '-',
+    },
+    {
       title: '开始时间',
       dataIndex: 'started_at',
-      key: 'started_at',
       render: (value: string) => value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-',
     },
     {
@@ -394,6 +401,24 @@ export function RecordsPage() {
             rules={[{ required: true, message: '请选择开始时间' }]}
           >
             <DatePicker showTime style={{ width: '100%' }} placeholder="请选择开始时间" />
+          </Form.Item>
+          <Form.Item
+            noStyle
+            shouldUpdate={(prev, curr) => prev.type !== curr.type}
+          >
+            {({ getFieldValue }) => {
+              const type = getFieldValue('type');
+              if (type !== 'sleep') return null;
+              return (
+                <Form.Item
+                  name="ended_at"
+                  label="结束时间"
+                  rules={[{ required: true, message: '请选择结束时间' }]}
+                >
+                  <DatePicker showTime style={{ width: '100%' }} placeholder="请选择结束时间" />
+                </Form.Item>
+              );
+            }}
           </Form.Item>
           <Form.Item
             name="note"

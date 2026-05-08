@@ -104,7 +104,7 @@ export function BabiesPage() {
     setEditingBaby(record);
     form.setFieldsValue({
       name: record.name,
-      gender: record.gender === 'male' ? 1 : record.gender === 'female' ? 2 : 0,
+      gender: record.gender,
       birthday: record.birthday ? dayjs(record.birthday) : null,
       family_id: record.family_id,
     });
@@ -327,8 +327,8 @@ export function BabiesPage() {
             <Select
               placeholder="请选择性别"
               options={[
-                { label: '男', value: 1 },
-                { label: '女', value: 2 },
+                { label: '男', value: 'male' },
+                { label: '女', value: 'female' },
               ]}
             />
           </Form.Item>
