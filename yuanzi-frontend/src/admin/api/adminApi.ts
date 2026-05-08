@@ -156,11 +156,11 @@ export function deletePhoto(id: string) {
 }
 
 export function getPhotoUploadUrl(data: { baby_id: string; filename: string; content_type: string; size: number }) {
-  return axios.post('/api/v1/photo/upload-url', data);
+  return adminClient.post<ApiResult<{ upload_url: string; photo_id: string }>>('/photos/upload-url', data);
 }
 
 export function confirmPhotoUpload(data: { photo_id: string; size?: number }) {
-  return axios.post('/api/v1/photo/confirm', data);
+  return adminClient.post<ApiResult<unknown>>('/photos/confirm', data);
 }
 
 export function getRecords(page = 1, pageSize = 20) {
