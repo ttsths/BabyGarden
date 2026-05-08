@@ -13,6 +13,7 @@ type Config struct {
 	Redis    RedisConfig    `mapstructure:"redis"`
 	JWT      JWTConfig      `mapstructure:"jwt"`
 	OSS      OSSConfig      `mapstructure:"oss"`
+	R2       R2Config       `mapstructure:"r2"`
 	Storage  StorageConfig  `mapstructure:"storage"`
 	SMS      SMSConfig      `mapstructure:"sms"`
 	AI       AIConfig       `mapstructure:"ai"`
@@ -58,6 +59,14 @@ type OSSConfig struct {
 	AccessKeySecret string `mapstructure:"access_key_secret"`
 	CdnDomain       string `mapstructure:"cdn_domain"`
 	CallbackSecret  string `mapstructure:"callback_secret"`
+}
+
+type R2Config struct {
+	AccountID       string `mapstructure:"account_id"`
+	AccessKeyID     string `mapstructure:"access_key_id"`
+	AccessKeySecret string `mapstructure:"access_key_secret"`
+	Bucket          string `mapstructure:"bucket"`
+	PublicURL       string `mapstructure:"public_url"`
 }
 
 type StorageConfig struct {
@@ -116,7 +125,7 @@ func Setup() {
 }
 
 func setDefaults() {
-	viper.SetDefault("storage.provider", "oss")
+	viper.SetDefault("storage.provider", "r2")
 
 	viper.SetDefault("server.run_mode", "debug")
 	viper.SetDefault("server.http_port", 8080)
