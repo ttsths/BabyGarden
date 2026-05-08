@@ -42,6 +42,10 @@ func (u *User) ToUserInfo() UserInfo {
 	return UserInfo{ID: u.ID, Phone: u.Phone, Nickname: u.Nickname, AvatarURL: u.AvatarURL, Status: u.Status}
 }
 
+func (u *User) SetPassword(password string) {
+	u.Password = password
+}
+
 // CheckPassword compares a plaintext password with the stored password.
 // In production, use bcrypt.CompareHashAndPassword.
 func (u *User) CheckPassword(password string) bool {

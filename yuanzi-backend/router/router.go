@@ -38,17 +38,24 @@ func SetupRouter() *gin.Engine {
 	// User management
 	adminAuth.GET("/users", admin.GetUsers)
 	adminAuth.GET("/users/:id", admin.GetUser)
+	adminAuth.POST("/users", admin.CreateUser)
+	adminAuth.PUT("/users/:id", admin.UpdateUser)
 	adminAuth.PUT("/users/:id/status", admin.UpdateUserStatus)
 	adminAuth.DELETE("/users/:id", admin.DeleteUser)
 
 	// Family management
 	adminAuth.GET("/families", admin.GetFamilies)
 	adminAuth.GET("/families/:id", admin.GetFamily)
+	adminAuth.POST("/families", admin.CreateFamily)
+	adminAuth.PUT("/families/:id", admin.UpdateFamily)
+	adminAuth.POST("/families/:id/members", admin.AddFamilyMember)
 	adminAuth.DELETE("/families/:id", admin.DeleteFamily)
 
 	// Baby management
 	adminAuth.GET("/babies", admin.GetBabies)
 	adminAuth.GET("/babies/:id", admin.GetBaby)
+	adminAuth.POST("/babies", admin.CreateBaby)
+	adminAuth.PUT("/babies/:id", admin.UpdateBaby)
 	adminAuth.DELETE("/babies/:id", admin.DeleteBaby)
 
 	// Photo management
@@ -59,6 +66,8 @@ func SetupRouter() *gin.Engine {
 	// Record management
 	adminAuth.GET("/records", admin.GetRecords)
 	adminAuth.GET("/records/:id", admin.GetRecord)
+	adminAuth.POST("/records", admin.CreateRecord)
+	adminAuth.PUT("/records/:id", admin.UpdateRecord)
 	adminAuth.DELETE("/records/:id", admin.DeleteRecord)
 
 	// Statistics
