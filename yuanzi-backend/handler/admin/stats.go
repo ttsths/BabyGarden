@@ -33,8 +33,11 @@ func GetStatsOverview(c *gin.Context) {
 	})
 }
 
-// GetDailyStats returns daily new user/baby/record counts for last 30 days.
-// GET /api/v1/admin/stats/daily
+// GetDailyStats returns daily new user/baby/record counts for last N days.
+// GET /api/v1/admin/stats/daily?days=30
+//
+// Optimized: 3 GROUP BY queries instead of 3*N individual count queries.
+// Old approach took 90 round-trips for 30 days; new takes 3.
 func GetDailyStats(c *gin.Context) {
 	days := 30
 	if d := c.Query("days"); d != "" {
@@ -44,6 +47,9 @@ func GetDailyStats(c *gin.Context) {
 	}
 
 	now := time.Now()
+	startDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, -(days - 1))
+	endDate := startDate.AddDate(0, 0, days).Add(-1 * time.Second)
+
 	type dailyItem struct {
 		Date       string `json:"date"`
 		NewUsers   int64  `json:"new_users"`
@@ -51,23 +57,37 @@ func GetDailyStats(c *gin.Context) {
 		NewRecords int64  `json:"new_records"`
 	}
 
+	// Single GROUP BY query per model — 3 queries instead of 3*days.
+	countByDate := func(modelPtr any, col string) map[string]int64 {
+		type row struct {
+			Date string `gorm:"column:date"`
+			Cnt  int64  `gorm:"column:cnt"`
+		}
+		var rows []row
+		mysql.DB.Model(modelPtr).
+			Select("DATE("+col+") as date, COUNT(*) as cnt").
+			Where(col+" >= ? AND "+col+" <= ?", startDate, endDate).
+			Group("DATE(" + col + ")").
+			Find(&rows)
+		m := make(map[string]int64, len(rows))
+		for _, r := range rows {
+			m[r.Date] = r.Cnt
+		}
+		return m
+	}
+
+	userByDate := countByDate(&model.User{}, "created_at")
+	babyByDate := countByDate(&model.Baby{}, "created_at")
+	recordByDate := countByDate(&model.Record{}, "created_at")
+
 	items := make([]dailyItem, days)
 	for i := 0; i < days; i++ {
-		day := now.AddDate(0, 0, -i)
-		start := time.Date(day.Year(), day.Month(), day.Day(), 0, 0, 0, 0, time.Local)
-		end := start.Add(24 * time.Hour)
-		dateStr := start.Format("2006-01-02")
-
-		var nc, bc, rc int64
-		mysql.DB.Model(&model.User{}).Where("created_at >= ? AND created_at < ?", start, end).Count(&nc)
-		mysql.DB.Model(&model.Baby{}).Where("created_at >= ? AND created_at < ?", start, end).Count(&bc)
-		mysql.DB.Model(&model.Record{}).Where("created_at >= ? AND created_at < ?", start, end).Count(&rc)
-
+		dateStr := startDate.AddDate(0, 0, i).Format("2006-01-02")
 		items[i] = dailyItem{
 			Date:       dateStr,
-			NewUsers:   nc,
-			NewBabies:  bc,
-			NewRecords: rc,
+			NewUsers:   userByDate[dateStr],
+			NewBabies:  babyByDate[dateStr],
+			NewRecords: recordByDate[dateStr],
 		}
 	}
 
