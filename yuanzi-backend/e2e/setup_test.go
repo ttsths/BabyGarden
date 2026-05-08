@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"time"
 	"strings"
 	"sync"
 	"testing"
@@ -169,6 +170,7 @@ func seedFamily(t *testing.T, userID string) (model.Family, func()) {
 		FamilyID: family.ID,
 		UserID:   userID,
 		Role:     model.FamilyRoleAdmin,
+		JoinedAt: time.Now(),
 	}
 	if err := mysql.DB.Create(&member).Error; err != nil {
 		t.Fatalf("创建E2E家庭成员失败: %v", err)
