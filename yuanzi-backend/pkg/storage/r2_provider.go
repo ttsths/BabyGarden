@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	appConfig "yuanzi-backend/config"
 )
 
 // R2Provider implements Provider using Cloudflare R2 (S3-compatible).
@@ -22,21 +23,41 @@ type R2Provider struct {
 }
 
 // NewR2Provider creates a Provider backed by Cloudflare R2.
-// Configuration is read from environment variables:
+// Configuration is read from the global config (config.GlobalConfig.R2) first,
+// then falls back to environment variables for backward compatibility.
+//
+// Expected env vars (fallback):
 //
 //	R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_ACCESS_KEY_SECRET, R2_BUCKET, R2_PUBLIC_URL.
 func NewR2Provider() (Provider, error) {
-	accountID := os.Getenv("R2_ACCOUNT_ID")
-	accessKeyID := os.Getenv("R2_ACCESS_KEY_ID")
-	accessKeySecret := os.Getenv("R2_ACCESS_KEY_SECRET")
-	bucket := os.Getenv("R2_BUCKET")
-	publicURL := os.Getenv("R2_PUBLIC_URL")
+	accountID := appConfig.GlobalConfig.R2.AccountID
+	accessKeyID := appConfig.GlobalConfig.R2.AccessKeyID
+	accessKeySecret := appConfig.GlobalConfig.R2.AccessKeySecret
+	bucket := appConfig.GlobalConfig.R2.Bucket
+	publicURL := appConfig.GlobalConfig.R2.PublicURL
+
+	// Fallback to environment variables if config values are empty
+	if accountID == "" {
+		accountID = os.Getenv("R2_ACCOUNT_ID")
+	}
+	if accessKeyID == "" {
+		accessKeyID = os.Getenv("R2_ACCESS_KEY_ID")
+	}
+	if accessKeySecret == "" {
+		accessKeySecret = os.Getenv("R2_ACCESS_KEY_SECRET")
+	}
+	if bucket == "" {
+		bucket = os.Getenv("R2_BUCKET")
+	}
+	if publicURL == "" {
+		publicURL = os.Getenv("R2_PUBLIC_URL")
+	}
 	if publicURL == "" {
 		publicURL = os.Getenv("R2_CUSTOM_DOMAIN")
 	}
 
 	if accountID == "" || accessKeyID == "" || accessKeySecret == "" || bucket == "" {
-		return nil, fmt.Errorf("missing required R2 configuration: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_ACCESS_KEY_SECRET, R2_BUCKET")
+		return nil, fmt.Errorf("missing required R2 configuration: account_id, access_key_id, access_key_secret, bucket")
 	}
 
 	endpoint := fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID)

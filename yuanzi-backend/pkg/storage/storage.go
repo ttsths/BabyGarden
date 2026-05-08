@@ -8,11 +8,11 @@ import (
 )
 
 // NewProviderFromConfig returns the appropriate Provider based on the global config.
-// It defaults to OSS if the provider setting is unrecognized.
+// It defaults to R2 if the provider setting is unrecognized.
 func NewProviderFromConfig() (Provider, error) {
 	provider := config.GlobalConfig.Storage.Provider
 	if provider == "" {
-		provider = "oss"
+		provider = "r2"
 	}
 
 	switch provider {
