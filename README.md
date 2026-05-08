@@ -72,9 +72,9 @@
 | **3** | 目标驱动 | analyze+fix+test 合并为 PI K2P6 智能循环 |
 | **4** | 热加载 + 多轮续接 | 检测配置变化自动重载，同线程多轮运行 |
 
-**5 步流水线：**
+**6 步流水线：**
 ```
-Reconcile → Implement (目标驱动) → Approve 🔒 → Create PR → Notify
+Reconcile → Implement (目标驱动) → Review (Codex CLI) → Approve 🔒 → Create PR → Notify
 ```
 
 ---
@@ -410,13 +410,14 @@ main       — 生产分支（已部署）
 
 **仓库内策略：** [`WORKFLOW.md`](WORKFLOW.md) — YAML front matter 定义 tracker/agent/retry 配置，Markdown body 是 prompt 模板。
 
-**5 步 Lobster 流水线：**
+**6 步 Lobster 流水线：**
 ```
 1. Reconcile  — 加载配置 + 核对 Issue 状态 + 创建工作区
 2. Implement  — PI K2P6 目标驱动修复 (analyze→fix→test 智能循环)
-3. Approve 🔒 — 人工审批代码变更
-4. Create PR  — 创建分支、提交、推送、生成 PR
-5. Notify     — 汇报结果 + 归档日志 + 延迟清理工作区
+3. Review     — Codex CLI 静态审查 (安全/逻辑/性能/测试覆盖)
+4. Approve 🔒 — 人工审批（含 Review 结果）
+5. Create PR  — 创建分支、提交、推送、生成 PR
+6. Notify     — 汇报结果 + 归档日志 + 延迟清理工作区
 ```
 
 **触发方式：**
