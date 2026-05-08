@@ -2,6 +2,8 @@ package e2e
 
 import (
 	"encoding/json"
+	"fmt"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -111,13 +113,24 @@ func assertCode(t *testing.T, resp model.Response, expected int, context string)
 	}
 }
 
+// e2ePhone generates a unique phone number for E2E testing.
+// Uses random suffix to avoid cross-test and cross-run conflicts.
+func e2ePhone() string {
+	return fmt.Sprintf("1380000%04d", rand.Intn(9999))
+}
+
 // seedAdminUser creates an admin user for E2E testing and returns cleanup function.
 func seedAdminUser(t *testing.T) (model.User, func()) {
 	t.Helper()
 	setupE2E(t)
 
+	phone := e2ePhone()
+
+	// 幂等化：先删除可能的残留数据
+	mysql.DB.Where("phone = ?", phone).Delete(&model.User{})
+
 	admin := model.User{
-		Phone:    "13899990001",
+		Phone:    phone,
 		Nickname: "E2E管理员",
 		IsAdmin:  1,
 		Password: "e2eadmin",
@@ -137,8 +150,11 @@ func seedRegularUser(t *testing.T) (model.User, func()) {
 	t.Helper()
 	setupE2E(t)
 
+	phone := e2ePhone()
+	mysql.DB.Where("phone = ?", phone).Delete(&model.User{})
+
 	user := model.User{
-		Phone:    "13899990002",
+		Phone:    phone,
 		Nickname: "E2E普通用户",
 		IsAdmin:  0,
 		Status:   1,
