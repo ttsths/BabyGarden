@@ -118,6 +118,14 @@ export function deletePhoto(id: string) {
   return adminClient.delete<ApiResult<unknown>>(`/photos/${id}`);
 }
 
+export function getPhotoUploadUrl(data: { filename: string; content_type: string }) {
+  return adminClient.post<ApiResult<{ upload_url: string; download_url: string }>>('/photo/upload-url', data);
+}
+
+export function confirmPhotoUpload(data: { filename: string; url: string; family_id: string; baby_id?: string }) {
+  return adminClient.post<ApiResult<AdminPhoto>>('/photo/confirm', data);
+}
+
 export function getRecords(page = 1, pageSize = 20) {
   return adminClient.get<ApiResult<PaginatedResponse<AdminRecord>>>('/records', {
     params: { page, page_size: pageSize },
