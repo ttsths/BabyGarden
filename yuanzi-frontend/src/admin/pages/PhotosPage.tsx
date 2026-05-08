@@ -23,6 +23,8 @@ import {
   deletePhoto,
   getPhotoUploadUrl,
   confirmPhotoUpload,
+  getFamilies,
+  getBabies,
 } from '@/admin/api/adminApi';
 import type { AdminPhoto } from '@/admin/types/admin';
 import dayjs from 'dayjs';
@@ -55,6 +57,26 @@ export function PhotosPage() {
       return res.data.data;
     },
   });
+
+  const { data: familiesData } = useQuery({
+    queryKey: ['admin', 'families', 'all'],
+    queryFn: async () => {
+      const res = await getFamilies(1, 1000);
+      return res.data.data?.list || [];
+    },
+  });
+
+  const { data: babiesData } = useQuery({
+    queryKey: ['admin', 'babies', 'all', uploadFamilyId],
+    queryFn: async () => {
+      const res = await getBabies(1, 1000);
+      return res.data.data?.list || [];
+    },
+    enabled: !!uploadFamilyId,
+  });
+
+  const familyOptions = familiesData?.map((f: any) => ({ label: f.name, value: f.id })) || [];
+  const babyOptions = babiesData?.filter((b: any) => b.family_id === uploadFamilyId).map((b: any) => ({ label: b.name, value: b.id })) || [];
 
   const { data: detailData, isLoading: detailLoading } = useQuery({
     queryKey: ['admin', 'photo', detailId],
@@ -437,8 +459,9 @@ export function PhotosPage() {
                 setUploadFamilyId(v);
                 setUploadBabyId('');
               }}
-              options={[]}
+              options={familyOptions}
               showSearch
+              loading={!familiesData}
             />
           </div>
 
@@ -449,9 +472,10 @@ export function PhotosPage() {
               placeholder="选择宝宝"
               value={uploadBabyId || undefined}
               onChange={setUploadBabyId}
-              options={[]}
+              options={babyOptions}
               showSearch
               disabled={!uploadFamilyId}
+              loading={!!uploadFamilyId && !babiesData}
             />
           </div>
 

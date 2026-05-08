@@ -62,11 +62,11 @@ export function FamiliesPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteFamily(id),
     onSuccess: () => {
-      message.success('删除成功');
+      message.success('家庭已禁用');
       queryClient.invalidateQueries({ queryKey: ['admin', 'families'] });
     },
     onError: () => {
-      message.error('删除失败');
+      message.error('操作失败');
     },
   });
 
@@ -174,16 +174,10 @@ export function FamiliesPage() {
       key: 'owner_id',
     },
     {
-      title: '存储配额',
-      dataIndex: 'storage_quota',
-      key: 'storage_quota',
-      render: (v: number) => `${(v / 1024 / 1024).toFixed(2)} MB`,
-    },
-    {
-      title: '已用存储',
-      dataIndex: 'storage_used',
-      key: 'storage_used',
-      render: (v: number) => `${(v / 1024 / 1024).toFixed(2)} MB`,
+      title: '成员数',
+      dataIndex: 'member_count',
+      key: 'member_count',
+      render: (v: number) => v ?? '-',
     },
     {
       title: '创建时间',
