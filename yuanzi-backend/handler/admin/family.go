@@ -140,7 +140,7 @@ func CreateFamily(c *gin.Context) {
 	})
 }
 
-// UpdateFamily updates family info.
+// UpdateFamily admin 更新家庭信息
 // PUT /api/v1/admin/families/:id
 func UpdateFamily(c *gin.Context) {
 	id := c.Param("id")
@@ -153,6 +153,7 @@ func UpdateFamily(c *gin.Context) {
 	var req struct {
 		Name       string `json:"name" binding:"omitempty"`
 		InviteCode string `json:"invite_code" binding:"omitempty"`
+		Status     *int   `json:"status" binding:"omitempty"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "请求参数错误"})
@@ -165,6 +166,9 @@ func UpdateFamily(c *gin.Context) {
 	}
 	if req.InviteCode != "" {
 		updates["invite_code"] = req.InviteCode
+	}
+	if req.Status != nil {
+		updates["is_paid"] = *req.Status
 	}
 
 	if len(updates) > 0 {
@@ -181,8 +185,29 @@ func UpdateFamily(c *gin.Context) {
 			"id":          family.ID,
 			"name":        family.Name,
 			"invite_code": family.InviteCode,
+			"status":      family.IsPaid,
 		},
 	})
+}
+
+// RemoveFamilyMember admin 移除家庭成员
+// DELETE /api/v1/admin/families/:id/members/:user_id
+func RemoveFamilyMember(c *gin.Context) {
+	id := c.Param("id")
+	userID := c.Param("user_id")
+
+	var family model.Family
+	if err := mysql.DB.Where("id = ?", id).First(&family).Error; err != nil {
+		c.JSON(http.StatusNotFound, model.Response{Code: model.ERROR_NOT_FUND, Msg: "家庭不存在"})
+		return
+	}
+
+	if err := mysql.DB.Where("family_id = ? AND user_id = ?", family.ID, userID).Delete(&model.FamilyMember{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "移除成员失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "移除成功"})
 }
 
 // AddFamilyMember adds a member to a family.

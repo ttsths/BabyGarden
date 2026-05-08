@@ -1,7 +1,9 @@
 package admin
 
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -99,7 +101,7 @@ func GetRecord(c *gin.Context) {
 	})
 }
 
-// CreateRecord creates a new record.
+// CreateRecord admin 创建记录
 // POST /api/v1/admin/records
 func CreateRecord(c *gin.Context) {
 	var req struct {
@@ -107,6 +109,7 @@ func CreateRecord(c *gin.Context) {
 		BabyID    string                 `json:"baby_id" binding:"required"`
 		FamilyID  string                 `json:"family_id" binding:"required"`
 		StartedAt string                 `json:"started_at" binding:"required"`
+		EndedAt   string                 `json:"ended_at"`
 		Note      string                 `json:"note"`
 		Content   map[string]interface{} `json:"content"`
 	}
@@ -115,10 +118,21 @@ func CreateRecord(c *gin.Context) {
 		return
 	}
 
-	startedAt, err := time.Parse("2006-01-02T15:04:05Z07:00", req.StartedAt)
+	// 支持多种时间格式
+	startedAt, err := parseTime(req.StartedAt)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "时间格式错误"})
 		return
+	}
+
+	var endedAt *time.Time
+	if req.EndedAt != "" {
+		et, err := parseTime(req.EndedAt)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "结束时间格式错误"})
+			return
+		}
+		endedAt = &et
 	}
 
 	var baby model.Baby
@@ -138,9 +152,12 @@ func CreateRecord(c *gin.Context) {
 		FamilyID:  req.FamilyID,
 		Type:      model.RecordType(req.Type),
 		StartedAt: startedAt,
-		Content:   contentJSON,
 		Note:      req.Note,
+		Content:   contentJSON,
 		CreatedBy: "admin",
+	}
+	if endedAt != nil {
+		record.EndedAt = sql.NullTime{Time: *endedAt, Valid: true}
 	}
 
 	if err := mysql.DB.Create(&record).Error; err != nil {
@@ -160,6 +177,21 @@ func CreateRecord(c *gin.Context) {
 			"note":       record.Note,
 		},
 	})
+}
+
+func parseTime(s string) (time.Time, error) {
+	formats := []string{
+		time.RFC3339,
+		"2006-01-02T15:04:05",
+		"2006-01-02 15:04:05",
+		"2006-01-02",
+	}
+	for _, f := range formats {
+		if t, err := time.Parse(f, s); err == nil {
+			return t, nil
+		}
+	}
+	return time.Time{}, fmt.Errorf("invalid time format: %s", s)
 }
 
 // UpdateRecord updates a record.
