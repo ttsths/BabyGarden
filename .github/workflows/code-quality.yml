@@ -36,6 +36,12 @@ jobs:
 
       - name: go test with coverage
         working-directory: yuanzi-backend
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_ACCESS_KEY_SECRET: ${{ secrets.R2_ACCESS_KEY_SECRET }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
         run: go test ./... -v -count=1 -coverprofile=coverage.out -covermode=atomic
 
       - name: Upload coverage to Codecov
@@ -74,4 +80,7 @@ jobs:
 
       - name: Build check
         working-directory: yuanzi-frontend
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL || '/api/v1' }}
+          VITE_R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
         run: npm run build
