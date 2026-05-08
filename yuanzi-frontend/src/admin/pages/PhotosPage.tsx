@@ -105,10 +105,12 @@ export function PhotosPage() {
         updateTask(taskId, { status: 'uploading', progress: 10 });
 
         const urlRes = await getPhotoUploadUrl({
+          baby_id: uploadBabyId || 'default',
           filename: file.name,
           content_type: file.type || 'image/jpeg',
+          size: file.size,
         });
-        const { upload_url, download_url } = urlRes.data.data;
+        const { upload_url, photo_id } = urlRes.data.data;
 
         updateTask(taskId, { progress: 40 });
 
@@ -127,10 +129,8 @@ export function PhotosPage() {
         updateTask(taskId, { status: 'confirming', progress: 85 });
 
         await confirmPhotoUpload({
-          filename: file.name,
-          url: download_url,
-          family_id: uploadFamilyId,
-          baby_id: uploadBabyId || undefined,
+          photo_id: photo_id,
+          size: file.size,
         });
 
         updateTask(taskId, { status: 'done', progress: 100 });
@@ -185,7 +185,45 @@ export function PhotosPage() {
       return;
     }
 
-    message.warning('批量下载功能开发中');
+    try {
+      message.loading('正在打包下载...', 0);
+      const { default: JSZip } = await import('jszip');
+      const zip = new JSZip();
+      const folder = zip.folder('photos');
+      if (!folder) throw new Error('创建 ZIP 失败');
+
+      for (let i = 0; i < selectedPhotos.length; i++) {
+        const photo = selectedPhotos[i];
+        setDownloadProgress((prev) => ({ ...prev, [photo.id]: 0 }));
+        const res = await axios.get(photo.original_url, {
+          responseType: 'blob',
+          onDownloadProgress: (e) => {
+            if (e.total) {
+              const percent = Math.round((e.loaded / e.total) * 100);
+              setDownloadProgress((prev) => ({ ...prev, [photo.id]: percent }));
+            }
+          },
+        });
+        folder.file(photo.filename, res.data);
+        setDownloadProgress((prev) => ({ ...prev, [photo.id]: 100 }));
+      }
+
+      const content = await zip.generateAsync({ type: 'blob' });
+      const url = window.URL.createObjectURL(content);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `photos_${dayjs().format('YYYYMMDD_HHmmss')}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      message.destroy();
+      message.success('批量下载成功');
+      setSelectedRowKeys([]);
+    } catch {
+      message.destroy();
+      message.error('批量下载失败');
+    }
   }, [data, selectedRowKeys, handleDownloadSingle]);
 
   const columns: ColumnsType<AdminPhoto> = [
