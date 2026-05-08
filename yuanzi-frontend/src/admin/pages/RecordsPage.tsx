@@ -24,8 +24,10 @@ import {
   deleteRecord,
   createRecord,
   updateRecord,
+  getFamilies,
+  getBabies,
 } from '@/admin/api/adminApi';
-import type { AdminRecord, CreateRecordRequest, UpdateRecordRequest } from '@/admin/types/admin';
+import type { AdminRecord, AdminFamily, AdminBaby, CreateRecordRequest, UpdateRecordRequest } from '@/admin/types/admin';
 import dayjs from 'dayjs';
 
 export function RecordsPage() {
@@ -36,6 +38,28 @@ export function RecordsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<AdminRecord | null>(null);
   const [form] = Form.useForm();
+
+  const { data: familiesData } = useQuery({
+    queryKey: ['admin', 'families', 'all'],
+    queryFn: async () => {
+      const res = await getFamilies(1, 1000);
+      return res.data.data?.list || [];
+    },
+  });
+
+  const { data: babiesData } = useQuery({
+    queryKey: ['admin', 'babies', 'all'],
+    queryFn: async () => {
+      const res = await getBabies(1, 1000);
+      return res.data.data?.list || [];
+    },
+  });
+
+  const familyMap = Object.fromEntries((familiesData || []).map((f: AdminFamily) => [f.id, f.name]));
+  const babyMap = Object.fromEntries((babiesData || []).map((b: AdminBaby) => [b.id, b.name]));
+
+  const familyOptions = (familiesData || []).map((f: AdminFamily) => ({ label: f.name, value: f.id }));
+  const babyOptions = (babiesData || []).map((b: AdminBaby) => ({ label: b.name, value: b.id }));
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin', 'records', page, pageSize],
@@ -169,21 +193,30 @@ export function RecordsPage() {
       ),
     },
     {
-      title: '宝宝ID',
+      title: '宝宝',
       dataIndex: 'baby_id',
       key: 'baby_id',
-      width: 100,
+      width: 120,
+      render: (babyId: string) => babyMap[babyId] || babyId,
     },
     {
-      title: '家庭ID',
+      title: '家庭',
       dataIndex: 'family_id',
       key: 'family_id',
-      width: 100,
+      width: 120,
+      render: (familyId: string) => familyMap[familyId] || familyId,
     },
     {
-      title: '创建者ID',
+      title: '创建者',
       dataIndex: 'created_by',
       key: 'created_by',
+      render: (createdBy: string) => createdBy,
+    },
+    {
+      title: '开始时间',
+      dataIndex: 'started_at',
+      key: 'started_at',
+      render: (value: string) => value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-',
     },
     {
       title: '创建时间',
@@ -278,15 +311,15 @@ export function RecordsPage() {
               </div>
             </div>
             <div>
-              <div className="text-gray-500 text-sm">宝宝ID</div>
-              <div>{detailData.baby_id}</div>
+              <div className="text-gray-500 text-sm">宝宝</div>
+              <div>{babyMap[detailData.baby_id] || detailData.baby_id}</div>
             </div>
             <div>
-              <div className="text-gray-500 text-sm">家庭ID</div>
-              <div>{detailData.family_id}</div>
+              <div className="text-gray-500 text-sm">家庭</div>
+              <div>{familyMap[detailData.family_id] || detailData.family_id}</div>
             </div>
             <div>
-              <div className="text-gray-500 text-sm">创建者ID</div>
+              <div className="text-gray-500 text-sm">创建者</div>
               <div>{detailData.created_by}</div>
             </div>
             <div>
@@ -343,17 +376,17 @@ export function RecordsPage() {
           </Form.Item>
           <Form.Item
             name="baby_id"
-            label="宝宝ID"
-            rules={[{ required: true, message: '请输入宝宝ID' }]}
+            label="宝宝"
+            rules={[{ required: true, message: '请选择宝宝' }]}
           >
-            <Input placeholder="请输入宝宝ID" />
+            <Select placeholder="请选择宝宝" options={babyOptions} showSearch />
           </Form.Item>
           <Form.Item
             name="family_id"
-            label="家庭ID"
-            rules={[{ required: true, message: '请输入家庭ID' }]}
+            label="家庭"
+            rules={[{ required: true, message: '请选择家庭' }]}
           >
-            <Input placeholder="请输入家庭ID" />
+            <Select placeholder="请选择家庭" options={familyOptions} showSearch />
           </Form.Item>
           <Form.Item
             name="started_at"

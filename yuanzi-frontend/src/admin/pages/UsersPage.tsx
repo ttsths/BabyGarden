@@ -12,16 +12,21 @@ import {
   Space,
   Spin,
   Alert,
+  Form,
+  Modal,
+  Select,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { SearchOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SearchOutlined, DeleteOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
 import {
   getUsers,
   getUserDetail,
   updateUserStatus,
   deleteUser,
+  createUser,
+  updateUser,
 } from '@/admin/api/adminApi';
-import type { AdminUser } from '@/admin/types/admin';
+import type { AdminUser, CreateUserRequest, UpdateUserRequest } from '@/admin/types/admin';
 import dayjs from 'dayjs';
 
 export function UsersPage() {
@@ -31,6 +36,10 @@ export function UsersPage() {
   const [keyword, setKeyword] = useState('');
   const [searchValue, setSearchValue] = useState('');
   const [detailId, setDetailId] = useState<string | null>(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [form] = Form.useForm();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin', 'users', page, pageSize, keyword],
@@ -73,6 +82,64 @@ export function UsersPage() {
       message.error('删除失败');
     },
   });
+
+  const createMutation = useMutation({
+    mutationFn: (data: CreateUserRequest) => createUser(data),
+    onSuccess: () => {
+      message.success('创建成功');
+      setIsModalOpen(false);
+      form.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
+    onError: () => {
+      message.error('创建失败');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateUserRequest }) => updateUser(id, data),
+    onSuccess: () => {
+      message.success('更新成功');
+      setIsModalOpen(false);
+      setEditingUser(null);
+      form.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'user', detailId] });
+    },
+    onError: () => {
+      message.error('更新失败');
+    },
+  });
+
+  const handleOpenCreate = () => {
+    setEditingUser(null);
+    form.resetFields();
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (record: AdminUser) => {
+    setEditingUser(record);
+    form.setFieldsValue({
+      phone: record.phone,
+      nickname: record.nickname,
+      status: record.status,
+      is_admin: record.is_admin ? 1 : 0,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      if (editingUser) {
+        updateMutation.mutate({ id: editingUser.id, data: values });
+      } else {
+        createMutation.mutate(values);
+      }
+    } catch {
+      // validation failed
+    }
+  };
 
   const handleSearch = () => {
     setKeyword(searchValue);
@@ -122,6 +189,9 @@ export function UsersPage() {
           <Button type="link" onClick={() => setDetailId(record.id)}>
             查看
           </Button>
+          <Button type="link" icon={<EditOutlined />} onClick={() => handleOpenEdit(record)}>
+            编辑
+          </Button>
           <Switch
             checked={record.status === 1}
             onChange={(checked) =>
@@ -161,17 +231,22 @@ export function UsersPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
-        <Input
-          placeholder="搜索手机号或昵称"
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          onPressEnter={handleSearch}
-          style={{ width: 300 }}
-          prefix={<SearchOutlined />}
-        />
-        <Button type="primary" onClick={handleSearch}>
-          搜索
+      <div style={{ marginBottom: 16, display: 'flex', gap: 8, justifyContent: 'space-between' }}>
+        <Space>
+          <Input
+            placeholder="搜索手机号或昵称"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onPressEnter={handleSearch}
+            style={{ width: 300 }}
+            prefix={<SearchOutlined />}
+          />
+          <Button type="primary" onClick={handleSearch}>
+            搜索
+          </Button>
+        </Space>
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCreate}>
+          新增用户
         </Button>
       </div>
 
@@ -256,6 +331,70 @@ export function UsersPage() {
           </div>
         ) : null}
       </Drawer>
+
+      <Modal
+        title={editingUser ? '编辑用户' : '新增用户'}
+        open={isModalOpen}
+        onOk={handleSubmit}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setEditingUser(null);
+          form.resetFields();
+        }}
+        confirmLoading={createMutation.isPending || updateMutation.isPending}
+      >
+        <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item
+            name="phone"
+            label="手机号"
+            rules={[{ required: true, message: '请输入手机号' }]}
+          >
+            <Input placeholder="请输入手机号" disabled={!!editingUser} />
+          </Form.Item>
+          {!editingUser && (
+            <Form.Item
+              name="password"
+              label="密码"
+              rules={[{ required: true, message: '请输入密码' }]}
+            >
+              <Input.Password placeholder="请输入密码" />
+            </Form.Item>
+          )}
+          <Form.Item
+            name="nickname"
+            label="昵称"
+            rules={[{ required: true, message: '请输入昵称' }]}
+          >
+            <Input placeholder="请输入昵称" />
+          </Form.Item>
+          <Form.Item
+            name="status"
+            label="状态"
+            rules={[{ required: true, message: '请选择状态' }]}
+          >
+            <Select
+              placeholder="请选择状态"
+              options={[
+                { label: '正常', value: 1 },
+                { label: '禁用', value: 0 },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item
+            name="is_admin"
+            label="管理员"
+            rules={[{ required: true, message: '请选择是否管理员' }]}
+          >
+            <Select
+              placeholder="请选择是否管理员"
+              options={[
+                { label: '是', value: 1 },
+                { label: '否', value: 0 },
+              ]}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

@@ -44,6 +44,7 @@ export interface AdminFamily {
   name: string;
   owner_id: string;
   invite_code?: string;
+  member_count?: number;
   storage_quota: number;
   storage_used: number;
   created_at: string;

@@ -10,15 +10,22 @@ import {
   Spin,
   Alert,
   Tag,
+  Form,
+  Modal,
+  Input,
+  Select,
+  DatePicker,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
 import {
   getBabies,
   getBabyDetail,
   deleteBaby,
+  createBaby,
+  updateBaby,
 } from '@/admin/api/adminApi';
-import type { AdminBaby } from '@/admin/types/admin';
+import type { AdminBaby, CreateBabyRequest, UpdateBabyRequest } from '@/admin/types/admin';
 import dayjs from 'dayjs';
 
 export function BabiesPage() {
@@ -26,6 +33,9 @@ export function BabiesPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBaby, setEditingBaby] = useState<AdminBaby | null>(null);
+  const [form] = Form.useForm();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin', 'babies', page, pageSize],
@@ -55,6 +65,68 @@ export function BabiesPage() {
       message.error('删除失败');
     },
   });
+
+  const createMutation = useMutation({
+    mutationFn: (data: CreateBabyRequest) => createBaby(data),
+    onSuccess: () => {
+      message.success('创建成功');
+      setIsModalOpen(false);
+      form.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['admin', 'babies'] });
+    },
+    onError: () => {
+      message.error('创建失败');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateBabyRequest }) => updateBaby(id, data),
+    onSuccess: () => {
+      message.success('更新成功');
+      setIsModalOpen(false);
+      setEditingBaby(null);
+      form.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['admin', 'babies'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'baby', detailId] });
+    },
+    onError: () => {
+      message.error('更新失败');
+    },
+  });
+
+  const handleOpenCreate = () => {
+    setEditingBaby(null);
+    form.resetFields();
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (record: AdminBaby) => {
+    setEditingBaby(record);
+    form.setFieldsValue({
+      name: record.name,
+      gender: record.gender === 'male' ? 1 : record.gender === 'female' ? 2 : 0,
+      birthday: record.birthday ? dayjs(record.birthday) : null,
+      family_id: record.family_id,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      const payload = {
+        ...values,
+        birthday: values.birthday ? values.birthday.format('YYYY-MM-DD') : undefined,
+      };
+      if (editingBaby) {
+        updateMutation.mutate({ id: editingBaby.id, data: payload });
+      } else {
+        createMutation.mutate(payload);
+      }
+    } catch {
+      // validation failed
+    }
+  };
 
   const columns: ColumnsType<AdminBaby> = [
     {
@@ -106,6 +178,9 @@ export function BabiesPage() {
           <Button type="link" onClick={() => setDetailId(record.id)}>
             查看
           </Button>
+          <Button type="link" icon={<EditOutlined />} onClick={() => handleOpenEdit(record)}>
+            编辑
+          </Button>
           <Popconfirm
             title="确认删除"
             description="删除后不可恢复，是否继续？"
@@ -135,6 +210,12 @@ export function BabiesPage() {
 
   return (
     <div>
+      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCreate}>
+          新增宝宝
+        </Button>
+      </div>
+
       <Table
         columns={columns}
         dataSource={data?.list || []}
@@ -218,6 +299,61 @@ export function BabiesPage() {
           </div>
         ) : null}
       </Drawer>
+
+      <Modal
+        title={editingBaby ? '编辑宝宝' : '新增宝宝'}
+        open={isModalOpen}
+        onOk={handleSubmit}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setEditingBaby(null);
+          form.resetFields();
+        }}
+        confirmLoading={createMutation.isPending || updateMutation.isPending}
+      >
+        <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item
+            name="name"
+            label="名字"
+            rules={[{ required: true, message: '请输入名字' }]}
+          >
+            <Input placeholder="请输入名字" />
+          </Form.Item>
+          <Form.Item
+            name="gender"
+            label="性别"
+            rules={[{ required: true, message: '请选择性别' }]}
+          >
+            <Select
+              placeholder="请选择性别"
+              options={[
+                { label: '男', value: 1 },
+                { label: '女', value: 2 },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item
+            name="birthday"
+            label="生日"
+            rules={[{ required: true, message: '请选择生日' }]}
+          >
+            <DatePicker style={{ width: '100%' }} placeholder="请选择生日" />
+          </Form.Item>
+          <Form.Item
+            name="family_id"
+            label="家庭ID"
+            rules={[{ required: true, message: '请输入家庭ID' }]}
+          >
+            <Input placeholder="请输入家庭ID" />
+          </Form.Item>
+          <Form.Item
+            name="avatar_url"
+            label="头像URL"
+          >
+            <Input placeholder="请输入头像URL" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }
