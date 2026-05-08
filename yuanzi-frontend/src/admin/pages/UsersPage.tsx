@@ -14,7 +14,6 @@ import {
   Alert,
   Form,
   Modal,
-  Select,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { SearchOutlined, DeleteOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';

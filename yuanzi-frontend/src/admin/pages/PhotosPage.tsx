@@ -26,7 +26,7 @@ import {
   getFamilies,
   getBabies,
 } from '@/admin/api/adminApi';
-import type { AdminPhoto, AdminFamily, AdminBaby } from '@/admin/types/admin';
+import type { AdminPhoto } from '@/admin/types/admin';
 import dayjs from 'dayjs';
 import axios from 'axios';
 
@@ -75,8 +75,8 @@ export function PhotosPage() {
     enabled: !!uploadFamilyId,
   });
 
-  const familyOptions = familiesData?.map((f: AdminFamily) => ({ label: f.name, value: f.id })) || [];
-  const babyOptions = babiesData?.filter((b: AdminBaby) => b.family_id === uploadFamilyId).map((b: AdminBaby) => ({ label: b.name, value: b.id })) || [];
+  const familyOptions = familiesData?.map((f: any) => ({ label: f.name, value: f.id })) || [];
+  const babyOptions = babiesData?.filter((b: any) => b.family_id === uploadFamilyId).map((b: any) => ({ label: b.name, value: b.id })) || [];
 
   const { data: detailData, isLoading: detailLoading } = useQuery({
     queryKey: ['admin', 'photo', detailId],
