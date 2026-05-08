@@ -10,15 +10,22 @@ import {
   Spin,
   Alert,
   Tag,
+  Form,
+  Modal,
+  Input,
+  Select,
+  DatePicker,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
 import {
   getRecords,
   getRecordDetail,
   deleteRecord,
+  createRecord,
+  updateRecord,
 } from '@/admin/api/adminApi';
-import type { AdminRecord } from '@/admin/types/admin';
+import type { AdminRecord, CreateRecordRequest, UpdateRecordRequest } from '@/admin/types/admin';
 import dayjs from 'dayjs';
 
 export function RecordsPage() {
@@ -26,6 +33,9 @@ export function RecordsPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<AdminRecord | null>(null);
+  const [form] = Form.useForm();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin', 'records', page, pageSize],
@@ -55,6 +65,69 @@ export function RecordsPage() {
       message.error('删除失败');
     },
   });
+
+  const createMutation = useMutation({
+    mutationFn: (data: CreateRecordRequest) => createRecord(data),
+    onSuccess: () => {
+      message.success('创建成功');
+      setIsModalOpen(false);
+      form.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['admin', 'records'] });
+    },
+    onError: () => {
+      message.error('创建失败');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateRecordRequest }) => updateRecord(id, data),
+    onSuccess: () => {
+      message.success('更新成功');
+      setIsModalOpen(false);
+      setEditingRecord(null);
+      form.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['admin', 'records'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'record', detailId] });
+    },
+    onError: () => {
+      message.error('更新失败');
+    },
+  });
+
+  const handleOpenCreate = () => {
+    setEditingRecord(null);
+    form.resetFields();
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (record: AdminRecord) => {
+    setEditingRecord(record);
+    form.setFieldsValue({
+      type: record.type,
+      baby_id: record.baby_id,
+      family_id: record.family_id,
+      note: record.note || '',
+      started_at: record.started_at ? dayjs(record.started_at) : null,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      const payload = {
+        ...values,
+        started_at: values.started_at ? values.started_at.format('YYYY-MM-DDTHH:mm:ssZ') : undefined,
+      };
+      if (editingRecord) {
+        updateMutation.mutate({ id: editingRecord.id, data: payload });
+      } else {
+        createMutation.mutate(payload);
+      }
+    } catch {
+      // validation failed
+    }
+  };
 
   const getTypeColor = (type: string) => {
     const map: Record<string, string> = {
@@ -126,6 +199,9 @@ export function RecordsPage() {
           <Button type="link" onClick={() => setDetailId(record.id)}>
             查看
           </Button>
+          <Button type="link" icon={<EditOutlined />} onClick={() => handleOpenEdit(record)}>
+            编辑
+          </Button>
           <Popconfirm
             title="确认删除"
             description="删除后不可恢复，是否继续？"
@@ -155,6 +231,12 @@ export function RecordsPage() {
 
   return (
     <div>
+      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCreate}>
+          新增记录
+        </Button>
+      </div>
+
       <Table
         columns={columns}
         dataSource={data?.list || []}
@@ -229,6 +311,65 @@ export function RecordsPage() {
           </div>
         ) : null}
       </Drawer>
+
+      <Modal
+        title={editingRecord ? '编辑记录' : '新增记录'}
+        open={isModalOpen}
+        onOk={handleSubmit}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setEditingRecord(null);
+          form.resetFields();
+        }}
+        confirmLoading={createMutation.isPending || updateMutation.isPending}
+      >
+        <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item
+            name="type"
+            label="记录类型"
+            rules={[{ required: true, message: '请选择记录类型' }]}
+          >
+            <Select
+              placeholder="请选择记录类型"
+              options={[
+                { label: '喂奶', value: 'feeding' },
+                { label: '睡眠', value: 'sleep' },
+                { label: '换尿布', value: 'diaper' },
+                { label: '体温', value: 'temperature' },
+                { label: '辅食', value: 'food' },
+                { label: '用药', value: 'medicine' },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item
+            name="baby_id"
+            label="宝宝ID"
+            rules={[{ required: true, message: '请输入宝宝ID' }]}
+          >
+            <Input placeholder="请输入宝宝ID" />
+          </Form.Item>
+          <Form.Item
+            name="family_id"
+            label="家庭ID"
+            rules={[{ required: true, message: '请输入家庭ID' }]}
+          >
+            <Input placeholder="请输入家庭ID" />
+          </Form.Item>
+          <Form.Item
+            name="started_at"
+            label="开始时间"
+            rules={[{ required: true, message: '请选择开始时间' }]}
+          >
+            <DatePicker showTime style={{ width: '100%' }} placeholder="请选择开始时间" />
+          </Form.Item>
+          <Form.Item
+            name="note"
+            label="备注"
+          >
+            <Input.TextArea placeholder="请输入备注" rows={3} />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

@@ -2,6 +2,7 @@ package admin
 
 import (
 	"net/http"
+	"time"
 	"yuanzi-backend/model"
 	"yuanzi-backend/mysql"
 
@@ -90,6 +91,112 @@ func GetBaby(c *gin.Context) {
 			"is_premature":  baby.IsPremature == 1,
 			"age_months":    baby.AgeInMonths(),
 			"created_at":    baby.CreatedAt.Format("2006-01-02 15:04:05"),
+		},
+	})
+}
+
+// CreateBaby creates a new baby.
+// POST /api/v1/admin/babies
+func CreateBaby(c *gin.Context) {
+	var req struct {
+		Name      string `json:"name" binding:"required"`
+		Gender    int8   `json:"gender" binding:"required,oneof=1 2"`
+		Birthday  string `json:"birthday" binding:"required"`
+		FamilyID  string `json:"family_id" binding:"required"`
+		AvatarURL string `json:"avatar_url"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "请求参数错误"})
+		return
+	}
+
+	birthday, err := time.Parse("2006-01-02", req.Birthday)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "生日格式错误，应为 YYYY-MM-DD"})
+		return
+	}
+
+	baby := model.Baby{
+		FamilyID:   req.FamilyID,
+		Name:       req.Name,
+		Birthday:   birthday,
+		Gender:     req.Gender,
+		AvatarURL:  req.AvatarURL,
+	}
+
+	if err := mysql.DB.Create(&baby).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "创建失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.Response{
+		Code: model.SUCCESS,
+		Msg:  "创建成功",
+		Data: gin.H{
+			"id":         baby.ID,
+			"family_id":  baby.FamilyID,
+			"name":       baby.Name,
+			"birthday":   baby.Birthday.Format("2006-01-02"),
+			"gender":     baby.Gender,
+			"avatar_url": baby.AvatarURL,
+		},
+	})
+}
+
+// UpdateBaby updates baby info.
+// PUT /api/v1/admin/babies/:id
+func UpdateBaby(c *gin.Context) {
+	id := c.Param("id")
+	var baby model.Baby
+	if err := mysql.DB.Where("id = ?", id).First(&baby).Error; err != nil {
+		c.JSON(http.StatusNotFound, model.Response{Code: model.ERROR_NOT_FUND, Msg: "宝宝不存在"})
+		return
+	}
+
+	var req struct {
+		Name      string `json:"name" binding:"omitempty"`
+		Gender    *int8  `json:"gender" binding:"omitempty,oneof=1 2"`
+		Birthday  string `json:"birthday" binding:"omitempty"`
+		AvatarURL string `json:"avatar_url" binding:"omitempty"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "请求参数错误"})
+		return
+	}
+
+	if req.Name != "" {
+		baby.Name = req.Name
+	}
+	if req.Gender != nil {
+		baby.Gender = *req.Gender
+	}
+	if req.Birthday != "" {
+		birthday, err := time.Parse("2006-01-02", req.Birthday)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "生日格式错误，应为 YYYY-MM-DD"})
+			return
+		}
+		baby.Birthday = birthday
+	}
+	if req.AvatarURL != "" {
+		baby.AvatarURL = req.AvatarURL
+	}
+
+	if err := mysql.DB.Save(&baby).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "更新失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.Response{
+		Code: model.SUCCESS,
+		Msg:  "更新成功",
+		Data: gin.H{
+			"id":         baby.ID,
+			"family_id":  baby.FamilyID,
+			"name":       baby.Name,
+			"birthday":   baby.Birthday.Format("2006-01-02"),
+			"gender":     baby.Gender,
+			"avatar_url": baby.AvatarURL,
 		},
 	})
 }

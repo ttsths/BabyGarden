@@ -43,6 +43,7 @@ export interface AdminFamily {
   id: string;
   name: string;
   owner_id: string;
+  invite_code?: string;
   storage_quota: number;
   storage_used: number;
   created_at: string;
@@ -80,8 +81,10 @@ export interface AdminRecord {
   baby_id: string;
   type: string;
   data: Record<string, unknown>;
+  note?: string;
   created_by: string;
   created_at: string;
+  started_at?: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -95,4 +98,65 @@ export interface ApiResult<T> {
   code: number;
   msg: string;
   data: T;
+}
+
+// Request types for create/update
+export interface CreateUserRequest {
+  phone: string;
+  password: string;
+  nickname: string;
+  status: number;
+  is_admin: number;
+}
+
+export interface UpdateUserRequest {
+  nickname?: string;
+  status?: number;
+  is_admin?: number;
+}
+
+export interface CreateBabyRequest {
+  name: string;
+  gender: string;
+  birthday: string;
+  family_id: string;
+  avatar_url?: string;
+}
+
+export interface UpdateBabyRequest {
+  name?: string;
+  gender?: string;
+  birthday?: string;
+  avatar_url?: string;
+}
+
+export interface CreateFamilyRequest {
+  name: string;
+  invite_code: string;
+}
+
+export interface UpdateFamilyRequest {
+  name?: string;
+  invite_code?: string;
+}
+
+export interface AddFamilyMemberRequest {
+  user_id: string;
+  role: string;
+}
+
+export interface CreateRecordRequest {
+  type: string;
+  baby_id: string;
+  family_id: string;
+  started_at: string;
+  note?: string;
+}
+
+export interface UpdateRecordRequest {
+  type?: string;
+  baby_id?: string;
+  family_id?: string;
+  started_at?: string;
+  note?: string;
 }

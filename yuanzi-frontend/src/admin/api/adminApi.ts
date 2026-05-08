@@ -12,6 +12,15 @@ import type {
   AdminPhoto,
   AdminRecord,
   PaginatedResponse,
+  CreateUserRequest,
+  UpdateUserRequest,
+  CreateBabyRequest,
+  UpdateBabyRequest,
+  CreateFamilyRequest,
+  UpdateFamilyRequest,
+  AddFamilyMemberRequest,
+  CreateRecordRequest,
+  UpdateRecordRequest,
 } from '@/admin/types/admin';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
@@ -58,6 +67,7 @@ export function getDailyStats(days = 30) {
   return adminClient.get<ApiResult<DailyStat[]>>('/stats/daily', { params: { days } });
 }
 
+// User management
 export function getUsers(page = 1, pageSize = 20, keyword?: string) {
   return adminClient.get<ApiResult<PaginatedResponse<AdminUser>>>('/users', {
     params: { page, page_size: pageSize, keyword },
@@ -68,6 +78,14 @@ export function getUserDetail(id: string) {
   return adminClient.get<ApiResult<AdminUser>>(`/users/${id}`);
 }
 
+export function createUser(data: CreateUserRequest) {
+  return adminClient.post<ApiResult<AdminUser>>('/users', data);
+}
+
+export function updateUser(id: string, data: UpdateUserRequest) {
+  return adminClient.put<ApiResult<AdminUser>>(`/users/${id}`, data);
+}
+
 export function updateUserStatus(id: string, status: number) {
   return adminClient.put<ApiResult<unknown>>(`/users/${id}/status`, { status });
 }
@@ -76,6 +94,7 @@ export function deleteUser(id: string) {
   return adminClient.delete<ApiResult<unknown>>(`/users/${id}`);
 }
 
+// Baby management
 export function getBabies(page = 1, pageSize = 20) {
   return adminClient.get<ApiResult<PaginatedResponse<AdminBaby>>>('/babies', {
     params: { page, page_size: pageSize },
@@ -86,10 +105,19 @@ export function getBabyDetail(id: string) {
   return adminClient.get<ApiResult<AdminBaby>>(`/babies/${id}`);
 }
 
+export function createBaby(data: CreateBabyRequest) {
+  return adminClient.post<ApiResult<AdminBaby>>('/babies', data);
+}
+
+export function updateBaby(id: string, data: UpdateBabyRequest) {
+  return adminClient.put<ApiResult<AdminBaby>>(`/babies/${id}`, data);
+}
+
 export function deleteBaby(id: string) {
   return adminClient.delete<ApiResult<unknown>>(`/babies/${id}`);
 }
 
+// Family management
 export function getFamilies(page = 1, pageSize = 20) {
   return adminClient.get<ApiResult<PaginatedResponse<AdminFamily>>>('/families', {
     params: { page, page_size: pageSize },
@@ -100,10 +128,23 @@ export function getFamilyDetail(id: string) {
   return adminClient.get<ApiResult<AdminFamilyDetail>>(`/families/${id}`);
 }
 
+export function createFamily(data: CreateFamilyRequest) {
+  return adminClient.post<ApiResult<AdminFamily>>('/families', data);
+}
+
+export function updateFamily(id: string, data: UpdateFamilyRequest) {
+  return adminClient.put<ApiResult<AdminFamily>>(`/families/${id}`, data);
+}
+
+export function addFamilyMember(id: string, data: AddFamilyMemberRequest) {
+  return adminClient.post<ApiResult<unknown>>(`/families/${id}/members`, data);
+}
+
 export function deleteFamily(id: string) {
   return adminClient.delete<ApiResult<unknown>>(`/families/${id}`);
 }
 
+// Photo management
 export function getPhotos(page = 1, pageSize = 20) {
   return adminClient.get<ApiResult<PaginatedResponse<AdminPhoto>>>('/photos', {
     params: { page, page_size: pageSize },
@@ -118,6 +159,15 @@ export function deletePhoto(id: string) {
   return adminClient.delete<ApiResult<unknown>>(`/photos/${id}`);
 }
 
+export function getPhotoUploadUrl(data: { filename: string; content_type: string }) {
+  return adminClient.post<ApiResult<{ upload_url: string; download_url: string }>>('/photo/upload-url', data);
+}
+
+export function confirmPhotoUpload(data: { filename: string; url: string; family_id: string; baby_id?: string }) {
+  return adminClient.post<ApiResult<AdminPhoto>>('/photo/confirm', data);
+}
+
+// Record management
 export function getRecords(page = 1, pageSize = 20) {
   return adminClient.get<ApiResult<PaginatedResponse<AdminRecord>>>('/records', {
     params: { page, page_size: pageSize },
@@ -126,6 +176,14 @@ export function getRecords(page = 1, pageSize = 20) {
 
 export function getRecordDetail(id: string) {
   return adminClient.get<ApiResult<AdminRecord>>(`/records/${id}`);
+}
+
+export function createRecord(data: CreateRecordRequest) {
+  return adminClient.post<ApiResult<AdminRecord>>('/records', data);
+}
+
+export function updateRecord(id: string, data: UpdateRecordRequest) {
+  return adminClient.put<ApiResult<AdminRecord>>(`/records/${id}`, data);
 }
 
 export function deleteRecord(id: string) {

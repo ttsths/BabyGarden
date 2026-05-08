@@ -11,15 +11,22 @@ import {
   Alert,
   List,
   Tag,
+  Form,
+  Modal,
+  Input,
+  Select,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined, EditOutlined, UserAddOutlined } from '@ant-design/icons';
 import {
   getFamilies,
   getFamilyDetail,
   deleteFamily,
+  createFamily,
+  updateFamily,
+  addFamilyMember,
 } from '@/admin/api/adminApi';
-import type { AdminFamily } from '@/admin/types/admin';
+import type { AdminFamily, AdminFamilyMember, CreateFamilyRequest, UpdateFamilyRequest, AddFamilyMemberRequest } from '@/admin/types/admin';
 import dayjs from 'dayjs';
 
 export function FamiliesPage() {
@@ -27,6 +34,12 @@ export function FamiliesPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+  const [editingFamily, setEditingFamily] = useState<AdminFamily | null>(null);
+  const [currentFamilyId, setCurrentFamilyId] = useState<string | null>(null);
+  const [form] = Form.useForm();
+  const [memberForm] = Form.useForm();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin', 'families', page, pageSize],
@@ -56,6 +69,92 @@ export function FamiliesPage() {
       message.error('删除失败');
     },
   });
+
+  const createMutation = useMutation({
+    mutationFn: (data: CreateFamilyRequest) => createFamily(data),
+    onSuccess: () => {
+      message.success('创建成功');
+      setIsModalOpen(false);
+      form.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['admin', 'families'] });
+    },
+    onError: () => {
+      message.error('创建失败');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateFamilyRequest }) => updateFamily(id, data),
+    onSuccess: () => {
+      message.success('更新成功');
+      setIsModalOpen(false);
+      setEditingFamily(null);
+      form.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['admin', 'families'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'family', detailId] });
+    },
+    onError: () => {
+      message.error('更新失败');
+    },
+  });
+
+  const addMemberMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: AddFamilyMemberRequest }) => addFamilyMember(id, data),
+    onSuccess: () => {
+      message.success('添加成员成功');
+      setIsMemberModalOpen(false);
+      memberForm.resetFields();
+      queryClient.invalidateQueries({ queryKey: ['admin', 'family', currentFamilyId] });
+    },
+    onError: () => {
+      message.error('添加成员失败');
+    },
+  });
+
+  const handleOpenCreate = () => {
+    setEditingFamily(null);
+    form.resetFields();
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (record: AdminFamily) => {
+    setEditingFamily(record);
+    form.setFieldsValue({
+      name: record.name,
+      invite_code: record.invite_code,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenAddMember = (familyId: string) => {
+    setCurrentFamilyId(familyId);
+    memberForm.resetFields();
+    setIsMemberModalOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      if (editingFamily) {
+        updateMutation.mutate({ id: editingFamily.id, data: values });
+      } else {
+        createMutation.mutate(values);
+      }
+    } catch {
+      // validation failed
+    }
+  };
+
+  const handleAddMemberSubmit = async () => {
+    try {
+      const values = await memberForm.validateFields();
+      if (currentFamilyId) {
+        addMemberMutation.mutate({ id: currentFamilyId, data: values });
+      }
+    } catch {
+      // validation failed
+    }
+  };
 
   const columns: ColumnsType<AdminFamily> = [
     {
@@ -100,6 +199,12 @@ export function FamiliesPage() {
           <Button type="link" onClick={() => setDetailId(record.id)}>
             查看
           </Button>
+          <Button type="link" icon={<EditOutlined />} onClick={() => handleOpenEdit(record)}>
+            编辑
+          </Button>
+          <Button type="link" icon={<UserAddOutlined />} onClick={() => handleOpenAddMember(record.id)}>
+            添加成员
+          </Button>
           <Popconfirm
             title="确认删除"
             description="删除后不可恢复，是否继续？"
@@ -129,6 +234,12 @@ export function FamiliesPage() {
 
   return (
     <div>
+      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCreate}>
+          新增家庭
+        </Button>
+      </div>
+
       <Table
         columns={columns}
         dataSource={data?.list || []}
@@ -191,7 +302,7 @@ export function FamiliesPage() {
               <div className="text-gray-500 text-sm mb-2">成员列表</div>
               <List
                 dataSource={detailData.members || []}
-                renderItem={(member) => (
+                renderItem={(member: AdminFamilyMember) => (
                   <List.Item>
                     <List.Item.Meta
                       avatar={
@@ -225,6 +336,70 @@ export function FamiliesPage() {
           </div>
         ) : null}
       </Drawer>
+
+      <Modal
+        title={editingFamily ? '编辑家庭' : '新增家庭'}
+        open={isModalOpen}
+        onOk={handleSubmit}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setEditingFamily(null);
+          form.resetFields();
+        }}
+        confirmLoading={createMutation.isPending || updateMutation.isPending}
+      >
+        <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item
+            name="name"
+            label="家庭名称"
+            rules={[{ required: true, message: '请输入家庭名称' }]}
+          >
+            <Input placeholder="请输入家庭名称" />
+          </Form.Item>
+          <Form.Item
+            name="invite_code"
+            label="邀请码"
+            rules={[{ required: true, message: '请输入邀请码' }]}
+          >
+            <Input placeholder="请输入邀请码" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="添加家庭成员"
+        open={isMemberModalOpen}
+        onOk={handleAddMemberSubmit}
+        onCancel={() => {
+          setIsMemberModalOpen(false);
+          memberForm.resetFields();
+        }}
+        confirmLoading={addMemberMutation.isPending}
+      >
+        <Form form={memberForm} layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item
+            name="user_id"
+            label="用户ID"
+            rules={[{ required: true, message: '请输入用户ID' }]}
+          >
+            <Input placeholder="请输入用户ID" />
+          </Form.Item>
+          <Form.Item
+            name="role"
+            label="角色"
+            rules={[{ required: true, message: '请选择角色' }]}
+          >
+            <Select
+              placeholder="请选择角色"
+              options={[
+                { label: '管理员', value: 'admin' },
+                { label: '成员', value: 'member' },
+                { label: '长辈', value: 'elder' },
+              ]}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }
