@@ -5,10 +5,26 @@
  * Worker 作为反向代理，将 HTTP 请求转发到容器。
  */
 import { Container } from '@cloudflare/containers';
+// Worker-level env includes wrangler.toml [vars] + secrets
+// Docs: https://developers.cloudflare.com/containers/examples/env-vars-and-secrets/
+import { env } from 'cloudflare:workers';
 
 export class YuanziBackend extends Container {
   // 容器监听端口（对应 Dockerfile EXPOSE 8080）
   defaultPort = 8080;
+
+  // Forward wrangler.toml [vars] + secrets as real OS env vars inside the container.
+  // Cloudflare Containers DON'T auto-expose [vars] as OS env — envVars is the bridge.
+  // Class field (not constructor) ensures envVars is available when Container base
+  // class reads it during start(). Only string values are forwarded (filter out DO/R2 bindings).
+  envVars = (() => {
+    const vars = {};
+    for (const [k, v] of Object.entries(env)) {
+      if (typeof v === 'string' && v.length > 0) vars[k] = v;
+    }
+    console.log(`[YuanziBackend] envVars: ${Object.keys(vars).join(', ')}`);
+    return vars;
+  })();
 
   /**
    * 处理所有进入容器的 HTTP 请求
