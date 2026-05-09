@@ -344,7 +344,7 @@ export function BabiesPage() {
             rules={editingBaby ? [] : [{ required: true, message: '请输入家庭ID' }]}
           >
             {editingBaby ? (
-              <Input placeholder="家庭名称" disabled value={(editingBaby as any).family_name || editingBaby.family_id} />
+              <Input placeholder="家庭名称" disabled value={editingBaby.family_name || editingBaby.family_id} />
             ) : (
               <Input placeholder="请输入家庭ID" />
             )}
