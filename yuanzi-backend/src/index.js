@@ -49,6 +49,8 @@ export default {
     if (Object.keys(vars).length > 0) {
       headers.set('X-Worker-Vars', btoa(JSON.stringify(vars)));
     }
+    // Minimal probe header to verify Worker→Container header forwarding
+    headers.set('X-Test-Ping', 'pong');
     const modifiedRequest = new Request(request, { headers });
 
     const id = env.YUANZI_BACKEND.idFromName('default');

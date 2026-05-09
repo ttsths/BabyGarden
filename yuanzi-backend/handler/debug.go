@@ -46,5 +46,9 @@ func DebugEnv(c *gin.Context) {
 		"worker_vars":      workerVars,
 		"viper_config":     viperVars,
 		"storage_provider": config.GlobalConfig.Storage.Provider,
+		"headers": gin.H{
+			"x_worker_vars_raw": len(c.GetHeader("X-Worker-Vars")) > 0,
+			"x_test_ping":       c.GetHeader("X-Test-Ping"),
+		},
 	})
 }
