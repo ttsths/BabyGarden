@@ -106,7 +106,6 @@ export function BabiesPage() {
       name: record.name,
       gender: record.gender,
       birthday: record.birthday ? dayjs(record.birthday) : null,
-      family_id: record.family_id,
     });
     setIsModalOpen(true);
   };
@@ -159,10 +158,10 @@ export function BabiesPage() {
       key: 'birthday',
     },
     {
-      title: '家庭ID',
-      dataIndex: 'family_id',
-      key: 'family_id',
-      width: 100,
+      title: '家庭',
+      dataIndex: 'family_name',
+      key: 'family_name',
+      render: (name: string) => name || '-',
     },
     {
       title: '创建时间',
@@ -281,8 +280,8 @@ export function BabiesPage() {
               <div>{detailData.birthday}</div>
             </div>
             <div>
-              <div className="text-gray-500 text-sm">家庭ID</div>
-              <div>{detailData.family_id}</div>
+              <div className="text-gray-500 text-sm">家庭</div>
+              <div>{detailData.family_name || detailData.family_id}</div>
             </div>
             <div>
               <div className="text-gray-500 text-sm">创建时间</div>
@@ -341,10 +340,14 @@ export function BabiesPage() {
           </Form.Item>
           <Form.Item
             name="family_id"
-            label="家庭ID"
-            rules={[{ required: true, message: '请输入家庭ID' }]}
+            label={editingBaby ? '家庭名称' : '家庭ID'}
+            rules={editingBaby ? [] : [{ required: true, message: '请输入家庭ID' }]}
           >
-            <Input placeholder="请输入家庭ID" />
+            {editingBaby ? (
+              <Input placeholder="家庭名称" disabled value={editingBaby.family_name || editingBaby.family_id} />
+            ) : (
+              <Input placeholder="请输入家庭ID" />
+            )}
           </Form.Item>
           <Form.Item
             name="avatar_url"

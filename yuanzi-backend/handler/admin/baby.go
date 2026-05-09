@@ -28,26 +28,40 @@ func GetBabies(c *gin.Context) {
 		return
 	}
 
+	// 预加载家庭名称
+	familyIDs := make([]string, len(babies))
+	for i, b := range babies {
+		familyIDs[i] = b.FamilyID
+	}
+	var families []model.Family
+	mysql.DB.Where("id IN ?", familyIDs).Find(&families)
+	familyNameMap := make(map[string]string)
+	for _, f := range families {
+		familyNameMap[f.ID] = f.Name
+	}
+
 	type babyItem struct {
-		ID        string `json:"id"`
-		FamilyID  string `json:"family_id"`
-		Name      string `json:"name"`
-		Birthday  string `json:"birthday"`
-		Gender    int8   `json:"gender"`
-		AvatarURL string `json:"avatar_url"`
-		AgeMonths int    `json:"age_months"`
+		ID         string `json:"id"`
+		FamilyID   string `json:"family_id"`
+		FamilyName string `json:"family_name"`
+		Name       string `json:"name"`
+		Birthday   string `json:"birthday"`
+		Gender     string `json:"gender"`
+		AvatarURL  string `json:"avatar_url"`
+		AgeMonths  int    `json:"age_months"`
 	}
 
 	items := make([]babyItem, len(babies))
 	for i, b := range babies {
 		items[i] = babyItem{
-			ID:        b.ID,
-			FamilyID:  b.FamilyID,
-			Name:      b.Name,
-			Birthday:  b.Birthday.Format("2006-01-02"),
-			Gender:    b.Gender,
-			AvatarURL: b.AvatarURL,
-			AgeMonths: b.AgeInMonths(),
+			ID:         b.ID,
+			FamilyID:   b.FamilyID,
+			FamilyName: familyNameMap[b.FamilyID],
+			Name:       b.Name,
+			Birthday:   b.Birthday.Format("2006-01-02"),
+			Gender:     genderToString(b.Gender),
+			AvatarURL:  b.AvatarURL,
+			AgeMonths:  b.AgeInMonths(),
 		}
 	}
 
@@ -75,15 +89,22 @@ func GetBaby(c *gin.Context) {
 		return
 	}
 
+	familyName := ""
+	var family model.Family
+	if err := mysql.DB.Where("id = ?", baby.FamilyID).First(&family).Error; err == nil {
+		familyName = family.Name
+	}
+
 	c.JSON(http.StatusOK, model.Response{
 		Code: model.SUCCESS,
 		Msg:  "获取成功",
 		Data: gin.H{
 			"id":            baby.ID,
 			"family_id":     baby.FamilyID,
+			"family_name":   familyName,
 			"name":          baby.Name,
 			"birthday":      baby.Birthday.Format("2006-01-02"),
-			"gender":        baby.Gender,
+			"gender":        genderToString(baby.Gender),
 			"birth_weight":  baby.BirthWeight,
 			"birth_height":  baby.BirthHeight,
 			"avatar_url":    baby.AvatarURL,
@@ -100,7 +121,7 @@ func GetBaby(c *gin.Context) {
 func CreateBaby(c *gin.Context) {
 	var req struct {
 		Name      string `json:"name" binding:"required"`
-		Gender    int8   `json:"gender" binding:"required,oneof=1 2"`
+		Gender    string `json:"gender" binding:"required"`
 		Birthday  string `json:"birthday" binding:"required"`
 		FamilyID  string `json:"family_id" binding:"required"`
 		AvatarURL string `json:"avatar_url"`
@@ -110,6 +131,8 @@ func CreateBaby(c *gin.Context) {
 		return
 	}
 
+	genderInt := stringToGender(req.Gender)
+
 	birthday, err := time.Parse("2006-01-02", req.Birthday)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "生日格式错误，应为 YYYY-MM-DD"})
@@ -117,11 +140,11 @@ func CreateBaby(c *gin.Context) {
 	}
 
 	baby := model.Baby{
-		FamilyID:   req.FamilyID,
-		Name:       req.Name,
-		Birthday:   birthday,
-		Gender:     req.Gender,
-		AvatarURL:  req.AvatarURL,
+		FamilyID:  req.FamilyID,
+		Name:      req.Name,
+		Birthday:  birthday,
+		Gender:    genderInt,
+		AvatarURL: req.AvatarURL,
 	}
 
 	if err := mysql.DB.Create(&baby).Error; err != nil {
@@ -135,9 +158,10 @@ func CreateBaby(c *gin.Context) {
 		Data: gin.H{
 			"id":         baby.ID,
 			"family_id":  baby.FamilyID,
+			"family_name": "",
 			"name":       baby.Name,
 			"birthday":   baby.Birthday.Format("2006-01-02"),
-			"gender":     baby.Gender,
+			"gender":     genderToString(baby.Gender),
 			"avatar_url": baby.AvatarURL,
 		},
 	})
@@ -214,4 +238,26 @@ func DeleteBaby(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "已删除"})
+}
+
+func genderToString(g int8) string {
+	switch g {
+	case 1:
+		return "male"
+	case 2:
+		return "female"
+	default:
+		return "unknown"
+	}
+}
+
+func stringToGender(s string) int8 {
+	switch s {
+	case "male":
+		return 1
+	case "female":
+		return 2
+	default:
+		return 0
+	}
 }

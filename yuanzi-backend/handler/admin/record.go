@@ -145,6 +145,9 @@ func CreateRecord(c *gin.Context) {
 	if req.Content != nil {
 		raw, _ := json.Marshal(req.Content)
 		contentJSON = model.JSON(raw)
+	} else {
+		// 默认空 JSON 对象，避免 NOT NULL 约束错误
+		contentJSON = model.JSON(json.RawMessage(`{}`))
 	}
 
 	record := model.Record{
@@ -184,6 +187,7 @@ func parseTime(s string) (time.Time, error) {
 		time.RFC3339,
 		"2006-01-02T15:04:05",
 		"2006-01-02 15:04:05",
+		"2006-01-02 15:04",
 		"2006-01-02",
 	}
 	for _, f := range formats {
