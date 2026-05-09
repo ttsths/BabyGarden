@@ -145,6 +145,9 @@ func CreateRecord(c *gin.Context) {
 	if req.Content != nil {
 		raw, _ := json.Marshal(req.Content)
 		contentJSON = model.JSON(raw)
+	} else {
+		// 默认空 JSON 对象，避免 NOT NULL 约束错误
+		contentJSON = model.JSON(json.RawMessage(`{}`))
 	}
 
 	record := model.Record{

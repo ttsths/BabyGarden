@@ -133,6 +133,7 @@ export function FamiliesPage() {
     form.setFieldsValue({
       name: record.name,
       invite_code: record.invite_code,
+      status: record.status,
     });
     setIsModalOpen(true);
   };
@@ -377,6 +378,18 @@ export function FamiliesPage() {
             rules={[{ required: true, message: '请输入邀请码' }]}
           >
             <Input placeholder="请输入邀请码" />
+          </Form.Item>
+          <Form.Item
+            name="status"
+            label="状态"
+          >
+            <Select
+              placeholder="请选择状态"
+              options={[
+                { label: '启用', value: 1 },
+                { label: '禁用', value: 0 },
+              ]}
+            />
           </Form.Item>
         </Form>
       </Modal>

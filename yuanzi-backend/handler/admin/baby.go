@@ -28,26 +28,40 @@ func GetBabies(c *gin.Context) {
 		return
 	}
 
+	// 预加载家庭名称
+	familyIDs := make([]string, len(babies))
+	for i, b := range babies {
+		familyIDs[i] = b.FamilyID
+	}
+	var families []model.Family
+	mysql.DB.Where("id IN ?", familyIDs).Find(&families)
+	familyNameMap := make(map[string]string)
+	for _, f := range families {
+		familyNameMap[f.ID] = f.Name
+	}
+
 	type babyItem struct {
-		ID        string `json:"id"`
-		FamilyID  string `json:"family_id"`
-		Name      string `json:"name"`
-		Birthday  string `json:"birthday"`
-		Gender    int8   `json:"gender"`
-		AvatarURL string `json:"avatar_url"`
-		AgeMonths int    `json:"age_months"`
+		ID         string `json:"id"`
+		FamilyID   string `json:"family_id"`
+		FamilyName string `json:"family_name"`
+		Name       string `json:"name"`
+		Birthday   string `json:"birthday"`
+		Gender     string `json:"gender"`
+		AvatarURL  string `json:"avatar_url"`
+		AgeMonths  int    `json:"age_months"`
 	}
 
 	items := make([]babyItem, len(babies))
 	for i, b := range babies {
 		items[i] = babyItem{
-			ID:        b.ID,
-			FamilyID:  b.FamilyID,
-			Name:      b.Name,
-			Birthday:  b.Birthday.Format("2006-01-02"),
-			Gender:    b.Gender,
-			AvatarURL: b.AvatarURL,
-			AgeMonths: b.AgeInMonths(),
+			ID:         b.ID,
+			FamilyID:   b.FamilyID,
+			FamilyName: familyNameMap[b.FamilyID],
+			Name:       b.Name,
+			Birthday:   b.Birthday.Format("2006-01-02"),
+			Gender:     genderToString(b.Gender),
+			AvatarURL:  b.AvatarURL,
+			AgeMonths:  b.AgeInMonths(),
 		}
 	}
 
@@ -75,15 +89,22 @@ func GetBaby(c *gin.Context) {
 		return
 	}
 
+	familyName := ""
+	var family model.Family
+	if err := mysql.DB.Where("id = ?", baby.FamilyID).First(&family).Error; err == nil {
+		familyName = family.Name
+	}
+
 	c.JSON(http.StatusOK, model.Response{
 		Code: model.SUCCESS,
 		Msg:  "获取成功",
 		Data: gin.H{
 			"id":            baby.ID,
 			"family_id":     baby.FamilyID,
+			"family_name":   familyName,
 			"name":          baby.Name,
 			"birthday":      baby.Birthday.Format("2006-01-02"),
-			"gender":        baby.Gender,
+			"gender":        genderToString(baby.Gender),
 			"birth_weight":  baby.BirthWeight,
 			"birth_height":  baby.BirthHeight,
 			"avatar_url":    baby.AvatarURL,
@@ -214,4 +235,15 @@ func DeleteBaby(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "已删除"})
+}
+
+func genderToString(g int8) string {
+	switch g {
+	case 1:
+		return "male"
+	case 2:
+		return "female"
+	default:
+		return "unknown"
+	}
 }

@@ -31,6 +31,7 @@ export interface AdminUser {
 export interface AdminBaby {
   id: string;
   family_id: string;
+  family_name?: string;
   name: string;
   avatar_url: string;
   birthday: string;
@@ -140,6 +141,7 @@ export interface CreateFamilyRequest {
 export interface UpdateFamilyRequest {
   name?: string;
   invite_code?: string;
+  status?: number;
 }
 
 export interface AddFamilyMemberRequest {

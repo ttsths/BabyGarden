@@ -36,10 +36,11 @@ type UserInfo struct {
 	Nickname  string `json:"nickname"`
 	AvatarURL string `json:"avatar_url"`
 	Status    int8   `json:"status"`
+	IsAdmin   int8   `json:"is_admin"`
 }
 
 func (u *User) ToUserInfo() UserInfo {
-	return UserInfo{ID: u.ID, Phone: u.Phone, Nickname: u.Nickname, AvatarURL: u.AvatarURL, Status: u.Status}
+	return UserInfo{ID: u.ID, Phone: u.Phone, Nickname: u.Nickname, AvatarURL: u.AvatarURL, Status: u.Status, IsAdmin: u.IsAdmin}
 }
 
 func (u *User) SetPassword(password string) {
