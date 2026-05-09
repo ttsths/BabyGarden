@@ -30,28 +30,13 @@ type R2Provider struct {
 //
 //	R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_ACCESS_KEY_SECRET, R2_BUCKET, R2_PUBLIC_URL.
 func NewR2Provider() (Provider, error) {
-	accountID := appConfig.GlobalConfig.R2.AccountID
-	accessKeyID := appConfig.GlobalConfig.R2.AccessKeyID
-	accessKeySecret := appConfig.GlobalConfig.R2.AccessKeySecret
-	bucket := appConfig.GlobalConfig.R2.Bucket
-	publicURL := appConfig.GlobalConfig.R2.PublicURL
-
-	// Fallback to environment variables if config values are empty
-	if accountID == "" {
-		accountID = os.Getenv("R2_ACCOUNT_ID")
-	}
-	if accessKeyID == "" {
-		accessKeyID = os.Getenv("R2_ACCESS_KEY_ID")
-	}
-	if accessKeySecret == "" {
-		accessKeySecret = os.Getenv("R2_ACCESS_KEY_SECRET")
-	}
-	if bucket == "" {
-		bucket = os.Getenv("R2_BUCKET")
-	}
-	if publicURL == "" {
-		publicURL = os.Getenv("R2_PUBLIC_URL")
-	}
+	// Always read from environment variables for Cloudflare Containers
+	// (Viper/AutomaticEnv may not populate nested struct fields correctly)
+	accountID := firstNonEmpty(os.Getenv("R2_ACCOUNT_ID"), appConfig.GlobalConfig.R2.AccountID)
+	accessKeyID := firstNonEmpty(os.Getenv("R2_ACCESS_KEY_ID"), appConfig.GlobalConfig.R2.AccessKeyID)
+	accessKeySecret := firstNonEmpty(os.Getenv("R2_ACCESS_KEY_SECRET"), appConfig.GlobalConfig.R2.AccessKeySecret)
+	bucket := firstNonEmpty(os.Getenv("R2_BUCKET"), appConfig.GlobalConfig.R2.Bucket)
+	publicURL := firstNonEmpty(os.Getenv("R2_PUBLIC_URL"), appConfig.GlobalConfig.R2.PublicURL)
 	if publicURL == "" {
 		publicURL = os.Getenv("R2_CUSTOM_DOMAIN")
 	}
@@ -146,4 +131,17 @@ func (p *R2Provider) DeleteObject(key string) error {
 		return fmt.Errorf("failed to delete R2 object: %w", err)
 	}
 	return nil
+}
+
+// firstNonEmpty returns the first non-empty string from the given arguments.
+func firstNonEmpty(first string, rest ...string) string {
+	if first != "" {
+		return first
+	}
+	for _, s := range rest {
+		if s != "" {
+			return s
+		}
+	}
+	return ""
 }
