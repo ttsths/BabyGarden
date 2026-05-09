@@ -20,6 +20,7 @@ import (
 	"yuanzi-backend/model"
 	"yuanzi-backend/mysql"
 	"yuanzi-backend/pkg/gredis"
+	"yuanzi-backend/pkg/storage"
 )
 
 var adminTestSetupOnce sync.Once
@@ -124,4 +125,40 @@ func bytesBody(data []byte) *bytes.Reader {
 
 func dbConn() *gorm.DB {
 	return mysql.DB
+}
+
+// --- storageURL 单元测试 ---
+
+func TestStorageURL(t *testing.T) {
+	t.Run("nil provider returns empty", func(t *testing.T) {
+		got := storageURL(nil, "some/key.jpg")
+		if got != "" {
+			t.Errorf("storageURL(nil, ...) = %q, want empty", got)
+		}
+	})
+
+	t.Run("empty key returns empty", func(t *testing.T) {
+		// Even with a mock provider, empty key → empty result
+		got := storageURL(nil, "")
+		if got != "" {
+			t.Errorf("storageURL(..., \"\") = %q, want empty", got)
+		}
+	})
+}
+
+// TestStorageURLIntegration tests storageURL with a real provider (needs config).
+// This is a placeholder — real integration test needs actual R2 config.
+func TestStorageURLIntegration(t *testing.T) {
+	setupAdminTestDB(t)
+
+	provider, err := storage.NewProviderFromConfig()
+	if err != nil {
+		t.Skipf("Skipping integration test: storage provider not configured (%v)", err)
+	}
+
+	url := storageURL(provider, "test-family/test-baby/test-photo.jpg")
+	if url == "" {
+		t.Error("storageURL returned empty for valid provider and key")
+	}
+	t.Logf("Generated URL: %s", url)
 }

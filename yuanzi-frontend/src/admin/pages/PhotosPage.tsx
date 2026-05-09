@@ -171,7 +171,12 @@ export function PhotosPage() {
   const handleDownloadSingle = useCallback(async (photo: AdminPhoto) => {
     try {
       setDownloadProgress((prev) => ({ ...prev, [photo.id]: 0 }));
-      const res = await axios.get(photo.original_url, {
+      const downloadUrl = photo.original_url;
+      if (!downloadUrl) {
+        message.error('下载链接不可用');
+        return;
+      }
+      const res = await axios.get(downloadUrl, {
         responseType: 'blob',
         onDownloadProgress: (e) => {
           if (e.total) {
@@ -180,11 +185,12 @@ export function PhotosPage() {
           }
         },
       });
-      const blob = new Blob([res.data]);
+      const blob = new Blob([res.data], { type: photo.content_type || 'application/octet-stream' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = photo.filename;
+      // 兜底: 如果 filename 为空，从 URL 路径提取文件名
+      a.download = photo.filename || downloadUrl.split('/').pop()?.split('?')[0] || 'download';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -218,7 +224,12 @@ export function PhotosPage() {
       for (let i = 0; i < selectedPhotos.length; i++) {
         const photo = selectedPhotos[i];
         setDownloadProgress((prev) => ({ ...prev, [photo.id]: 0 }));
-        const res = await axios.get(photo.original_url, {
+        const downloadUrl = photo.original_url;
+        if (!downloadUrl) {
+          setDownloadProgress((prev) => ({ ...prev, [photo.id]: 100 }));
+          continue;
+        }
+        const res = await axios.get(downloadUrl, {
           responseType: 'blob',
           onDownloadProgress: (e) => {
             if (e.total) {
@@ -227,7 +238,8 @@ export function PhotosPage() {
             }
           },
         });
-        folder.file(photo.filename, res.data);
+        const fname = photo.filename || downloadUrl.split('/').pop()?.split('?')[0] || `photo_${i + 1}`;
+        folder.file(fname, res.data);
         setDownloadProgress((prev) => ({ ...prev, [photo.id]: 100 }));
       }
 

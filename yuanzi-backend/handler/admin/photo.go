@@ -2,6 +2,7 @@ package admin
 
 import (
 	"net/http"
+	"strings"
 	"time"
 	"yuanzi-backend/model"
 	"yuanzi-backend/mysql"
@@ -9,6 +10,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+// photoItem is the API response structure for a single photo in the list.
+type photoItem struct {
+	ID          string `json:"id"`
+	BabyID      string `json:"baby_id"`
+	FamilyID    string `json:"family_id"`
+	Filename    string `json:"filename"`
+	OriginalURL string `json:"original_url"`
+	Size        int64  `json:"size"`
+	ContentType string `json:"content_type"`
+	Status      string `json:"status"`
+	UploadedAt  string `json:"uploaded_at"`
+}
 
 // GetPhotos returns paginated photo list.
 // GET /api/v1/admin/photos
@@ -25,15 +39,7 @@ func GetPhotos(c *gin.Context) {
 		return
 	}
 
-	type photoItem struct {
-		ID          string `json:"id"`
-		BabyID      string `json:"baby_id"`
-		FamilyID    string `json:"family_id"`
-		Size        int64  `json:"size"`
-		ContentType string `json:"content_type"`
-		Status      string `json:"status"`
-		UploadedAt  string `json:"uploaded_at"`
-	}
+	provider, _ := storage.NewProviderFromConfig()
 
 	items := make([]photoItem, len(photos))
 	for i, p := range photos {
@@ -41,6 +47,8 @@ func GetPhotos(c *gin.Context) {
 			ID:          p.ID,
 			BabyID:      p.BabyID,
 			FamilyID:    p.FamilyID,
+			Filename:    extractFilename(p.OSSKey),
+			OriginalURL: storageURL(provider, p.OSSKey),
 			Size:        p.Size,
 			ContentType: p.ContentType,
 			Status:      string(p.Status),
@@ -170,6 +178,25 @@ func PhotoUploadConfirm(c *gin.Context) {
 
 func buildPhotoObjectKey(familyID, babyID, filename string) string {
 	return familyID + "/" + babyID + "/" + filename
+}
+
+// extractFilename extracts the filename from an OSS object key.
+// Returns the portion after the last '/', or the key itself if no separator present.
+func extractFilename(ossKey string) string {
+	idx := strings.LastIndex(ossKey, "/")
+	if idx >= 0 && idx < len(ossKey)-1 {
+		return ossKey[idx+1:]
+	}
+	return ossKey
+}
+
+// storageURL returns the public access URL for an OSS object key.
+// Falls back to returning an empty string if the provider is unavailable.
+func storageURL(provider storage.Provider, key string) string {
+	if provider == nil || key == "" {
+		return ""
+	}
+	return provider.GetURL(key)
 }
 
 // GetPhoto returns photo detail.
