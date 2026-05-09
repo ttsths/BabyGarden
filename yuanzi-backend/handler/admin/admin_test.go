@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
+	
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 	"yuanzi-backend/config"
@@ -82,35 +82,6 @@ func createTestFamily(t *testing.T, createdBy string, name string) model.Family 
 	return family
 }
 
-func createTestFamilyMember(t *testing.T, familyID, userID string, role model.FamilyRole) model.FamilyMember {
-	t.Helper()
-	member := model.FamilyMember{FamilyID: familyID, UserID: userID, Role: role, JoinedAt: time.Now()}
-	if err := mysql.DB.Create(&member).Error; err != nil {
-		t.Fatalf("创建测试成员失败: %v", err)
-	}
-	return member
-}
-
-// generateAdminToken creates a JWT token for an admin user (for middleware-based tests).
-func generateAdminToken(t *testing.T, userID, phone string) string {
-	t.Helper()
-	claims := middlewareClaims{
-		UserID:  userID,
-		Phone:   phone,
-		IsAdmin: true,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
-			Issuer:    "yuanzi-admin",
-		},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(config.GlobalConfig.JWT.Secret))
-	if err != nil {
-		t.Fatalf("生成测试 Token 失败: %v", err)
-	}
-	return tokenString
-}
-
 func mustMarshal(t *testing.T, v interface{}) []byte {
 	t.Helper()
 	data, err := json.Marshal(v)
@@ -147,16 +118,6 @@ func cleanupUsers(t *testing.T, userIDs ...string) {
 	}
 	_ = mysql.DB.Where("id IN ?", userIDs).Delete(&model.User{}).Error
 }
-
-func mustJSON(t *testing.T, v interface{}) model.JSON {
-	t.Helper()
-	data, err := json.Marshal(v)
-	if err != nil {
-		t.Fatalf("JSON 编码失败: %v", err)
-	}
-	return model.JSON(data)
-}
-
 func bytesBody(data []byte) *bytes.Reader {
 	return bytes.NewReader(data)
 }
