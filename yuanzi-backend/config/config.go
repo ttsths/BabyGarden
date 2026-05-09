@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"strings"
 	"time"
 
 	"github.com/spf13/viper"
@@ -112,7 +113,9 @@ func Setup() {
 	// 设置默认值
 	setDefaults()
 
-	// 读取环境变量
+	// 读取环境变量（自动覆盖配置文件中的值）
+	// SetEnvKeyReplacer 让 R2_ACCOUNT_ID 这样的环境变量能映射到 r2.account_id
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
