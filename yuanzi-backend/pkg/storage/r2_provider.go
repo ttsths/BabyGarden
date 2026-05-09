@@ -30,13 +30,15 @@ type R2Provider struct {
 //
 //	R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_ACCESS_KEY_SECRET, R2_BUCKET, R2_PUBLIC_URL.
 func NewR2Provider() (Provider, error) {
-	// Always read from environment variables for Cloudflare Containers
-	// (Viper/AutomaticEnv may not populate nested struct fields correctly)
-	accountID := firstNonEmpty(os.Getenv("R2_ACCOUNT_ID"), appConfig.GlobalConfig.R2.AccountID)
-	accessKeyID := firstNonEmpty(os.Getenv("R2_ACCESS_KEY_ID"), appConfig.GlobalConfig.R2.AccessKeyID)
-	accessKeySecret := firstNonEmpty(os.Getenv("R2_ACCESS_KEY_SECRET"), appConfig.GlobalConfig.R2.AccessKeySecret)
-	bucket := firstNonEmpty(os.Getenv("R2_BUCKET"), appConfig.GlobalConfig.R2.Bucket)
-	publicURL := firstNonEmpty(os.Getenv("R2_PUBLIC_URL"), appConfig.GlobalConfig.R2.PublicURL)
+	// Priority order:
+	// 1. OS environment variable (local dev, Docker --env)
+	// 2. Worker vars header (Cloudflare Containers relay via X-Worker-Vars)
+	// 3. Viper config (config.yaml or AutomaticEnv)
+	accountID := firstNonEmpty(os.Getenv("R2_ACCOUNT_ID"), GetWorkerVar("R2_ACCOUNT_ID"), appConfig.GlobalConfig.R2.AccountID)
+	accessKeyID := firstNonEmpty(os.Getenv("R2_ACCESS_KEY_ID"), GetWorkerVar("R2_ACCESS_KEY_ID"), appConfig.GlobalConfig.R2.AccessKeyID)
+	accessKeySecret := firstNonEmpty(os.Getenv("R2_ACCESS_KEY_SECRET"), GetWorkerVar("R2_ACCESS_KEY_SECRET"), appConfig.GlobalConfig.R2.AccessKeySecret)
+	bucket := firstNonEmpty(os.Getenv("R2_BUCKET"), GetWorkerVar("R2_BUCKET"), appConfig.GlobalConfig.R2.Bucket)
+	publicURL := firstNonEmpty(os.Getenv("R2_PUBLIC_URL"), GetWorkerVar("R2_PUBLIC_URL"), appConfig.GlobalConfig.R2.PublicURL)
 	if publicURL == "" {
 		publicURL = os.Getenv("R2_CUSTOM_DOMAIN")
 	}

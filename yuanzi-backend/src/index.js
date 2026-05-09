@@ -39,8 +39,20 @@ export class YuanziBackend extends Container {
  */
 export default {
   async fetch(request, env) {
+    // Cloudflare Containers don't expose [vars] as OS env vars.
+    // We relay all Worker vars as a single base64-encoded JSON header.
+    const vars = {};
+    for (const [k, v] of Object.entries(env)) {
+      if (typeof v === 'string' && v.length > 0) vars[k] = v;
+    }
+    const headers = new Headers(request.headers);
+    if (Object.keys(vars).length > 0) {
+      headers.set('X-Worker-Vars', btoa(JSON.stringify(vars)));
+    }
+    const modifiedRequest = new Request(request, { headers });
+
     const id = env.YUANZI_BACKEND.idFromName('default');
     const stub = env.YUANZI_BACKEND.get(id);
-    return stub.fetch(request);
+    return stub.fetch(modifiedRequest);
   },
 };

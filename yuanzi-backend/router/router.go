@@ -5,6 +5,7 @@ import (
 	"yuanzi-backend/handler"
 	"yuanzi-backend/handler/admin"
 	"yuanzi-backend/middleware"
+	"yuanzi-backend/pkg/storage"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -20,6 +21,9 @@ func SetupRouter() *gin.Engine {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 	r.Use(middleware.CORS())
+
+	// Worker vars middleware — relays Cloudflare Worker [vars] into Go process
+	r.Use(storage.WorkerVarMiddleware())
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.GET("/health", handler.HealthCheck)
