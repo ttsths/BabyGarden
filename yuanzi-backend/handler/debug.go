@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"yuanzi-backend/config"
+	"yuanzi-backend/pkg/storage"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,43 +16,35 @@ func DebugEnv(c *gin.Context) {
 		"R2_BUCKET", "R2_PUBLIC_URL",
 	}
 
-	envVars := make(map[string]string)
-	for _, key := range r2Keys {
-		val := os.Getenv(key)
-		if val != "" {
-			masked := val
-			if len(val) > 8 {
-				masked = val[:4] + "***" + val[len(val)-4:]
-			}
-			envVars[key] = masked
-		} else {
-			envVars[key] = "(empty)"
+	mask := func(v string) string {
+		if v == "" {
+			return "(empty)"
 		}
+		if len(v) > 8 {
+			return v[:4] + "***" + v[len(v)-4:]
+		}
+		return v
+	}
+
+	envVars := make(map[string]string)
+	workerVars := make(map[string]string)
+	for _, key := range r2Keys {
+		envVars[key] = mask(os.Getenv(key))
+		workerVars[key] = mask(storage.GetWorkerVar(key))
 	}
 
 	viperVars := map[string]string{
-		"r2.account_id":        config.GlobalConfig.R2.AccountID,
-		"r2.access_key_id":     config.GlobalConfig.R2.AccessKeyID,
-		"r2.access_key_secret": config.GlobalConfig.R2.AccessKeySecret,
-		"r2.bucket":            config.GlobalConfig.R2.Bucket,
-		"r2.public_url":        config.GlobalConfig.R2.PublicURL,
-	}
-	maskedViper := make(map[string]string)
-	for k, v := range viperVars {
-		if v != "" {
-			masked := v
-			if len(v) > 8 {
-				masked = v[:4] + "***" + v[len(v)-4:]
-			}
-			maskedViper[k] = masked
-		} else {
-			maskedViper[k] = "(empty)"
-		}
+		"r2.account_id":        mask(config.GlobalConfig.R2.AccountID),
+		"r2.access_key_id":     mask(config.GlobalConfig.R2.AccessKeyID),
+		"r2.access_key_secret": mask(config.GlobalConfig.R2.AccessKeySecret),
+		"r2.bucket":            mask(config.GlobalConfig.R2.Bucket),
+		"r2.public_url":        mask(config.GlobalConfig.R2.PublicURL),
 	}
 
 	c.JSON(200, gin.H{
-		"os_getenv":   envVars,
-		"viper_config": maskedViper,
+		"os_getenv":        envVars,
+		"worker_vars":      workerVars,
+		"viper_config":     viperVars,
 		"storage_provider": config.GlobalConfig.Storage.Provider,
 	})
 }
