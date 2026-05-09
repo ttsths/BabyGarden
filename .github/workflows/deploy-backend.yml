@@ -60,11 +60,3 @@ jobs:
           workingDirectory: yuanzi-backend
           wranglerVersion: '4'
           command: deploy
-
-      - name: Notify Telegram
-        if: success()
-        run: |
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d parse_mode="Markdown" \
-            -d text="🚀 *Backend 部署完成*%0A%0A📦 Commit: \`${GITHUB_SHA:0:7}\`%0A🔗 ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}%0A🌐 https://yuanzi-backend.shentuhaisan.workers.dev"
