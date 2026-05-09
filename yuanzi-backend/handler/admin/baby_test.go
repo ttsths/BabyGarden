@@ -123,7 +123,19 @@ func TestGetBabiesReturnsFamilyName(t *testing.T) {
 		t.Fatal("宝宝列表为空")
 	}
 
-	item := resp.Data.List[0]
+	// 在列表中查找自己的宝宝（不假设它是第一条）
+	var item map[string]interface{}
+	found := false
+	for _, bm := range resp.Data.List {
+		if bm["id"] == baby.ID {
+			found = true
+			item = bm
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("未在列表中找到宝宝 ID=%s, 列表中共%d条", baby.ID, len(resp.Data.List))
+	}
 
 	// 验证返回了 family_name
 	fn, ok := item["family_name"].(string)
