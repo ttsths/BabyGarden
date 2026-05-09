@@ -28,6 +28,9 @@ new_sqlite_classes = ["YuanziBackend"]
 # ---- 环境变量 ----
 [vars]
 ENV = "production"
+R2_ACCOUNT_ID = "73e0d8f48f0da9703c8bd7d216d969ff"
+R2_BUCKET = "yuanzi-photos"
+R2_PUBLIC_URL = "https://pub-6f8874934223499995783f73976738cb.r2.dev"
 
 # ---- 路由 ----
 # Workers 子域名: yuanzi-backend.<subdomain>.workers.dev
