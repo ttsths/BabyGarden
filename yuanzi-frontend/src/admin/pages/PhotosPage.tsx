@@ -168,6 +168,25 @@ export function PhotosPage() {
     [uploadFamilyId, uploadBabyId, updateTask, queryClient]
   );
 
+  const getDownloadFilename = useCallback((photo: AdminPhoto): string => {
+    // 1. 后端返回的 filename（优先）
+    if (photo.filename && photo.filename !== 'undefined') return photo.filename;
+    // 2. 从 original_url 路径提取（兜底）
+    if (photo.original_url) {
+      try {
+        const pathname = new URL(photo.original_url).pathname;
+        const name = pathname.split('/').pop();
+        if (name && name !== 'undefined') return name;
+      } catch { /* URL parse failed, fall through */ }
+    }
+    // 3. 根据 content_type 生成默认名
+    if (photo.content_type) {
+      const ext = photo.content_type.split('/')[1] || 'jpg';
+      return `photo_${photo.id?.slice(0, 8) || 'download'}.${ext}`;
+    }
+    return 'photo.jpg';
+  }, []);
+
   const handleDownloadSingle = useCallback(async (photo: AdminPhoto) => {
     try {
       setDownloadProgress((prev) => ({ ...prev, [photo.id]: 0 }));
@@ -184,7 +203,7 @@ export function PhotosPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = photo.filename;
+      a.download = getDownloadFilename(photo);
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -194,7 +213,7 @@ export function PhotosPage() {
     } catch {
       message.error('下载失败');
     }
-  }, []);
+  }, [getDownloadFilename]);
 
   const handleBatchDownload = useCallback(async () => {
     const selectedPhotos =

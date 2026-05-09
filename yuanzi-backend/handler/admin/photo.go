@@ -2,6 +2,8 @@ package admin
 
 import (
 	"net/http"
+	"os"
+	"strings"
 	"time"
 	"yuanzi-backend/model"
 	"yuanzi-backend/mysql"
@@ -29,18 +31,30 @@ func GetPhotos(c *gin.Context) {
 		ID          string `json:"id"`
 		BabyID      string `json:"baby_id"`
 		FamilyID    string `json:"family_id"`
+		Filename    string `json:"filename"`
+		OriginalURL string `json:"original_url"`
 		Size        int64  `json:"size"`
 		ContentType string `json:"content_type"`
 		Status      string `json:"status"`
 		UploadedAt  string `json:"uploaded_at"`
 	}
 
+	r2PublicURL := strings.TrimRight(os.Getenv("R2_PUBLIC_URL"), "/")
+
 	items := make([]photoItem, len(photos))
 	for i, p := range photos {
+		// Extract filename from OSSKey (last segment after "/")
+		filename := p.OSSKey
+		if idx := strings.LastIndex(p.OSSKey, "/"); idx >= 0 {
+			filename = p.OSSKey[idx+1:]
+		}
+
 		items[i] = photoItem{
 			ID:          p.ID,
 			BabyID:      p.BabyID,
 			FamilyID:    p.FamilyID,
+			Filename:    filename,
+			OriginalURL: r2PublicURL + "/" + p.OSSKey,
 			Size:        p.Size,
 			ContentType: p.ContentType,
 			Status:      string(p.Status),
