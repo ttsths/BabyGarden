@@ -187,6 +187,7 @@ func parseTime(s string) (time.Time, error) {
 		time.RFC3339,
 		"2006-01-02T15:04:05",
 		"2006-01-02 15:04:05",
+		"2006-01-02 15:04",
 		"2006-01-02",
 	}
 	for _, f := range formats {
