@@ -1,0 +1,76 @@
+name: 🚀 Feature Request
+description: 提交 Feature 需求，Agent 自动设计并开发
+title: "[Feature] "
+labels: [feature, agent]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: 功能类型
+      options:
+        - 新功能 (New Feature)
+        - 功能增强 (Enhancement)
+        - 重构 (Refactor)
+        - 性能优化 (Performance)
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 涉及模块
+      options:
+        - 全栈 (前后端)
+        - 后端 API (yuanzi-backend)
+        - 前端页面 (yuanzi-frontend)
+        - 管理后台 (Admin)
+        - 用户端 (User)
+        - 数据库 (MySQL/TiDB)
+        - 存储 (R2)
+        - 基础设施 (CI/CD/部署)
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 优先级
+      options:
+        - P0 — 紧急
+        - P1 — 高
+        - P2 — 中
+        - P3 — 低
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: 需求描述
+      placeholder: |
+        作为 [角色]
+        我想要 [功能]
+        以便 [价值]
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收标准
+      placeholder: |
+        - [ ] 用户可以...
+        - [ ] 管理员可以...
+        - [ ] 前端 ESLint + tsc 通过
+        - [ ] 后端 go test + golangci-lint 通过
+    validations:
+      required: true
+  - type: textarea
+    id: design_notes
+    attributes:
+      label: 设计备注（可选）
+      placeholder: |
+        - API 端点设计思路
+        - 数据模型变更考虑
+        - 前端交互参考
+  - type: textarea
+    id: context
+    attributes:
+      label: 补充上下文
+      placeholder: 相关 Issue、参考链接、截图等
