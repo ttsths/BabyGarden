@@ -224,3 +224,263 @@ func TestSmoke_AdminLoginAndFamilyDetail(t *testing.T) {
 
 	t.Logf("家庭详情: id=%s, name=%s", family.ID, family.Name)
 }
+
+// Smoke 6: Record CREATE → LIST → DELETE full lifecycle
+func TestSmoke_RecordCRUD(t *testing.T) {
+	r := e2eRouter(t)
+	admin, cleanupAdmin := seedAdminUser(t)
+	defer cleanupAdmin()
+
+	// Login
+	loginW := postJSON(t, r, "/api/v1/admin/login", map[string]string{
+		"phone":    admin.Phone,
+		"password": "e2eadmin",
+	}, nil)
+	loginData := parseResponse(t, loginW).Data.(map[string]interface{})
+	token := loginData["token"].(string)
+
+	// Create family + baby for record context
+	family, cleanupFamily := seedFamily(t, admin.ID)
+	defer cleanupFamily()
+	baby, cleanupBaby := seedBaby(t, family.ID)
+	defer cleanupBaby()
+
+	// Step 1: Create record
+	createBody := map[string]interface{}{
+		"type":       "feeding",
+		"baby_id":    baby.ID,
+		"family_id":  family.ID,
+		"started_at": "2026-05-09 12:00",
+		"note":       "e2e record test",
+	}
+	createW := postJSON(t, r, "/api/v1/admin/records", createBody, map[string]string{
+		"Authorization": "Bearer " + token,
+	})
+	assertStatus(t, createW, http.StatusOK, "创建记录")
+	createResp := parseResponse(t, createW)
+	assertCode(t, createResp, model.SUCCESS, "创建记录")
+
+	recordData, ok := createResp.Data.(map[string]interface{})
+	if !ok {
+		t.Fatal("创建记录响应 data 格式错误")
+	}
+	recordID, ok := recordData["id"].(string)
+	if !ok || recordID == "" {
+		t.Fatalf("创建记录未返回 id: %+v", recordData)
+	}
+
+	// Verify type is preserved
+	if typ, ok := recordData["type"].(string); !ok || typ != "feeding" {
+		t.Errorf("记录 type 期望 feeding, 实际: %v", recordData["type"])
+	}
+
+	// Step 2: List records and verify our record exists
+	listW := getJSON(t, r, "/api/v1/admin/records?baby_id="+baby.ID+"&page=1&size=10", map[string]string{
+		"Authorization": "Bearer " + token,
+	})
+	assertStatus(t, listW, http.StatusOK, "记录列表")
+	listResp := parseResponse(t, listW)
+	assertCode(t, listResp, model.SUCCESS, "记录列表")
+
+	listData, ok := listResp.Data.(map[string]interface{})
+	if !ok {
+		t.Fatal("记录列表 data 格式错误")
+	}
+	list, ok := listData["list"].([]interface{})
+	if !ok || len(list) == 0 {
+		t.Fatal("记录列表为空")
+	}
+	t.Logf("记录列表长度: %d", len(list))
+
+	// Step 3: Delete the record
+	deleteW := doRequest(t, r, http.MethodDelete, "/api/v1/admin/records/"+recordID, "", map[string]string{
+		"Authorization": "Bearer " + token,
+	})
+	assertStatus(t, deleteW, http.StatusOK, "删除记录")
+	deleteResp := parseResponse(t, deleteW)
+	assertCode(t, deleteResp, model.SUCCESS, "删除记录")
+
+	t.Logf("记录 CRUD 完整流程通过: id=%s", recordID)
+}
+
+// Smoke 7: Baby list returns gender string and family_name (Bug #3/#4 fix verification)
+func TestSmoke_BabyListGenderAndFamilyName(t *testing.T) {
+	r := e2eRouter(t)
+	admin, cleanupAdmin := seedAdminUser(t)
+	defer cleanupAdmin()
+
+	// Login
+	loginW := postJSON(t, r, "/api/v1/admin/login", map[string]string{
+		"phone":    admin.Phone,
+		"password": "e2eadmin",
+	}, nil)
+	loginData := parseResponse(t, loginW).Data.(map[string]interface{})
+	token := loginData["token"].(string)
+
+	// Create family + baby
+	family, cleanupFamily := seedFamily(t, admin.ID)
+	defer cleanupFamily()
+	baby, cleanupBaby := seedBabyWithGender(t, family.ID, "male")
+	defer cleanupBaby()
+
+	// Get baby list
+	listW := getJSON(t, r, "/api/v1/admin/babies?page=1&size=10", map[string]string{
+		"Authorization": "Bearer " + token,
+	})
+	assertStatus(t, listW, http.StatusOK, "宝宝列表")
+	listResp := parseResponse(t, listW)
+	assertCode(t, listResp, model.SUCCESS, "宝宝列表")
+
+	listData := listResp.Data.(map[string]interface{})
+	babies, ok := listData["list"].([]interface{})
+	if !ok || len(babies) == 0 {
+		t.Fatal("宝宝列表为空")
+	}
+
+	// Find our baby and verify fields
+	found := false
+	for _, b := range babies {
+		bm, ok := b.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if bm["id"] == baby.ID {
+			found = true
+			// Verify gender is string not int
+			gender, ok := bm["gender"].(string)
+			if !ok {
+				t.Errorf("gender 应为字符串, 实际类型=%T 值=%v", bm["gender"], bm["gender"])
+			} else if gender != "male" {
+				t.Errorf("gender 期望 male, 实际=%s", gender)
+			}
+			// Verify family_name is present
+			familyName, ok := bm["family_name"].(string)
+			if !ok || familyName == "" {
+				t.Errorf("family_name 缺失或为空: %v", bm["family_name"])
+			}
+			t.Logf("宝宝验证: gender=%s family_name=%s", gender, familyName)
+			break
+		}
+	}
+	if !found {
+		t.Error("未在列表中找到创建的宝宝")
+	}
+}
+
+// Smoke 8: User list returns is_admin field (Bug #8 fix verification)
+func TestSmoke_UserListHasIsAdmin(t *testing.T) {
+	r := e2eRouter(t)
+	admin, cleanupAdmin := seedAdminUser(t)
+	defer cleanupAdmin()
+
+	// Login
+	loginW := postJSON(t, r, "/api/v1/admin/login", map[string]string{
+		"phone":    admin.Phone,
+		"password": "e2eadmin",
+	}, nil)
+	loginData := parseResponse(t, loginW).Data.(map[string]interface{})
+	token := loginData["token"].(string)
+
+	// Get user list
+	listW := getJSON(t, r, "/api/v1/admin/users?page=1&size=10", map[string]string{
+		"Authorization": "Bearer " + token,
+	})
+	assertStatus(t, listW, http.StatusOK, "用户列表")
+	listResp := parseResponse(t, listW)
+	assertCode(t, listResp, model.SUCCESS, "用户列表")
+
+	listData := listResp.Data.(map[string]interface{})
+	users, ok := listData["list"].([]interface{})
+	if !ok {
+		t.Fatal("用户列表 list 字段缺失")
+	}
+
+	// Verify each user has is_admin field
+	for _, u := range users {
+		um, ok := u.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		isAdmin, exists := um["is_admin"]
+		if !exists {
+			t.Error("用户列表缺少 is_admin 字段")
+			break
+		}
+		// is_admin can be float64 (JSON number) or int
+		switch v := isAdmin.(float64); {
+		case v != 1 && v != 0:
+			// Check if it's actually a different type
+			if ia, ok := isAdmin.(int); !ok || (ia != 0 && ia != 1) {
+				t.Logf("is_admin 值: %v (type=%T)", isAdmin, isAdmin)
+			}
+		}
+	}
+	t.Logf("用户列表验证通过: 共 %d 个用户", len(users))
+}
+
+// Smoke 9: Wrong password returns 403
+func TestSmoke_WrongPasswordReturns403(t *testing.T) {
+	r := e2eRouter(t)
+	admin, cleanupAdmin := seedAdminUser(t)
+	defer cleanupAdmin()
+
+	// Attempt login with wrong password
+	loginW := postJSON(t, r, "/api/v1/admin/login", map[string]string{
+		"phone":    admin.Phone,
+		"password": "wrongpassword",
+	}, nil)
+	assertStatus(t, loginW, http.StatusForbidden, "错误密码")
+	loginResp := parseResponse(t, loginW)
+	if loginResp.Code == model.SUCCESS {
+		t.Error("错误密码不应登录成功")
+	}
+}
+
+// Smoke 10: Photo upload URL (known R2 dependency — skip until R2 configured)
+func TestSmoke_PhotoUploadURL(t *testing.T) {
+	t.Skip("跳过：需要 R2 环境变量配置（Bug #1）")
+
+	r := e2eRouter(t)
+	admin, cleanupAdmin := seedAdminUser(t)
+	defer cleanupAdmin()
+
+	// Login
+	loginW := postJSON(t, r, "/api/v1/admin/login", map[string]string{
+		"phone":    admin.Phone,
+		"password": "e2eadmin",
+	}, nil)
+	loginData := parseResponse(t, loginW).Data.(map[string]interface{})
+	token := loginData["token"].(string)
+
+	// Create family + baby
+	family, cleanupFamily := seedFamily(t, admin.ID)
+	defer cleanupFamily()
+	baby, cleanupBaby := seedBaby(t, family.ID)
+	defer cleanupBaby()
+
+	// Request upload URL
+	uploadW := postJSON(t, r, "/api/v1/admin/photos/upload-url", map[string]interface{}{
+		"baby_id":      baby.ID,
+		"filename":     "test.jpg",
+		"content_type": "image/jpeg",
+		"size":         12345,
+	}, map[string]string{
+		"Authorization": "Bearer " + token,
+	})
+	assertStatus(t, uploadW, http.StatusOK, "照片上传URL")
+	uploadResp := parseResponse(t, uploadW)
+	assertCode(t, uploadResp, model.SUCCESS, "照片上传URL")
+
+	// Verify upload URL fields
+	data, ok := uploadResp.Data.(map[string]interface{})
+	if !ok {
+		t.Fatal("照片上传URL data 格式错误")
+	}
+	if url, ok := data["upload_url"].(string); !ok || url == "" {
+		t.Error("upload_url 缺失或为空")
+	}
+	if url, ok := data["access_url"].(string); !ok || url == "" {
+		t.Error("access_url 缺失或为空")
+	}
+	t.Logf("照片上传URL: upload_url=%s", data["upload_url"])
+}

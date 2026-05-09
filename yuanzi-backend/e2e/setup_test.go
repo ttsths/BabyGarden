@@ -198,3 +198,50 @@ func seedFamily(t *testing.T, userID string) (model.Family, func()) {
 	}
 	return family, cleanup
 }
+
+// seedBaby creates a baby for E2E testing.
+func seedBaby(t *testing.T, familyID string) (model.Baby, func()) {
+	t.Helper()
+	setupE2E(t)
+
+	baby := model.Baby{
+		Name:      "E2E测试宝宝",
+		FamilyID:  familyID,
+		Gender:    2, // female
+		Birthday:  time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
+	}
+	if err := mysql.DB.Create(&baby).Error; err != nil {
+		t.Fatalf("创建E2E宝宝失败: %v", err)
+	}
+	cleanup := func() {
+		mysql.DB.Where("id = ?", baby.ID).Delete(&model.Baby{})
+	}
+	return baby, cleanup
+}
+
+// seedBabyWithGender creates a baby with specified gender string.
+func seedBabyWithGender(t *testing.T, familyID string, gender string) (model.Baby, func()) {
+	t.Helper()
+	setupE2E(t)
+
+	genderInt := 2 // default: female
+	if gender == "male" {
+		genderInt = 1
+	} else if gender == "unknown" {
+		genderInt = 0
+	}
+
+	baby := model.Baby{
+		Name:      "E2E性别宝宝",
+		FamilyID:  familyID,
+		Gender:    int8(genderInt),
+		Birthday:  time.Date(2026, 3, 15, 0, 0, 0, 0, time.UTC),
+	}
+	if err := mysql.DB.Create(&baby).Error; err != nil {
+		t.Fatalf("创建E2E宝宝失败: %v", err)
+	}
+	cleanup := func() {
+		mysql.DB.Where("id = ?", baby.ID).Delete(&model.Baby{})
+	}
+	return baby, cleanup
+}
