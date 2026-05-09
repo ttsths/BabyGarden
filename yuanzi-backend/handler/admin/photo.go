@@ -84,6 +84,7 @@ func GetPhotoUploadURL(c *gin.Context) {
 
 	provider, err := storage.NewProviderFromConfig()
 	if err != nil {
+		log.Printf("[upload-url] storage init error: %v", err)
 		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "存储配置错误"})
 		return
 	}

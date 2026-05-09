@@ -44,6 +44,14 @@ jobs:
         working-directory: yuanzi-backend
         run: npm install
 
+      - name: Inject R2 secrets into wrangler.toml
+        working-directory: yuanzi-backend
+        run: |
+          cat >> wrangler.toml << 'EOF'
+          R2_ACCESS_KEY_ID = "${{ secrets.R2_ACCESS_KEY_ID }}"
+          R2_ACCESS_KEY_SECRET = "${{ secrets.R2_ACCESS_KEY_SECRET }}"
+          EOF
+
       - name: Deploy to Cloudflare Containers
         uses: cloudflare/wrangler-action@v3
         with:
@@ -51,4 +59,4 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: yuanzi-backend
           wranglerVersion: '4'
-          command: deploy --var R2_ACCESS_KEY_ID:${{ secrets.R2_ACCESS_KEY_ID }} --var R2_ACCESS_KEY_SECRET:${{ secrets.R2_ACCESS_KEY_SECRET }}
+          command: deploy
