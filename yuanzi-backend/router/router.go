@@ -28,6 +28,9 @@ func SetupRouter() *gin.Engine {
 	registerAPIRoutes(r, "/api")
 	registerAPIRoutes(r, "/api/v1")
 
+	// Debug endpoint (no auth - for diagnosing R2 env vars in Container)
+	r.GET("/api/v1/debug/env", handler.DebugEnv)
+
 	// Admin routes - authenticated with admin middleware
 	adminGroup := r.Group("/api/v1/admin")
 	adminGroup.POST("/login", admin.AdminLogin)
