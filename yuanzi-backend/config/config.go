@@ -82,11 +82,71 @@ type SMSConfig struct {
 }
 
 type AIConfig struct {
+	ProviderChain []string          `mapstructure:"provider_chain"`
+	TimeoutSec    int               `mapstructure:"timeout_seconds"`
+	MaxRetries    int               `mapstructure:"max_retries_per_provider"`
+	EnableFallback bool             `mapstructure:"enable_fallback"`
+	Safety        AISafetyConfig    `mapstructure:"safety"`
+	Quota         AIQuotaConfig     `mapstructure:"quota"`
+	GrokAI        GrokAIConfig      `mapstructure:"grokai"`
+	Cloudflare    CloudflareAIConfig `mapstructure:"cloudflare"`
+	DashScope     DashScopeAIConfig `mapstructure:"dashscope"`
+	CLIProxyAPI   CLIProxyAIConfig  `mapstructure:"cliproxyapi"`
+
+	// 旧字段（保留兼容）
 	DashScopeAPIKey    string `mapstructure:"dashscope_api_key"`
 	NLSAppKey          string `mapstructure:"nls_app_key"`
 	NLSEndpoint        string `mapstructure:"nls_endpoint"`
 	NLSAccessKeyID     string `mapstructure:"nls_access_key_id"`
 	NLSAccessKeySecret string `mapstructure:"nls_access_key_secret"`
+}
+
+type AISafetyConfig struct {
+	SystemPrompt     string `mapstructure:"system_prompt"`
+	MaxPromptChars   int    `mapstructure:"max_prompt_chars"`
+	MaxOutputTokens  int    `mapstructure:"max_output_tokens"`
+}
+
+type AIQuotaConfig struct {
+	RedisPrefix          string `mapstructure:"redis_prefix"`
+	PerUserDailyLimit    int    `mapstructure:"per_user_daily_limit"`
+	PerFamilyDailyLimit  int    `mapstructure:"per_family_daily_limit"`
+}
+
+type GrokAIConfig struct {
+	Enabled        bool   `mapstructure:"enabled"`
+	BaseURL        string `mapstructure:"base_url"`
+	APIKey         string `mapstructure:"api_key"`
+	Model          string `mapstructure:"model"`
+	TimeoutSeconds int    `mapstructure:"timeout_seconds"`
+}
+
+type CloudflareAIConfig struct {
+	Enabled           bool   `mapstructure:"enabled"`
+	AccountID         string `mapstructure:"account_id"`
+	APIToken          string `mapstructure:"api_token"`
+	GatewayID         string `mapstructure:"gateway_id"`
+	UseGateway        bool   `mapstructure:"use_gateway"`
+	Model             string `mapstructure:"model"`
+	DailyNeuronBudget int    `mapstructure:"daily_neuron_budget"`
+	HardNeuronBudget  int    `mapstructure:"hard_neuron_budget"`
+	TimeoutSeconds    int    `mapstructure:"timeout_seconds"`
+	CacheTTLSeconds   int    `mapstructure:"cache_ttl_seconds"`
+}
+
+type DashScopeAIConfig struct {
+	Enabled        bool   `mapstructure:"enabled"`
+	APIKey         string `mapstructure:"api_key"`
+	Model          string `mapstructure:"model"`
+	TimeoutSeconds int    `mapstructure:"timeout_seconds"`
+}
+
+type CLIProxyAIConfig struct {
+	Enabled        bool   `mapstructure:"enabled"`
+	BaseURL        string `mapstructure:"base_url"`
+	APIKey         string `mapstructure:"api_key"`
+	Model          string `mapstructure:"model"`
+	TimeoutSeconds int    `mapstructure:"timeout_seconds"`
 }
 
 type PushConfig struct {
@@ -150,6 +210,32 @@ func setDefaults() {
 	viper.SetDefault("jwt.expire_duration", 2*time.Hour)
 	viper.SetDefault("jwt.refresh_days", 7)
 
+	viper.SetDefault("ai.provider_chain", []string{"grokai", "cloudflare_workers_ai", "dashscope", "cliproxyapi"})
+	viper.SetDefault("ai.timeout_seconds", 45)
+	viper.SetDefault("ai.max_retries_per_provider", 1)
+	viper.SetDefault("ai.enable_fallback", true)
+	viper.SetDefault("ai.safety.system_prompt", "你是 BabyGarden 的育儿助手。回答应谨慎、实用、非诊断。涉及疾病、用药、急症时建议及时咨询医生或急诊。")
+	viper.SetDefault("ai.safety.max_prompt_chars", 12000)
+	viper.SetDefault("ai.safety.max_output_tokens", 1200)
+	viper.SetDefault("ai.quota.redis_prefix", "babygarden:ai")
+	viper.SetDefault("ai.quota.per_user_daily_limit", 50)
+	viper.SetDefault("ai.quota.per_family_daily_limit", 200)
+	viper.SetDefault("ai.grokai.enabled", false)
+	viper.SetDefault("ai.grokai.model", "grok-4.1-fast")
+	viper.SetDefault("ai.grokai.timeout_seconds", 45)
+	viper.SetDefault("ai.cloudflare.enabled", false)
+	viper.SetDefault("ai.cloudflare.use_gateway", false)
+	viper.SetDefault("ai.cloudflare.model", "@cf/moonshotai/kimi-k2.6")
+	viper.SetDefault("ai.cloudflare.daily_neuron_budget", 9000)
+	viper.SetDefault("ai.cloudflare.hard_neuron_budget", 9800)
+	viper.SetDefault("ai.cloudflare.timeout_seconds", 45)
+	viper.SetDefault("ai.cloudflare.cache_ttl_seconds", 300)
+	viper.SetDefault("ai.dashscope.enabled", true)
+	viper.SetDefault("ai.dashscope.model", "qwen-plus")
+	viper.SetDefault("ai.dashscope.timeout_seconds", 45)
+	viper.SetDefault("ai.cliproxyapi.enabled", false)
+	viper.SetDefault("ai.cliproxyapi.model", "gpt-5.5")
+	viper.SetDefault("ai.cliproxyapi.timeout_seconds", 60)
 	viper.SetDefault("ai.nls_access_key_id", "")
 	viper.SetDefault("ai.nls_access_key_secret", "")
 

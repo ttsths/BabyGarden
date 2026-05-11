@@ -1,5 +1,6 @@
-# Yuanzi 后端配置文件
-# 环境: 开发/测试
+# BabyGarden 后端配置示例
+# 复制为 config.yaml 并填入真实值
+# ⚠️ config.yaml 包含敏感信息，不可提交到 GitHub
 
 server:
   run_mode: debug
@@ -9,19 +10,19 @@ server:
 
 database:
   type: mysql
-  host: 121.43.54.203
+  host: localhost
   port: 3306
   user: root
-  password: "Sin2=cos2=1"
+  password: ""
   name: yuanzi
   table_prefix: ""
   max_idle_conn: 20
   max_open_conn: 100
 
 redis:
-  host: 121.43.54.203
-  port: 31379
-  password: "123456"
+  host: localhost
+  port: 6379
+  password: ""
   database: 1
 
 jwt:
@@ -31,7 +32,7 @@ jwt:
 
 oss:
   region: cn-hangzhou
-  bucket: yuanzi-bucket
+  bucket: ""
   access_key_id: ""
   access_key_secret: ""
   cdn_domain: ""
@@ -63,8 +64,8 @@ ai:
     per_user_daily_limit: 50
     per_family_daily_limit: 200
 
-  # GrokAI — 通过环境变量覆盖敏感字段:
-  #   AI_GROKAI_ENABLED, AI_GROKAI_BASE_URL, AI_GROKAI_API_KEY, AI_GROKAI_MODEL
+  # GrokAI — 通过 grok2api Worker 调用
+  # 环境变量: AI_GROKAI_ENABLED, AI_GROKAI_BASE_URL, AI_GROKAI_API_KEY
   grokai:
     enabled: false
     base_url: ""
@@ -72,9 +73,8 @@ ai:
     model: "grok-4.1-fast"
     timeout_seconds: 45
 
-  # Cloudflare Workers AI — 通过环境变量覆盖敏感字段:
-  #   AI_CLOUDFLARE_ENABLED, AI_CLOUDFLARE_ACCOUNT_ID, AI_CLOUDFLARE_API_TOKEN,
-  #   AI_CLOUDFLARE_GATEWAY_ID, AI_CLOUDFLARE_USE_GATEWAY, AI_CLOUDFLARE_MODEL
+  # Cloudflare Workers AI — 免费额度
+  # 环境变量: AI_CLOUDFLARE_ENABLED, AI_CLOUDFLARE_ACCOUNT_ID, AI_CLOUDFLARE_API_TOKEN, etc.
   cloudflare:
     enabled: false
     account_id: ""
@@ -87,16 +87,16 @@ ai:
     timeout_seconds: 45
     cache_ttl_seconds: 300
 
-  # DashScope — 通过环境变量覆盖敏感字段:
-  #   AI_DASHSCOPE_ENABLED, AI_DASHSCOPE_API_KEY, AI_DASHSCOPE_MODEL
+  # DashScope — 保留现有
+  # 环境变量: AI_DASHSCOPE_API_KEY, AI_DASHSCOPE_MODEL
   dashscope:
     enabled: true
     api_key: ""
     model: "qwen-plus"
     timeout_seconds: 45
 
-  # CLIProxyAPI — 通过环境变量覆盖敏感字段:
-  #   AI_CLIPROXYAPI_ENABLED, AI_CLIPROXYAPI_BASE_URL, AI_CLIPROXYAPI_API_KEY, AI_CLIPROXYAPI_MODEL
+  # CLIProxyAPI — 最后 fallback
+  # 环境变量: AI_CLIPROXYAPI_ENABLED, AI_CLIPROXYAPI_BASE_URL, AI_CLIPROXYAPI_API_KEY
   cliproxyapi:
     enabled: false
     base_url: ""
@@ -119,4 +119,3 @@ push:
     key_path: ""
     use_sandbox: true
     timeout_seconds: 10
-

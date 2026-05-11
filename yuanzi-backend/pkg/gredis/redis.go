@@ -97,6 +97,14 @@ func Incr(key string) (int64, error) {
 	return RedisClient.Incr(Ctx, key).Result()
 }
 
+// IncrBy 自增指定值
+func IncrBy(key string, value int64) (int64, error) {
+	if !connected() {
+		return 0, ErrRedisNotConnected
+	}
+	return RedisClient.IncrBy(Ctx, key, value).Result()
+}
+
 // Decr 自减
 func Decr(key string) (int64, error) {
 	if !connected() {

@@ -27,6 +27,9 @@ build/
 .env
 .env.local
 
+# Config with secrets (use config.example.yaml as template)
+config/config.yaml
+
 # Logs
 logs/
 *.log
