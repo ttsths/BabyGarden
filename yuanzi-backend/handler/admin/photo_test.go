@@ -69,25 +69,22 @@ func TestGetPhotosReturnsFilenameAndOriginalURL(t *testing.T) {
 		t.Fatal("照片列表为空，无法验证字段")
 	}
 
-	item := resp.Data.List[0]
-
-	// 验证 filename — 应该从 OSSKey 提取 "cat.jpg"
-	filename, ok := item["filename"].(string)
-	if !ok || filename == "" {
-		t.Errorf("filename 字段缺失或为空: %v", item["filename"])
-	}
-	if filename != "cat.jpg" {
-		t.Errorf("filename 期望 cat.jpg, 实际 %s", filename)
-	}
-
-	// 验证 original_url — 应该是 R2_PUBLIC_URL + OSSKey
-	originalURL, ok := item["original_url"].(string)
-	if !ok || originalURL == "" {
-		t.Errorf("original_url 字段缺失或为空: %v", item["original_url"])
-	}
+	// 查找自己插入的测试照片（列表可能包含其他测试的残留数据）
 	expectedURL := "https://pub-test.r2.dev/" + photo.OSSKey
-	if originalURL != expectedURL {
-		t.Errorf("original_url 期望 %s, 实际 %s", expectedURL, originalURL)
+	found := false
+	for _, item := range resp.Data.List {
+		filename, _ := item["filename"].(string)
+		originalURL, _ := item["original_url"].(string)
+		if originalURL == expectedURL {
+			found = true
+			if filename != "cat.jpg" {
+				t.Errorf("filename 期望 cat.jpg, 实际 %s", filename)
+			}
+			break
+		}
+	}
+	if !found {
+		t.Errorf("未找到测试照片 (期望 original_url=%s)，响应列表: %+v", expectedURL, resp.Data.List)
 	}
 }
 
