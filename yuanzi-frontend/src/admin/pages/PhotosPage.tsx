@@ -140,6 +140,12 @@ export function PhotosPage() {
           headers: {
             'Content-Type': file.type || 'image/jpeg',
           },
+          transformRequest: [(data, headers) => {
+            // Remove axios default headers that are not part of the R2 presigned URL signature
+            delete headers['X-Requested-With'];
+            delete headers['Authorization'];
+            return data;
+          }],
           onUploadProgress: (e) => {
             if (e.total) {
               const percent = Math.round(40 + (e.loaded / e.total) * 40);

@@ -76,16 +76,21 @@ func NewR2Provider() (Provider, error) {
 }
 
 // GetUploadSignature generates a presigned PUT URL for direct upload to R2.
-func (p *R2Provider) GetUploadSignature(key string, maxSize int64, expireSeconds int) (*UploadSignature, error) {
+func (p *R2Provider) GetUploadSignature(key string, maxSize int64, expireSeconds int, contentType string) (*UploadSignature, error) {
 	if expireSeconds <= 0 {
 		expireSeconds = 300
 	}
 
-	ctx := context.Background()
-	req, err := p.presigner.PresignPutObject(ctx, &s3.PutObjectInput{
+	putInput := &s3.PutObjectInput{
 		Bucket: aws.String(p.bucket),
 		Key:    aws.String(key),
-	}, s3.WithPresignExpires(time.Duration(expireSeconds)*time.Second))
+	}
+	if contentType != "" {
+		putInput.ContentType = aws.String(contentType)
+	}
+
+	ctx := context.Background()
+	req, err := p.presigner.PresignPutObject(ctx, putInput, s3.WithPresignExpires(time.Duration(expireSeconds)*time.Second))
 	if err != nil {
 		return nil, fmt.Errorf("failed to presign PUT URL: %w", err)
 	}
@@ -109,14 +114,10 @@ func (p *R2Provider) GetURL(key string) string {
 	return fmt.Sprintf("https://%s.r2.cloudflarestorage.com/%s/%s", p.accountID, p.bucket, key)
 }
 
-// GetThumbnailURL returns a URL that may trigger R2 Image Resizing.
-// If width > 0, appends an image-resizing query parameter.
+// GetThumbnailURL returns the public URL for the given object.
+// R2 does not support server-side image resizing, so the original URL is returned.
 func (p *R2Provider) GetThumbnailURL(key string, width int) string {
-	url := p.GetURL(key)
-	if width > 0 {
-		return url + fmt.Sprintf("?x-oss-process=image/resize,w_%d", width)
-	}
-	return url
+	return p.GetURL(key)
 }
 
 // DeleteObject removes the object from R2 via the S3 DeleteObject API.

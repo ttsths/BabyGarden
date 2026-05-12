@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"yuanzi-backend/config"
 	"yuanzi-backend/model"
 	"yuanzi-backend/mysql"
 	"yuanzi-backend/pkg/storage"
@@ -28,15 +29,16 @@ func GetPhotos(c *gin.Context) {
 	}
 
 	type photoItem struct {
-		ID          string `json:"id"`
-		BabyID      string `json:"baby_id"`
-		FamilyID    string `json:"family_id"`
-		Filename    string `json:"filename"`
-		OriginalURL string `json:"original_url"`
-		Size        int64  `json:"size"`
-		ContentType string `json:"content_type"`
-		Status      string `json:"status"`
-		UploadedAt  string `json:"uploaded_at"`
+		ID           string `json:"id"`
+		BabyID       string `json:"baby_id"`
+		FamilyID     string `json:"family_id"`
+		Filename     string `json:"filename"`
+		OriginalURL  string `json:"original_url"`
+		ThumbnailURL string `json:"thumbnail_url"`
+		Size         int64  `json:"size"`
+		ContentType  string `json:"content_type"`
+		Status       string `json:"status"`
+		UploadedAt   string `json:"uploaded_at"`
 	}
 
 	r2PublicURL := strings.TrimRight(os.Getenv("R2_PUBLIC_URL"), "/")
@@ -50,15 +52,16 @@ func GetPhotos(c *gin.Context) {
 		}
 
 		items[i] = photoItem{
-			ID:          p.ID,
-			BabyID:      p.BabyID,
-			FamilyID:    p.FamilyID,
-			Filename:    filename,
-			OriginalURL: r2PublicURL + "/" + p.OSSKey,
-			Size:        p.Size,
-			ContentType: p.ContentType,
-			Status:      string(p.Status),
-			UploadedAt:  p.UploadedAt.Format("2006-01-02 15:04:05"),
+			ID:           p.ID,
+			BabyID:       p.BabyID,
+			FamilyID:     p.FamilyID,
+			Filename:     filename,
+			OriginalURL:  r2PublicURL + "/" + p.OSSKey,
+			ThumbnailURL: r2PublicURL + "/" + p.OSSKey,
+			Size:         p.Size,
+			ContentType:  p.ContentType,
+			Status:       string(p.Status),
+			UploadedAt:   p.UploadedAt.Format("2006-01-02 15:04:05"),
 		}
 	}
 
@@ -107,7 +110,7 @@ func GetPhotoUploadURL(c *gin.Context) {
 	}
 	objectKey := buildPhotoObjectKey(baby.FamilyID, baby.ID, filename)
 
-	sig, err := provider.GetUploadSignature(objectKey, req.Size, 300)
+	sig, err := provider.GetUploadSignature(objectKey, req.Size, 300, req.ContentType)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "获取上传签名失败"})
 		return
@@ -196,6 +199,11 @@ func GetPhoto(c *gin.Context) {
 		return
 	}
 
+	r2PublicURL := strings.TrimRight(os.Getenv("R2_PUBLIC_URL"), "/")
+	if r2PublicURL == "" {
+		r2PublicURL = strings.TrimRight(config.GlobalConfig.R2.PublicURL, "/")
+	}
+
 	c.JSON(http.StatusOK, model.Response{
 		Code: model.SUCCESS,
 		Msg:  "获取成功",
@@ -204,6 +212,7 @@ func GetPhoto(c *gin.Context) {
 			"baby_id":       photo.BabyID,
 			"family_id":     photo.FamilyID,
 			"oss_key":       photo.OSSKey,
+			"original_url":  r2PublicURL + "/" + photo.OSSKey,
 			"thumbnail_key": photo.ThumbnailKey,
 			"width":         photo.Width,
 			"height":        photo.Height,

@@ -39,7 +39,7 @@ type UploadSignature struct {
 // Provider defines the common interface for storage backends.
 type Provider interface {
 	// GetUploadSignature generates upload credentials or a presigned URL for the given object key.
-	GetUploadSignature(key string, maxSize int64, expireSeconds int) (*UploadSignature, error)
+	GetUploadSignature(key string, maxSize int64, expireSeconds int, contentType string) (*UploadSignature, error)
 	// GetURL returns the public access URL for an object.
 	GetURL(key string) string
 	// GetThumbnailURL returns the URL for a resized thumbnail of the object.

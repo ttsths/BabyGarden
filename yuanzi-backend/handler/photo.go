@@ -82,7 +82,7 @@ func GetPhotoUploadURL(c *gin.Context) {
 	objectKey := buildPhotoObjectKey(family.ID, baby.ID, filename)
 
 	provider := getStorageProvider()
-	sig, err := provider.GetUploadSignature(objectKey, req.Size, photoUploadExpireSeconds)
+	sig, err := provider.GetUploadSignature(objectKey, req.Size, photoUploadExpireSeconds, req.ContentType)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "生成签名失败"})
 		return

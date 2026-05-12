@@ -19,7 +19,7 @@ func NewOSSProvider() Provider {
 }
 
 // GetUploadSignature generates an OSS Post signature for browser-based multipart uploads.
-func (p *OSSProvider) GetUploadSignature(key string, maxSize int64, expireSeconds int) (*UploadSignature, error) {
+func (p *OSSProvider) GetUploadSignature(key string, maxSize int64, expireSeconds int, contentType string) (*UploadSignature, error) {
 	if expireSeconds <= 0 {
 		expireSeconds = 300
 	}
