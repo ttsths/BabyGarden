@@ -41,6 +41,9 @@ func TestAdminRoutesRequireJWT(t *testing.T) {
 		{"babies list no auth", "GET", "/api/v1/admin/babies", http.StatusUnauthorized},
 		{"photos list no auth", "GET", "/api/v1/admin/photos", http.StatusUnauthorized},
 		{"records list no auth", "GET", "/api/v1/admin/records", http.StatusUnauthorized},
+		{"ai usage list no auth", "GET", "/api/v1/admin/ai/usage", http.StatusUnauthorized},
+		{"ai usage summary no auth", "GET", "/api/v1/admin/ai/usage/summary", http.StatusUnauthorized},
+		{"ai usage user no auth", "GET", "/api/v1/admin/ai/usage/user-1", http.StatusUnauthorized},
 	}
 
 	for _, tt := range tests {

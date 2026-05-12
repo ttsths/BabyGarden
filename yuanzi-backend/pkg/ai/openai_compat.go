@@ -84,9 +84,12 @@ func (p *OpenAICompatProvider) Chat(ctx context.Context, req ChatRequest) (*Chat
 			} `json:"message"`
 		} `json:"choices"`
 		Usage struct {
-			PromptTokens     int `json:"prompt_tokens"`
-			CompletionTokens int `json:"completion_tokens"`
-			TotalTokens      int `json:"total_tokens"`
+			PromptTokens        int `json:"prompt_tokens"`
+			CompletionTokens    int `json:"completion_tokens"`
+			TotalTokens         int `json:"total_tokens"`
+			PromptTokensDetails struct {
+				CachedTokens int `json:"cached_tokens"`
+			} `json:"prompt_tokens_details"`
 		} `json:"usage"`
 	}
 	if err := json.Unmarshal(raw, &out); err != nil {
@@ -103,6 +106,7 @@ func (p *OpenAICompatProvider) Chat(ctx context.Context, req ChatRequest) (*Chat
 		Usage: Usage{
 			InputTokens:  out.Usage.PromptTokens,
 			OutputTokens: out.Usage.CompletionTokens,
+			CachedTokens: out.Usage.PromptTokensDetails.CachedTokens,
 			TotalTokens:  out.Usage.TotalTokens,
 		},
 	}, nil

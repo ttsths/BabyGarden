@@ -17,6 +17,53 @@ export interface DailyStat {
   new_records: number;
 }
 
+export interface AIUsageLog {
+  id: string;
+  user_id: string;
+  family_id?: string;
+  provider: string;
+  model: string;
+  input_tokens: number;
+  output_tokens: number;
+  cached_tokens: number;
+  total_tokens: number;
+  request_type: string;
+  status: string;
+  error_message?: string;
+  created_at: string;
+}
+
+export interface AIUsageSummaryItem {
+  period: string;
+  provider: string;
+  requests: number;
+  input_tokens: number;
+  output_tokens: number;
+  cached_tokens: number;
+  total_tokens: number;
+}
+
+export interface AIUsageOverview {
+  today_total_tokens: number;
+  week_total_tokens: number;
+  month_total_tokens: number;
+}
+
+export interface AIUsageSummaryResponse {
+  period: string;
+  items: AIUsageSummaryItem[];
+}
+
+export interface AIUsageListResponse {
+  list: AIUsageLog[];
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages?: number;
+  };
+}
+
 export interface AdminUser {
   id: string;
   phone: string;

@@ -11,6 +11,8 @@ import type {
   AdminFamilyDetail,
   AdminPhoto,
   AdminRecord,
+  AIUsageListResponse,
+  AIUsageSummaryResponse,
   PaginatedResponse,
   CreateUserRequest,
   UpdateUserRequest,
@@ -65,6 +67,32 @@ export function getStatsOverview() {
 
 export function getDailyStats(days = 30) {
   return adminClient.get<ApiResult<DailyStat[]>>('/stats/daily', { params: { days } });
+}
+
+export function getAIUsage(params: {
+  page?: number;
+  page_size?: number;
+  provider?: string;
+  status?: string;
+  request_type?: string;
+  user_id?: string;
+  family_id?: string;
+  start_date?: string;
+  end_date?: string;
+}) {
+  return adminClient.get<ApiResult<AIUsageListResponse>>('/ai/usage', { params });
+}
+
+export function getAIUsageSummary(params: {
+  period?: 'day' | 'week' | 'month';
+  days?: number;
+  provider?: string;
+  status?: string;
+  request_type?: string;
+  user_id?: string;
+  family_id?: string;
+}) {
+  return adminClient.get<ApiResult<AIUsageSummaryResponse>>('/ai/usage/summary', { params });
 }
 
 export function getUsers(page = 1, pageSize = 20, keyword?: string) {

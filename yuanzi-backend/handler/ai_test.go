@@ -27,11 +27,18 @@ func TestAIChatSuccess(t *testing.T) {
 	defer cleanupAIChatRecords(t, admin.ID)
 	clearAIQuota(t, admin.ID)
 
-	aiChatFunc = func(messages []ai.ChatMessage) (*ai.LegacyChatResponse, error) {
-		resp := &ai.LegacyChatResponse{}
-		resp.Output.Text = "测试回答"
-		resp.Usage.TotalTokens = 12
-		return resp, nil
+	aiChatFunc = func(messages []ai.ChatMessage) (*ai.ChatResponse, error) {
+		return &ai.ChatResponse{
+			Content:  "测试回答",
+			Provider: ai.ProviderDashScope,
+			Model:    "qwen-turbo",
+			Usage: ai.Usage{
+				InputTokens:  5,
+				OutputTokens: 7,
+				CachedTokens: 2,
+				TotalTokens:  12,
+			},
+		}, nil
 	}
 	defer resetAIHandlers()
 
@@ -53,7 +60,7 @@ func TestAIChatSuccess(t *testing.T) {
 		Data AIChatResponse `json:"data"`
 	}
 	decodeResponse(t, recorder.Body.Bytes(), &response)
-	if response.Data.Answer != "测试回答" || response.Data.TokensUsed != 12 {
+	if response.Data.Answer != "测试回答" || response.Data.TokensUsed != 12 || response.Data.InputTokens != 5 || response.Data.OutputTokens != 7 || response.Data.CachedTokens != 2 || response.Data.Provider != string(ai.ProviderDashScope) {
 		t.Fatalf("AI问答响应错误: %+v", response.Data)
 	}
 

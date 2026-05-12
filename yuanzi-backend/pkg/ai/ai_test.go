@@ -3,6 +3,9 @@ package ai
 import (
 	"context"
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -12,9 +15,9 @@ func TestEstimateTokenCount(t *testing.T) {
 		expected int
 	}{
 		{"", 0},
-		{"hello", 3},     // 5 chars / 2 + 1 = 3
-		{"你好世界", 3},      // 4 runes / 2 + 1 = 3
-		{"hello你好", 4},    // 9 chars → 9 runes / 2 + 1 = 5... wait
+		{"hello", 3},   // 5 chars / 2 + 1 = 3
+		{"你好世界", 3},    // 4 runes / 2 + 1 = 3
+		{"hello你好", 4}, // 9 chars → 9 runes / 2 + 1 = 5... wait
 	}
 
 	for _, tt := range tests {
@@ -64,6 +67,33 @@ func TestNewOpenAICompatProvider(t *testing.T) {
 	}
 }
 
+func TestOpenAICompatProviderChatUsage(t *testing.T) {
+	p := NewOpenAICompatProvider(ProviderGrokAI, true, "https://api.example.test", "sk-test", "grok-test", 30e9)
+	p.client = &http.Client{Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     make(http.Header),
+			Body: io.NopCloser(strings.NewReader(`{
+				"choices":[{"message":{"content":"ok"}}],
+				"usage":{
+					"prompt_tokens":10,
+					"completion_tokens":4,
+					"total_tokens":14,
+					"prompt_tokens_details":{"cached_tokens":3}
+				}
+			}`)),
+		}, nil
+	})}
+
+	resp, err := p.Chat(context.Background(), ChatRequest{Messages: []ChatMessage{{Role: "user", Content: "hi"}}})
+	if err != nil {
+		t.Fatalf("Chat failed: %v", err)
+	}
+	if resp.Usage.InputTokens != 10 || resp.Usage.OutputTokens != 4 || resp.Usage.CachedTokens != 3 || resp.Usage.TotalTokens != 14 {
+		t.Fatalf("usage解析错误: %+v", resp.Usage)
+	}
+}
+
 func TestNewCloudflareWorkersAIProvider(t *testing.T) {
 	p := NewCloudflareWorkersAIProvider(true, "acct-123", "token-456", "gw-789", true, "@cf/moonshotai/kimi-k2.6", 30e9)
 	if p.Name() != ProviderCloudflareWorkersAI {
@@ -83,6 +113,34 @@ func TestNewCloudflareWorkersAIProvider(t *testing.T) {
 	p3 := NewCloudflareWorkersAIProvider(false, "", "", "", false, "", 0)
 	if p3.Enabled() {
 		t.Error("Expected disabled provider")
+	}
+}
+
+func TestCloudflareWorkersAIProviderChatUsage(t *testing.T) {
+	p := NewCloudflareWorkersAIProvider(true, "acct-123", "token-456", "", false, "@cf/test/model", 30e9)
+	p.client = &http.Client{Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     make(http.Header),
+			Body: io.NopCloser(strings.NewReader(`{
+				"success": true,
+				"result": {"response": "ok"},
+				"usage": {
+					"prompt_tokens": 8,
+					"completion_tokens": 5,
+					"total_tokens": 13,
+					"prompt_tokens_details": {"cached_tokens": 2}
+				}
+			}`)),
+		}, nil
+	})}
+
+	resp, err := p.Chat(context.Background(), ChatRequest{Messages: []ChatMessage{{Role: "user", Content: "hi"}}})
+	if err != nil {
+		t.Fatalf("Chat failed: %v", err)
+	}
+	if resp.Usage.InputTokens != 8 || resp.Usage.OutputTokens != 5 || resp.Usage.CachedTokens != 2 || resp.Usage.TotalTokens != 13 {
+		t.Fatalf("usage解析错误: %+v", resp.Usage)
 	}
 }
 
@@ -107,8 +165,14 @@ type mockProvider struct {
 	chatFn  func(req ChatRequest) (*ChatResponse, error)
 }
 
-func (m *mockProvider) Name() ProviderName                       { return m.name }
-func (m *mockProvider) Enabled() bool                            { return m.enabled }
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req)
+}
+
+func (m *mockProvider) Name() ProviderName { return m.name }
+func (m *mockProvider) Enabled() bool      { return m.enabled }
 func (m *mockProvider) Chat(_ context.Context, req ChatRequest) (*ChatResponse, error) {
 	return m.chatFn(req)
 }

@@ -72,13 +72,24 @@ func AIChat(c *gin.Context) {
 	resp, err := aiChatFunc(messages)
 	if err != nil {
 		_ = rollbackQuota(userID, quotaTypeChat)
+		logAIUsageAsync(model.AIUsageLog{
+			UserID:       userID,
+			FamilyID:     familyIDFromBaby(baby),
+			RequestType:  "chat",
+			Status:       "error",
+			ErrorMessage: err.Error(),
+		})
 		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "AI服务异常"})
 		return
 	}
 
-	answer := strings.TrimSpace(resp.Output.Text)
+	answer := strings.TrimSpace(resp.Content)
 	if answer == "" {
 		answer = "AI暂时无法回答，请稍后再试"
+	}
+	totalTokens := resp.Usage.TotalTokens
+	if totalTokens == 0 {
+		totalTokens = resp.Usage.InputTokens + resp.Usage.OutputTokens
 	}
 
 	record := model.AIChatRecord{
@@ -86,8 +97,8 @@ func AIChat(c *gin.Context) {
 		BabyID:     req.BabyID,
 		Question:   req.Question,
 		Answer:     answer,
-		TokensUsed: resp.Usage.TotalTokens,
-		Model:      "qwen-turbo",
+		TokensUsed: totalTokens,
+		Model:      resp.Model,
 		CreatedAt:  time.Now(),
 	}
 	if err := mysql.DB.Create(&record).Error; err != nil {
@@ -95,13 +106,30 @@ func AIChat(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "保存问答记录失败"})
 		return
 	}
+	logAIUsageAsync(model.AIUsageLog{
+		UserID:       userID,
+		FamilyID:     familyIDFromBaby(baby),
+		Provider:     string(resp.Provider),
+		Model:        resp.Model,
+		InputTokens:  resp.Usage.InputTokens,
+		OutputTokens: resp.Usage.OutputTokens,
+		CachedTokens: resp.Usage.CachedTokens,
+		TotalTokens:  totalTokens,
+		RequestType:  "chat",
+		Status:       "success",
+	})
 
 	c.JSON(http.StatusOK, model.Response{
 		Code: model.SUCCESS,
 		Msg:  "success",
 		Data: AIChatResponse{
 			Answer:         answer,
-			TokensUsed:     resp.Usage.TotalTokens,
+			TokensUsed:     totalTokens,
+			InputTokens:    resp.Usage.InputTokens,
+			OutputTokens:   resp.Usage.OutputTokens,
+			CachedTokens:   resp.Usage.CachedTokens,
+			TotalTokens:    totalTokens,
+			Provider:       string(resp.Provider),
 			RemainingQuota: remaining,
 		},
 	})
@@ -188,6 +216,7 @@ func GetAIQuota(c *gin.Context) {
 	cfg := config.GlobalConfig.AI
 	speechUsed, _ := getQuotaUsage(userID, quotaTypeSpeech)
 	chatUsed, _ := getQuotaUsage(userID, quotaTypeChat)
+	tokenStats := getUserTokenStats(userID)
 
 	// Cloudflare Neurons 估算
 	cfNeuronsUsed, _ := getCloudflareNeurons()
@@ -212,16 +241,17 @@ func GetAIQuota(c *gin.Context) {
 				Used:      chatUsed,
 				Limit:     chatDailyLimit,
 				Remaining: calcRemaining(chatDailyLimit, chatUsed),
+				Tokens:    tokenStats,
 			},
 			ProviderChain: cfg.ProviderChain,
 			Cloudflare: &CloudflareQuotaDetail{
-				Model:                cfg.Cloudflare.Model,
-				DailyNeuronBudget:    cfBudget,
-				HardNeuronBudget:     cfg.Cloudflare.HardNeuronBudget,
-				NeuronsUsedToday:     cfNeuronsUsed,
-				NeuronsRemaining:     cfRemaining,
-				ResetAtUTC:           resetAt.Format(time.RFC3339),
-				SourceOfTruth:        "Cloudflare Workers AI Dashboard",
+				Model:             cfg.Cloudflare.Model,
+				DailyNeuronBudget: cfBudget,
+				HardNeuronBudget:  cfg.Cloudflare.HardNeuronBudget,
+				NeuronsUsedToday:  cfNeuronsUsed,
+				NeuronsRemaining:  cfRemaining,
+				ResetAtUTC:        resetAt.Format(time.RFC3339),
+				SourceOfTruth:     "Cloudflare Workers AI Dashboard",
 			},
 		},
 	})
@@ -254,6 +284,11 @@ type ChatHistory struct {
 type AIChatResponse struct {
 	Answer         string `json:"answer"`
 	TokensUsed     int    `json:"tokens_used"`
+	InputTokens    int    `json:"input_tokens"`
+	OutputTokens   int    `json:"output_tokens"`
+	CachedTokens   int    `json:"cached_tokens"`
+	TotalTokens    int    `json:"total_tokens"`
+	Provider       string `json:"provider"`
 	RemainingQuota int    `json:"remaining_quota"`
 }
 
@@ -271,9 +306,18 @@ type AIQuotaResponse struct {
 }
 
 type QuotaDetail struct {
-	Used      int `json:"used"`
-	Limit     int `json:"limit"`
-	Remaining int `json:"remaining"`
+	Used      int              `json:"used"`
+	Limit     int              `json:"limit"`
+	Remaining int              `json:"remaining"`
+	Tokens    *TokenQuotaStats `json:"tokens,omitempty"`
+}
+
+type TokenQuotaStats struct {
+	TodayInputTokens  int `json:"today_input_tokens"`
+	TodayOutputTokens int `json:"today_output_tokens"`
+	TodayCachedTokens int `json:"today_cached_tokens"`
+	TodayTotalTokens  int `json:"today_total_tokens"`
+	MonthTotalTokens  int `json:"month_total_tokens"`
 }
 
 var (
@@ -355,7 +399,7 @@ func initAIRouter() {
 	})
 }
 
-func defaultChatFunc(messages []ai.ChatMessage) (*ai.LegacyChatResponse, error) {
+func defaultChatFunc(messages []ai.ChatMessage) (*ai.ChatResponse, error) {
 	initAIRouter()
 
 	req := ai.ChatRequest{
@@ -369,21 +413,7 @@ func defaultChatFunc(messages []ai.ChatMessage) (*ai.LegacyChatResponse, error) 
 		return nil, err
 	}
 
-	// 转换回旧版 ChatResponse 格式（向后兼容）
-	return &ai.LegacyChatResponse{
-		Output: struct {
-			Text string `json:"text"`
-		}{Text: resp.Content},
-		Usage: struct {
-			InputTokens  int `json:"input_tokens"`
-			OutputTokens int `json:"output_tokens"`
-			TotalTokens  int `json:"total_tokens"`
-		}{
-			InputTokens:  resp.Usage.InputTokens,
-			OutputTokens: resp.Usage.OutputTokens,
-			TotalTokens:  resp.Usage.TotalTokens,
-		},
-	}, nil
+	return resp, nil
 }
 
 func defaultSpeechFunc(data []byte) (*ai.SpeechResult, error) {
@@ -430,6 +460,59 @@ func buildBabyContext(baby *model.Baby) string {
 		context += "，早产"
 	}
 	return context
+}
+
+func familyIDFromBaby(baby *model.Baby) string {
+	if baby == nil {
+		return ""
+	}
+	return baby.FamilyID
+}
+
+func logAIUsageAsync(log model.AIUsageLog) {
+	if mysql.DB == nil {
+		return
+	}
+	go func(item model.AIUsageLog) {
+		_ = mysql.DB.Create(&item).Error
+	}(log)
+}
+
+func getUserTokenStats(userID string) *TokenQuotaStats {
+	if mysql.DB == nil {
+		return &TokenQuotaStats{}
+	}
+
+	now := time.Now()
+	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
+
+	stats := &TokenQuotaStats{}
+	type tokenSum struct {
+		InputTokens  int
+		OutputTokens int
+		CachedTokens int
+		TotalTokens  int
+	}
+	var today tokenSum
+	if err := mysql.DB.Model(&model.AIUsageLog{}).
+		Select("COALESCE(SUM(input_tokens), 0) AS input_tokens, COALESCE(SUM(output_tokens), 0) AS output_tokens, COALESCE(SUM(cached_tokens), 0) AS cached_tokens, COALESCE(SUM(total_tokens), 0) AS total_tokens").
+		Where("user_id = ? AND status = ? AND created_at >= ?", userID, "success", todayStart).
+		Scan(&today).Error; err == nil {
+		stats.TodayInputTokens = today.InputTokens
+		stats.TodayOutputTokens = today.OutputTokens
+		stats.TodayCachedTokens = today.CachedTokens
+		stats.TodayTotalTokens = today.TotalTokens
+	}
+
+	var month tokenSum
+	if err := mysql.DB.Model(&model.AIUsageLog{}).
+		Select("COALESCE(SUM(total_tokens), 0) AS total_tokens").
+		Where("user_id = ? AND status = ? AND created_at >= ?", userID, "success", monthStart).
+		Scan(&month).Error; err == nil {
+		stats.MonthTotalTokens = month.TotalTokens
+	}
+	return stats
 }
 
 func quotaKey(userID, quotaType string) string {
