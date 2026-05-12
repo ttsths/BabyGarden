@@ -52,6 +52,26 @@ jobs:
           R2_ACCESS_KEY_SECRET = "${{ secrets.R2_ACCESS_KEY_SECRET }}"
           EOF
 
+      - name: Inject AI secrets into wrangler.toml
+        working-directory: yuanzi-backend
+        run: |
+          cat >> wrangler.toml << 'ENVEOF'
+          # ---- AI Provider 环境变量（CI 注入）----
+          AI_GROKAI_ENABLED = "true"
+          AI_GROKAI_BASE_URL = "https://grok2api.shentuhaisan.workers.dev/"
+          AI_GROKAI_API_KEY = "${{ secrets.AI_GROKAI_API_KEY }}"
+          AI_GROKAI_MODEL = "grok-4.1-fast"
+          AI_CLOUDFLARE_ENABLED = "true"
+          AI_CLOUDFLARE_ACCOUNT_ID = "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
+          AI_CLOUDFLARE_API_TOKEN = "${{ secrets.AI_CLOUDFLARE_API_TOKEN }}"
+          AI_CLOUDFLARE_GATEWAY_ID = "yuanzi-ai-gateway"
+          AI_CLOUDFLARE_USE_GATEWAY = "false"
+          AI_CLOUDFLARE_MODEL = "@cf/moonshotai/kimi-k2.6"
+          AI_DASHSCOPE_ENABLED = "true"
+          AI_DASHSCOPE_API_KEY = "${{ secrets.AI_DASHSCOPE_API_KEY }}"
+          AI_DASHSCOPE_MODEL = "qwen-plus"
+          ENVEOF
+
       - name: Deploy to Cloudflare Containers
         uses: cloudflare/wrangler-action@v3
         with:
