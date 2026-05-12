@@ -82,7 +82,7 @@ func GetPhotoUploadURL(c *gin.Context) {
 	objectKey := buildPhotoObjectKey(family.ID, baby.ID, filename)
 
 	provider := getStorageProvider()
-	sig, err := provider.GetUploadSignature(objectKey, req.Size, photoUploadExpireSeconds)
+	sig, err := provider.GetUploadSignature(objectKey, req.Size, photoUploadExpireSeconds, storage.WithContentType(req.ContentType))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "生成签名失败"})
 		return
@@ -127,6 +127,7 @@ func GetPhotoUploadURL(c *gin.Context) {
 			ThumbURL:  provider.GetThumbnailURL(objectKey, photoThumbWidth),
 			ExpiresAt: expiresAt,
 			FormData:  formData,
+			Headers:   sig.Headers,
 		},
 	})
 }
@@ -371,6 +372,7 @@ type PhotoUploadURLResponse struct {
 	ThumbURL  string            `json:"thumb_url"`
 	ExpiresAt int64             `json:"expires_at"`
 	FormData  map[string]string `json:"form_data,omitempty"`
+	Headers   map[string]string `json:"headers,omitempty"`
 }
 
 type PhotoCallbackRequest struct {

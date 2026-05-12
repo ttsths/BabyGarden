@@ -29,6 +29,7 @@ func NewProviderFromConfig() (Provider, error) {
 // directly to the storage backend.
 type UploadSignature struct {
 	FormData     map[string]string // for OSS multipart POST
+	Headers      map[string]string // for R2 presigned PUT required request headers
 	PresignedURL string            // for R2 presigned PUT
 	UploadURL    string            // upload endpoint URL
 	AccessURL    string            // final access URL
@@ -36,10 +37,32 @@ type UploadSignature struct {
 	ExpiresAt    int64             // unix timestamp
 }
 
+type UploadOptions struct {
+	ContentType string
+}
+
+type UploadOption func(*UploadOptions)
+
+func WithContentType(contentType string) UploadOption {
+	return func(opts *UploadOptions) {
+		opts.ContentType = contentType
+	}
+}
+
+func applyUploadOptions(options []UploadOption) UploadOptions {
+	var opts UploadOptions
+	for _, option := range options {
+		if option != nil {
+			option(&opts)
+		}
+	}
+	return opts
+}
+
 // Provider defines the common interface for storage backends.
 type Provider interface {
 	// GetUploadSignature generates upload credentials or a presigned URL for the given object key.
-	GetUploadSignature(key string, maxSize int64, expireSeconds int) (*UploadSignature, error)
+	GetUploadSignature(key string, maxSize int64, expireSeconds int, options ...UploadOption) (*UploadSignature, error)
 	// GetURL returns the public access URL for an object.
 	GetURL(key string) string
 	// GetThumbnailURL returns the URL for a resized thumbnail of the object.

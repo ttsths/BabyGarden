@@ -115,6 +115,29 @@ redis:
   port: 6379
 ```
 
+### Cloudflare R2 CORS（浏览器直传必需）
+
+后台照片上传使用浏览器 `PUT` 到 R2 presigned URL。Bucket CORS 必须允许前端站点 Origin，且允许直传和图片展示：
+
+```json
+[
+  {
+    "AllowedOrigins": [
+      "https://your-frontend-domain.example"
+    ],
+    "AllowedMethods": ["PUT", "GET", "HEAD"],
+    "AllowedHeaders": ["Content-Type"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+说明：
+- 将 `AllowedOrigins` 替换为实际 Cloudflare Pages/自定义前端域名；本地调试可额外加入 `http://localhost:5173`。
+- 前端直传 R2 只发送 `Content-Type`，且必须与后端签名时使用的文件 MIME 类型一致；不要允许或发送业务 `Authorization` 头到 R2。
+- Cloudflare R2 控制台配置 CORS 时无需显式写 `OPTIONS`，浏览器预检会按上述 methods/headers 匹配。
+
 ## RESTful API 文档
 
 启动服务后访问: `http://localhost:8080/swagger/index.html`

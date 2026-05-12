@@ -19,11 +19,12 @@ func NewOSSProvider() Provider {
 }
 
 // GetUploadSignature generates an OSS Post signature for browser-based multipart uploads.
-func (p *OSSProvider) GetUploadSignature(key string, maxSize int64, expireSeconds int) (*UploadSignature, error) {
+func (p *OSSProvider) GetUploadSignature(key string, maxSize int64, expireSeconds int, options ...UploadOption) (*UploadSignature, error) {
 	if expireSeconds <= 0 {
 		expireSeconds = 300
 	}
 
+	opts := applyUploadOptions(options)
 	sig, uploadURL, err := p.client.GetPostSignature(key, maxSize, expireSeconds)
 	if err != nil {
 		return nil, err
@@ -34,6 +35,9 @@ func (p *OSSProvider) GetUploadSignature(key string, maxSize int64, expireSecond
 		"policy":         sig.Policy,
 		"signature":      sig.Signature,
 		"key":            key,
+	}
+	if opts.ContentType != "" {
+		formData["Content-Type"] = opts.ContentType
 	}
 
 	expiresAt := time.Now().Add(time.Duration(expireSeconds) * time.Second).Unix()

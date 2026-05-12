@@ -76,16 +76,24 @@ func NewR2Provider() (Provider, error) {
 }
 
 // GetUploadSignature generates a presigned PUT URL for direct upload to R2.
-func (p *R2Provider) GetUploadSignature(key string, maxSize int64, expireSeconds int) (*UploadSignature, error) {
+func (p *R2Provider) GetUploadSignature(key string, maxSize int64, expireSeconds int, options ...UploadOption) (*UploadSignature, error) {
 	if expireSeconds <= 0 {
 		expireSeconds = 300
 	}
 
-	ctx := context.Background()
-	req, err := p.presigner.PresignPutObject(ctx, &s3.PutObjectInput{
+	opts := applyUploadOptions(options)
+	putObjectInput := &s3.PutObjectInput{
 		Bucket: aws.String(p.bucket),
 		Key:    aws.String(key),
-	}, s3.WithPresignExpires(time.Duration(expireSeconds)*time.Second))
+	}
+	headers := make(map[string]string)
+	if opts.ContentType != "" {
+		putObjectInput.ContentType = aws.String(opts.ContentType)
+		headers["Content-Type"] = opts.ContentType
+	}
+
+	ctx := context.Background()
+	req, err := p.presigner.PresignPutObject(ctx, putObjectInput, s3.WithPresignExpires(time.Duration(expireSeconds)*time.Second))
 	if err != nil {
 		return nil, fmt.Errorf("failed to presign PUT URL: %w", err)
 	}
@@ -93,6 +101,7 @@ func (p *R2Provider) GetUploadSignature(key string, maxSize int64, expireSeconds
 	expiresAt := time.Now().Add(time.Duration(expireSeconds) * time.Second).Unix()
 
 	return &UploadSignature{
+		Headers:      headers,
 		PresignedURL: req.URL,
 		UploadURL:    req.URL,
 		AccessURL:    p.GetURL(key),

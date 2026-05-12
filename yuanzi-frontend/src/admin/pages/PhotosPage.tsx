@@ -38,6 +38,28 @@ interface UploadTask {
   error?: string;
 }
 
+async function uploadToPresignedUrl(
+  uploadUrl: string,
+  file: File,
+  contentType: string,
+  uploadHeaders?: Record<string, string>
+) {
+  const headers = new Headers();
+  headers.set('Content-Type', uploadHeaders?.['Content-Type'] || uploadHeaders?.['content-type'] || contentType);
+
+  const response = await fetch(uploadUrl, {
+    method: 'PUT',
+    body: file,
+    headers,
+    credentials: 'omit',
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    throw new Error(`R2 上传失败 (${response.status})`);
+  }
+}
+
 export function PhotosPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -123,30 +145,24 @@ export function PhotosPage() {
         if (!uploadFamilyId) {
           throw new Error('请选择家庭');
         }
+        if (!uploadBabyId) {
+          throw new Error('请选择宝宝');
+        }
 
         updateTask(taskId, { status: 'uploading', progress: 10 });
 
+        const contentType = file.type || 'application/octet-stream';
         const urlRes = await getPhotoUploadUrl({
-          baby_id: uploadBabyId || 'default',
+          baby_id: uploadBabyId,
           filename: file.name,
-          content_type: file.type || 'image/jpeg',
+          content_type: contentType,
           size: file.size,
         });
-        const { upload_url, photo_id } = urlRes.data.data;
+        const { upload_url, photo_id, upload_headers } = urlRes.data.data;
         
         updateTask(taskId, { progress: 40 });
 
-        await axios.put(upload_url, file, {
-          headers: {
-            'Content-Type': file.type || 'image/jpeg',
-          },
-          onUploadProgress: (e) => {
-            if (e.total) {
-              const percent = Math.round(40 + (e.loaded / e.total) * 40);
-              updateTask(taskId, { progress: percent });
-            }
-          },
-        });
+        await uploadToPresignedUrl(upload_url, file, contentType, upload_headers);
 
         updateTask(taskId, { status: 'confirming', progress: 85 });
 
@@ -486,7 +502,10 @@ export function PhotosPage() {
           </div>
 
           <div>
-            <div style={{ marginBottom: 8 }}>目标宝宝（可选）</div>
+            <div style={{ marginBottom: 8 }}>
+              <span style={{ color: '#ff4d4f', marginRight: 4 }}>*</span>
+              目标宝宝
+            </div>
             <Select
               style={{ width: '100%' }}
               placeholder="选择宝宝"
@@ -507,7 +526,7 @@ export function PhotosPage() {
               return false;
             }}
             accept="image/*"
-            disabled={!uploadFamilyId}
+            disabled={!uploadFamilyId || !uploadBabyId}
           >
             <p className="ant-upload-drag-icon">
               <UploadOutlined />
