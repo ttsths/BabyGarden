@@ -27,8 +27,8 @@ func TestAIChatSuccess(t *testing.T) {
 	defer cleanupAIChatRecords(t, admin.ID)
 	clearAIQuota(t, admin.ID)
 
-	aiChatFunc = func(messages []ai.ChatMessage) (*ai.ChatResponse, error) {
-		resp := &ai.ChatResponse{}
+	aiChatFunc = func(messages []ai.ChatMessage) (*ai.LegacyChatResponse, error) {
+		resp := &ai.LegacyChatResponse{}
 		resp.Output.Text = "测试回答"
 		resp.Usage.TotalTokens = 12
 		return resp, nil

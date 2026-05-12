@@ -1,11 +1,13 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"yuanzi-backend/config"
@@ -169,7 +171,7 @@ func SpeechRecognize(c *gin.Context) {
 
 // GetAIQuota 获取 AI 配额
 // @Summary 获取 AI 配额
-// @Description 获取用户当日 AI 使用配额情况
+// @Description 获取用户当日 AI 使用配额情况，含 Provider 链与 Cloudflare 估算额度
 // @Tags AI
 // @Accept json
 // @Produce json
@@ -183,8 +185,19 @@ func GetAIQuota(c *gin.Context) {
 		return
 	}
 
+	cfg := config.GlobalConfig.AI
 	speechUsed, _ := getQuotaUsage(userID, quotaTypeSpeech)
 	chatUsed, _ := getQuotaUsage(userID, quotaTypeChat)
+
+	// Cloudflare Neurons 估算
+	cfNeuronsUsed, _ := getCloudflareNeurons()
+	cfBudget := cfg.Cloudflare.DailyNeuronBudget
+	cfRemaining := cfBudget - cfNeuronsUsed
+	if cfRemaining < 0 {
+		cfRemaining = 0
+	}
+
+	resetAt := nextUTCMidnight()
 
 	c.JSON(http.StatusOK, model.Response{
 		Code: model.SUCCESS,
@@ -200,8 +213,29 @@ func GetAIQuota(c *gin.Context) {
 				Limit:     chatDailyLimit,
 				Remaining: calcRemaining(chatDailyLimit, chatUsed),
 			},
+			ProviderChain: cfg.ProviderChain,
+			Cloudflare: &CloudflareQuotaDetail{
+				Model:                cfg.Cloudflare.Model,
+				DailyNeuronBudget:    cfBudget,
+				HardNeuronBudget:     cfg.Cloudflare.HardNeuronBudget,
+				NeuronsUsedToday:     cfNeuronsUsed,
+				NeuronsRemaining:     cfRemaining,
+				ResetAtUTC:           resetAt.Format(time.RFC3339),
+				SourceOfTruth:        "Cloudflare Workers AI Dashboard",
+			},
 		},
 	})
+}
+
+// CloudflareQuotaDetail Cloudflare Workers AI 额度明细
+type CloudflareQuotaDetail struct {
+	Model             string `json:"model"`
+	DailyNeuronBudget int    `json:"daily_neuron_budget"`
+	HardNeuronBudget  int    `json:"hard_neuron_budget"`
+	NeuronsUsedToday  int    `json:"estimated_neurons_used_today"`
+	NeuronsRemaining  int    `json:"estimated_neurons_remaining"`
+	ResetAtUTC        string `json:"reset_at_utc"`
+	SourceOfTruth     string `json:"source_of_truth"`
 }
 
 // 请求响应结构
@@ -230,8 +264,10 @@ type SpeechRecognizeResponse struct {
 }
 
 type AIQuotaResponse struct {
-	Speech QuotaDetail `json:"speech"`
-	AIChat QuotaDetail `json:"ai_chat"`
+	Speech        QuotaDetail            `json:"speech"`
+	AIChat        QuotaDetail            `json:"ai_chat"`
+	ProviderChain []string               `json:"provider_chain,omitempty"`
+	Cloudflare    *CloudflareQuotaDetail `json:"cloudflare,omitempty"`
 }
 
 type QuotaDetail struct {
@@ -248,18 +284,106 @@ var (
 const (
 	quotaTypeChat    = "chat"
 	quotaTypeSpeech  = "speech"
-	chatDailyLimit   = 10
+	chatDailyLimit   = 50
 	speechDailyLimit = 20
 )
 
-var errQuotaExceeded = errors.New("quota exceeded")
+var (
+	errQuotaExceeded = errors.New("quota exceeded")
+	aiRouterOnce     sync.Once
+	aiRouter         *ai.Router
+	aiQuotaStore     *redisQuotaStore
+)
 
-func defaultChatFunc(messages []ai.ChatMessage) (*ai.ChatResponse, error) {
-	if config.GlobalConfig.AI.DashScopeAPIKey == "" {
-		return nil, errors.New("dashscope api key missing")
+// initAIRouter 延迟初始化 AI Router（首次调用时创建）
+func initAIRouter() {
+	aiRouterOnce.Do(func() {
+		cfg := config.GlobalConfig.AI
+		aiQuotaStore = newRedisQuotaStore()
+
+		var providers []ai.Provider
+
+		// 1. GrokAI（首选）
+		if cfg.GrokAI.Enabled || cfg.GrokAI.BaseURL != "" {
+			providers = append(providers, ai.NewOpenAICompatProvider(
+				ai.ProviderGrokAI,
+				cfg.GrokAI.Enabled,
+				cfg.GrokAI.BaseURL,
+				cfg.GrokAI.APIKey,
+				cfg.GrokAI.Model,
+				time.Duration(cfg.GrokAI.TimeoutSeconds)*time.Second,
+			))
+		}
+
+		// 2. Cloudflare Workers AI
+		if cfg.Cloudflare.Enabled || cfg.Cloudflare.APIToken != "" {
+			providers = append(providers, ai.NewCloudflareWorkersAIProvider(
+				cfg.Cloudflare.Enabled,
+				cfg.Cloudflare.AccountID,
+				cfg.Cloudflare.APIToken,
+				cfg.Cloudflare.GatewayID,
+				cfg.Cloudflare.UseGateway,
+				cfg.Cloudflare.Model,
+				time.Duration(cfg.Cloudflare.TimeoutSeconds)*time.Second,
+			))
+		}
+
+		// 3. DashScope
+		dsKey := cfg.DashScope.APIKey
+		if dsKey == "" {
+			dsKey = cfg.DashScopeAPIKey // fallback 到旧字段
+		}
+		providers = append(providers, ai.NewDashScopeProvider(
+			cfg.DashScope.Enabled,
+			dsKey,
+			cfg.DashScope.Model,
+		))
+
+		// 4. CLIProxyAPI（最后 fallback）
+		if cfg.CLIProxyAPI.Enabled || cfg.CLIProxyAPI.BaseURL != "" {
+			providers = append(providers, ai.NewOpenAICompatProvider(
+				ai.ProviderCLIProxyAPI,
+				cfg.CLIProxyAPI.Enabled,
+				cfg.CLIProxyAPI.BaseURL,
+				cfg.CLIProxyAPI.APIKey,
+				cfg.CLIProxyAPI.Model,
+				time.Duration(cfg.CLIProxyAPI.TimeoutSeconds)*time.Second,
+			))
+		}
+
+		aiRouter = ai.NewRouter(aiQuotaStore, providers...)
+	})
+}
+
+func defaultChatFunc(messages []ai.ChatMessage) (*ai.LegacyChatResponse, error) {
+	initAIRouter()
+
+	req := ai.ChatRequest{
+		Messages:    messages,
+		MaxTokens:   config.GlobalConfig.AI.Safety.MaxOutputTokens,
+		Temperature: 0.7,
 	}
-	client := ai.NewClient()
-	return client.Chat(messages)
+
+	resp, err := aiRouter.Chat(context.Background(), req)
+	if err != nil {
+		return nil, err
+	}
+
+	// 转换回旧版 ChatResponse 格式（向后兼容）
+	return &ai.LegacyChatResponse{
+		Output: struct {
+			Text string `json:"text"`
+		}{Text: resp.Content},
+		Usage: struct {
+			InputTokens  int `json:"input_tokens"`
+			OutputTokens int `json:"output_tokens"`
+			TotalTokens  int `json:"total_tokens"`
+		}{
+			InputTokens:  resp.Usage.InputTokens,
+			OutputTokens: resp.Usage.OutputTokens,
+			TotalTokens:  resp.Usage.TotalTokens,
+		},
+	}, nil
 }
 
 func defaultSpeechFunc(data []byte) (*ai.SpeechResult, error) {
@@ -366,4 +490,102 @@ func quotaTTL() time.Duration {
 	now := time.Now().In(time.Local)
 	next := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
 	return next.Sub(now) + time.Minute
+}
+
+// ============================================================================
+// Redis QuotaStore — 实现 ai.QuotaStore 接口
+// ============================================================================
+
+// redisQuotaStore 基于 Redis 的额度与熔断存储
+type redisQuotaStore struct{}
+
+func newRedisQuotaStore() *redisQuotaStore {
+	return &redisQuotaStore{}
+}
+
+func (s *redisQuotaStore) CanUseProvider(ctx context.Context, provider ai.ProviderName, req ai.ChatRequest) bool {
+	// 检查熔断
+	circuitKey := "ai:provider:" + string(provider) + ":circuit_until"
+	val, err := gredis.Get(circuitKey)
+	if err == nil && val != "" {
+		until, parseErr := time.Parse(time.RFC3339, val)
+		if parseErr == nil && time.Now().Before(until) {
+			return false
+		}
+	}
+
+	// Cloudflare 特有：检查 Neurons 预算
+	if provider == ai.ProviderCloudflareWorkersAI {
+		cfg := config.GlobalConfig.AI.Cloudflare
+		neuronsUsed, _ := getCloudflareNeurons()
+		if neuronsUsed >= cfg.HardNeuronBudget {
+			return false
+		}
+		if neuronsUsed >= cfg.DailyNeuronBudget {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (s *redisQuotaStore) RecordSuccess(ctx context.Context, provider ai.ProviderName, resp *ai.ChatResponse) {
+	// 重置熔断计数
+	failKey := "ai:provider:" + string(provider) + ":failures"
+	_ = gredis.Del(failKey)
+	_ = gredis.Del("ai:provider:" + string(provider) + ":circuit_until")
+
+	// Cloudflare：记录 Neurons 消耗
+	if provider == ai.ProviderCloudflareWorkersAI && resp.Usage.NeuronsEst > 0 {
+		addCloudflareNeurons(resp.Usage.NeuronsEst)
+	}
+}
+
+func (s *redisQuotaStore) RecordFailure(ctx context.Context, provider ai.ProviderName, err error) {
+	failKey := "ai:provider:" + string(provider) + ":failures"
+	val, incrErr := gredis.Incr(failKey)
+	if incrErr != nil {
+		return
+	}
+	_ = gredis.Expire(failKey, 300) // 5 分钟窗口
+
+	// 连续失败 >= 3 次 → 熔断 60 秒
+	if val >= 3 {
+		circuitKey := "ai:provider:" + string(provider) + ":circuit_until"
+		until := time.Now().Add(60 * time.Second).UTC().Format(time.RFC3339)
+		_ = gredis.Set(circuitKey, until, 60)
+	}
+}
+
+// ============================================================================
+// Cloudflare Neurons 追踪
+// ============================================================================
+
+func cloudflareNeuronsKey() string {
+	return "babygarden:ai:cf:neurons:" + time.Now().UTC().Format("2006-01-02")
+}
+
+func getCloudflareNeurons() (int, error) {
+	val, err := gredis.Get(cloudflareNeuronsKey())
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return 0, nil
+		}
+		return 0, err
+	}
+	if val == "" {
+		return 0, nil
+	}
+	return strconv.Atoi(val)
+}
+
+func addCloudflareNeurons(neurons int) {
+	key := cloudflareNeuronsKey()
+	_, _ = gredis.IncrBy(key, int64(neurons))
+	_ = gredis.Expire(key, 48*3600) // 48 小时过期
+}
+
+func nextUTCMidnight() time.Time {
+	now := time.Now().UTC()
+	return time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, time.UTC)
 }
