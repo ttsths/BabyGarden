@@ -57,6 +57,7 @@ func (p *DashScopeProvider) Chat(ctx context.Context, req ChatRequest) (*ChatRes
 		Usage: Usage{
 			InputTokens:  resp.Usage.InputTokens,
 			OutputTokens: resp.Usage.OutputTokens,
+			CachedTokens: resp.Usage.CachedTokens,
 			TotalTokens:  resp.Usage.TotalTokens,
 		},
 	}, nil
@@ -72,9 +73,11 @@ type LegacyChatResponse struct {
 		Text string `json:"text"`
 	} `json:"output"`
 	Usage struct {
-		InputTokens  int `json:"input_tokens"`
-		OutputTokens int `json:"output_tokens"`
-		TotalTokens  int `json:"total_tokens"`
+		InputTokens          int `json:"input_tokens"`
+		OutputTokens         int `json:"output_tokens"`
+		CachedTokens         int `json:"cached_tokens"`
+		PromptCacheHitTokens int `json:"prompt_cache_hit_tokens"`
+		TotalTokens          int `json:"total_tokens"`
 	} `json:"usage"`
 }
 
@@ -173,6 +176,9 @@ func (c *dashClient) chat(messages []ChatMessage, model string, maxTokens int, t
 	var result LegacyChatResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, err
+	}
+	if result.Usage.CachedTokens == 0 && result.Usage.PromptCacheHitTokens > 0 {
+		result.Usage.CachedTokens = result.Usage.PromptCacheHitTokens
 	}
 
 	return &result, nil

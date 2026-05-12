@@ -15,6 +15,7 @@ import {
   TeamOutlined,
   PictureOutlined,
   FileTextOutlined,
+  RobotOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   LogoutOutlined,
@@ -55,6 +56,11 @@ const menuItems: MenuItem[] = [
     key: 'records',
     icon: <FileTextOutlined />,
     label: '记录管理',
+  },
+  {
+    key: 'ai-usage',
+    icon: <RobotOutlined />,
+    label: 'AI统计',
   },
 ];
 

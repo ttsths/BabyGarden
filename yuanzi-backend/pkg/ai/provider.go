@@ -20,8 +20,8 @@ type ChatMessage struct {
 
 // ChatRequest 统一聊天请求
 type ChatRequest struct {
-	UserID      uint          `json:"user_id"`
-	FamilyID    uint          `json:"family_id"`
+	UserID      string        `json:"user_id"`
+	FamilyID    string        `json:"family_id"`
 	Messages    []ChatMessage `json:"messages"`
 	Stream      bool          `json:"stream"`
 	MaxTokens   int           `json:"max_tokens,omitempty"`
@@ -33,6 +33,7 @@ type ChatRequest struct {
 type Usage struct {
 	InputTokens  int `json:"input_tokens,omitempty"`
 	OutputTokens int `json:"output_tokens,omitempty"`
+	CachedTokens int `json:"cached_tokens,omitempty"`
 	TotalTokens  int `json:"total_tokens,omitempty"`
 	NeuronsEst   int `json:"neurons_est,omitempty"`
 }

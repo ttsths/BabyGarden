@@ -82,6 +82,9 @@ func SetupRouter() *gin.Engine {
 	// Statistics
 	adminAuth.GET("/stats/overview", admin.GetStatsOverview)
 	adminAuth.GET("/stats/daily", admin.GetDailyStats)
+	adminAuth.GET("/ai/usage", admin.GetAIUsage)
+	adminAuth.GET("/ai/usage/summary", admin.GetAIUsageSummary)
+	adminAuth.GET("/ai/usage/:userId", admin.GetUserAIUsage)
 
 	return r
 }

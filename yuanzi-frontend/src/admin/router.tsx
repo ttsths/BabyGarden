@@ -8,6 +8,7 @@ import { BabiesPage } from '@/admin/pages/BabiesPage';
 import { FamiliesPage } from '@/admin/pages/FamiliesPage';
 import { PhotosPage } from '@/admin/pages/PhotosPage';
 import { RecordsPage } from '@/admin/pages/RecordsPage';
+import { AIUsagePage } from '@/admin/pages/AIUsagePage';
 
 export function AdminRouter() {
   return (
@@ -22,6 +23,7 @@ export function AdminRouter() {
           <Route path="families" element={<FamiliesPage />} />
           <Route path="photos" element={<PhotosPage />} />
           <Route path="records" element={<RecordsPage />} />
+          <Route path="ai-usage" element={<AIUsagePage />} />
         </Route>
       </Route>
     </Routes>

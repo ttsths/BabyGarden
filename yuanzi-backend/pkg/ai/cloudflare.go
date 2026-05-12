@@ -108,6 +108,14 @@ func (p *CloudflareWorkersAIProvider) Chat(ctx context.Context, req ChatRequest)
 		Result  struct {
 			Response string `json:"response"`
 		} `json:"result"`
+		Usage struct {
+			PromptTokens        int `json:"prompt_tokens"`
+			CompletionTokens    int `json:"completion_tokens"`
+			TotalTokens         int `json:"total_tokens"`
+			PromptTokensDetails struct {
+				CachedTokens int `json:"cached_tokens"`
+			} `json:"prompt_tokens_details"`
+		} `json:"usage"`
 		Errors []any `json:"errors"`
 	}
 	if err := json.Unmarshal(raw, &out); err != nil {
@@ -118,6 +126,15 @@ func (p *CloudflareWorkersAIProvider) Chat(ctx context.Context, req ChatRequest)
 	}
 
 	usage := EstimateKimiNeurons(req.Messages, out.Result.Response)
+	if out.Usage.TotalTokens > 0 || out.Usage.PromptTokens > 0 || out.Usage.CompletionTokens > 0 {
+		usage.InputTokens = out.Usage.PromptTokens
+		usage.OutputTokens = out.Usage.CompletionTokens
+		usage.CachedTokens = out.Usage.PromptTokensDetails.CachedTokens
+		usage.TotalTokens = out.Usage.TotalTokens
+		if usage.TotalTokens == 0 {
+			usage.TotalTokens = usage.InputTokens + usage.OutputTokens
+		}
+	}
 
 	return &ChatResponse{
 		Content:  out.Result.Response,
