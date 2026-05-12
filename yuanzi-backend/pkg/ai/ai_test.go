@@ -134,7 +134,7 @@ func TestRouterProviderOrder(t *testing.T) {
 	}
 
 	router := NewRouter(nil, p1, p2)
-	resp, err := router.Chat(nil, ChatRequest{})
+	resp, err := router.Chat(context.TODO(), ChatRequest{})
 	if err != nil {
 		t.Fatalf("Router.Chat failed: %v", err)
 	}
@@ -163,7 +163,7 @@ func TestRouterFallback(t *testing.T) {
 	}
 
 	router := NewRouter(nil, p1, p2)
-	resp, err := router.Chat(nil, ChatRequest{})
+	resp, err := router.Chat(context.TODO(), ChatRequest{})
 	if err != nil {
 		t.Fatalf("Router.Chat fallback failed: %v", err)
 	}
@@ -189,7 +189,7 @@ func TestRouterAllFailed(t *testing.T) {
 	}
 
 	router := NewRouter(nil, p1, p2)
-	_, err := router.Chat(nil, ChatRequest{})
+	_, err := router.Chat(context.TODO(), ChatRequest{})
 	if err == nil {
 		t.Fatal("Expected error when all providers fail")
 	}
@@ -212,7 +212,7 @@ func TestRouterSkipsDisabled(t *testing.T) {
 	}
 
 	router := NewRouter(nil, p1, p2)
-	resp, err := router.Chat(nil, ChatRequest{})
+	resp, err := router.Chat(context.TODO(), ChatRequest{})
 	if err != nil {
 		t.Fatalf("Router.Chat failed: %v", err)
 	}
