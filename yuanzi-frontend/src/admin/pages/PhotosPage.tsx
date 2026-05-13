@@ -136,22 +136,31 @@ export function PhotosPage() {
         
         updateTask(taskId, { progress: 40 });
 
-        await axios.put(upload_url, file, {
-          headers: {
-            'Content-Type': file.type || 'image/jpeg',
-          },
-          transformRequest: [(data, headers) => {
-            // Remove axios default headers that are not part of the R2 presigned URL signature
-            delete headers['X-Requested-With'];
-            delete headers['Authorization'];
-            return data;
-          }],
-          onUploadProgress: (e) => {
+        // Use XMLHttpRequest directly for R2 upload to avoid axios default headers
+        // and interceptors that could break the presigned URL signature or trigger CORS issues.
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('PUT', upload_url);
+          // Only set Content-Type header — no extra headers that would break the signature.
+          xhr.setRequestHeader('Content-Type', file.type || 'image/jpeg');
+
+          xhr.upload.onprogress = (e) => {
             if (e.total) {
               const percent = Math.round(40 + (e.loaded / e.total) * 40);
               updateTask(taskId, { progress: percent });
             }
-          },
+          };
+
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve();
+            } else {
+              reject(new Error(`R2 upload failed: HTTP ${xhr.status}`));
+            }
+          };
+
+          xhr.onerror = () => reject(new Error('Network Error — check R2 CORS configuration'));
+          xhr.send(file);
         });
 
         updateTask(taskId, { status: 'confirming', progress: 85 });

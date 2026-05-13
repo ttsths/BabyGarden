@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	appConfig "yuanzi-backend/config"
 )
 
@@ -66,13 +68,22 @@ func NewR2Provider() (Provider, error) {
 
 	presigner := s3.NewPresignClient(client)
 
-	return &R2Provider{
+	provider := &R2Provider{
 		client:    client,
 		presigner: presigner,
 		bucket:    bucket,
 		publicURL: publicURL,
 		accountID: accountID,
-	}, nil
+	}
+
+	// Configure CORS on the R2 bucket so browsers can upload directly via presigned URLs.
+	// Without CORS, the browser OPTIONS preflight is blocked and PUT requests fail with Network Error.
+	if err := provider.ConfigureCORS(nil); err != nil {
+		// Log warning but don't block startup — CORS may already be configured via dashboard.
+		fmt.Fprintf(os.Stderr, "[R2] warning: failed to configure CORS on bucket %s: %v\n", bucket, err)
+	}
+
+	return provider, nil
 }
 
 // GetUploadSignature generates a presigned PUT URL for direct upload to R2.
@@ -133,6 +144,65 @@ func (p *R2Provider) DeleteObject(key string) error {
 	if err != nil {
 		return fmt.Errorf("failed to delete R2 object: %w", err)
 	}
+	return nil
+}
+
+// ConfigureCORS applies CORS rules to the R2 bucket so browsers can directly
+// upload files (PUT) and read/download them (GET/HEAD) from the frontend.
+//
+// If allowedOrigins is empty, it defaults to:
+//   - R2_CORS_ORIGINS env var (comma-separated), or
+//   - "*" if neither is set.
+func (p *R2Provider) ConfigureCORS(allowedOrigins []string) error {
+	if len(allowedOrigins) == 0 {
+		if raw := os.Getenv("R2_CORS_ORIGINS"); raw != "" {
+			for _, o := range strings.Split(raw, ",") {
+				o = strings.TrimSpace(o)
+				if o != "" {
+					allowedOrigins = append(allowedOrigins, o)
+				}
+			}
+		}
+	}
+	// Default to wildcard if nothing configured — this allows any origin,
+	// which is acceptable for a public photo bucket behind presigned URLs.
+	if len(allowedOrigins) == 0 {
+		allowedOrigins = []string{"*"}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	_, err := p.client.PutBucketCors(ctx, &s3.PutBucketCorsInput{
+		Bucket: aws.String(p.bucket),
+		CORSConfiguration: &types.CORSConfiguration{
+			CORSRules: []types.CORSRule{
+				{
+					AllowedHeaders: []string{
+						"Content-Type",
+						"Content-Length",
+						"Content-MD5",
+					},
+					AllowedMethods: []string{
+						"PUT",
+						"GET",
+						"HEAD",
+					},
+					AllowedOrigins: allowedOrigins,
+					ExposeHeaders: []string{
+						"ETag",
+						"Content-Length",
+						"x-amz-request-id",
+					},
+					MaxAgeSeconds: aws.Int32(3600),
+				},
+			},
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("PutBucketCors failed: %w", err)
+	}
+
 	return nil
 }
 
