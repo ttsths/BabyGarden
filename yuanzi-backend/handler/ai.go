@@ -68,11 +68,15 @@ func AIChat(c *gin.Context) {
 		baby = loaded
 	}
 
-	messages := buildChatMessages(req, baby)
-	resp, err := aiChatFunc(messages)
+	// 确定首选 Provider 用于动态系统提示词
+	firstProvider := firstEnabledProvider()
+	messages := buildChatMessages(req, baby, firstProvider)
+	requestID := model.NewID() // 生成 request_id 用于跨 Provider 追踪
+	resp, err := aiChatFunc(c.Request.Context(), messages)
 	if err != nil {
 		_ = rollbackQuota(userID, quotaTypeChat)
 		logAIUsageAsync(model.AIUsageLog{
+			RequestID:    requestID,
 			UserID:       userID,
 			FamilyID:     familyIDFromBaby(baby),
 			RequestType:  "chat",
@@ -107,6 +111,7 @@ func AIChat(c *gin.Context) {
 		return
 	}
 	logAIUsageAsync(model.AIUsageLog{
+		RequestID:    requestID,
 		UserID:       userID,
 		FamilyID:     familyIDFromBaby(baby),
 		Provider:     string(resp.Provider),
@@ -381,6 +386,7 @@ func initAIRouter() {
 			cfg.DashScope.Enabled,
 			dsKey,
 			cfg.DashScope.Model,
+			time.Duration(cfg.DashScope.TimeoutSeconds)*time.Second,
 		))
 
 		// 4. CLIProxyAPI（最后 fallback）
@@ -399,7 +405,7 @@ func initAIRouter() {
 	})
 }
 
-func defaultChatFunc(messages []ai.ChatMessage) (*ai.ChatResponse, error) {
+func defaultChatFunc(ctx context.Context, messages []ai.ChatMessage) (*ai.ChatResponse, error) {
 	initAIRouter()
 
 	req := ai.ChatRequest{
@@ -408,7 +414,7 @@ func defaultChatFunc(messages []ai.ChatMessage) (*ai.ChatResponse, error) {
 		Temperature: 0.7,
 	}
 
-	resp, err := aiRouter.Chat(context.Background(), req)
+	resp, err := aiRouter.Chat(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -416,12 +422,22 @@ func defaultChatFunc(messages []ai.ChatMessage) (*ai.ChatResponse, error) {
 	return resp, nil
 }
 
+func firstEnabledProvider() ai.ProviderName {
+	initAIRouter()
+	for _, p := range aiRouter.Providers() {
+		if p.Enabled() {
+			return p.Name()
+		}
+	}
+	return ai.ProviderDashScope // fallback
+}
+
 func defaultSpeechFunc(data []byte) (*ai.SpeechResult, error) {
 	return ai.RecognizeSpeech(data)
 }
 
-func buildChatMessages(req AIChatRequest, baby *model.Baby) []ai.ChatMessage {
-	messages := []ai.ChatMessage{{Role: "system", Content: ai.BuildSystemPrompt()}}
+func buildChatMessages(req AIChatRequest, baby *model.Baby, provider ai.ProviderName) []ai.ChatMessage {
+	messages := []ai.ChatMessage{{Role: "system", Content: ai.BuildSystemPrompt(provider)}}
 	if baby != nil {
 		messages = append(messages, ai.ChatMessage{Role: "system", Content: buildBabyContext(baby)})
 	}

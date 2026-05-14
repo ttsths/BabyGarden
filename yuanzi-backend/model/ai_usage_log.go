@@ -8,6 +8,7 @@ import (
 
 type AIUsageLog struct {
 	ID           string    `gorm:"type:varchar(36);primaryKey" json:"id"`
+	RequestID    string    `gorm:"type:varchar(36);index:idx_ai_usage_request_id" json:"request_id,omitempty"`
 	UserID       string    `gorm:"type:varchar(36);not null;index:idx_ai_usage_user_created,priority:1" json:"user_id"`
 	FamilyID     string    `gorm:"type:varchar(36);index:idx_ai_usage_family_created,priority:1" json:"family_id,omitempty"`
 	Provider     string    `gorm:"type:varchar(64);not null;index:idx_ai_usage_provider_created,priority:1" json:"provider"`
