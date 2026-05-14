@@ -27,7 +27,10 @@ build/
 .env
 .env.local
 
-# Use config.example.yaml as template for local dev overrides
+# ⚠️ config.yaml 包含敏感信息，不可提交到 GitHub
+# 所有密码/密钥通过环境变量注入，见 .env.example
+# Viper AutomaticEnv() 会自动覆盖空值
+config.yaml
 
 # Logs
 logs/

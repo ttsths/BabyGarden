@@ -14,7 +14,7 @@ type AIChatRecord struct {
 	Answer     string     `gorm:"type:text;not null" json:"answer"`
 	VoiceURL   string     `gorm:"type:varchar(500)" json:"voice_url,omitempty"`
 	TokensUsed int        `json:"tokens_used"`
-	Model      string     `gorm:"type:varchar(50);default:'qwen-turbo'" json:"model"`
+	Model      string     `gorm:"type:varchar(50)" json:"model"`
 	CreatedAt  time.Time  `json:"created_at"`
 }
 

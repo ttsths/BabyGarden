@@ -25,6 +25,11 @@ func NewRouter(quota QuotaStore, providers ...Provider) *Router {
 	return &Router{providers: providers, quota: quota}
 }
 
+// Providers 返回所有注册的 Provider（用于外部查询首选 Provider 等）
+func (r *Router) Providers() []Provider {
+	return r.providers
+}
+
 // Chat 按优先级链调用 AI，失败自动 fallback
 func (r *Router) Chat(ctx context.Context, req ChatRequest) (*ChatResponse, error) {
 	var errs []error

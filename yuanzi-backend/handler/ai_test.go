@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -27,7 +28,7 @@ func TestAIChatSuccess(t *testing.T) {
 	defer cleanupAIChatRecords(t, admin.ID)
 	clearAIQuota(t, admin.ID)
 
-	aiChatFunc = func(messages []ai.ChatMessage) (*ai.ChatResponse, error) {
+	aiChatFunc = func(_ context.Context, messages []ai.ChatMessage) (*ai.ChatResponse, error) {
 		return &ai.ChatResponse{
 			Content:  "测试回答",
 			Provider: ai.ProviderDashScope,

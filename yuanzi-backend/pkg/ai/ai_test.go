@@ -7,25 +7,28 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestEstimateTokenCount(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected int
+		minExpected int
 	}{
 		{"", 0},
-		{"hello", 3},   // 5 chars / 2 + 1 = 3
-		{"你好世界", 3},    // 4 runes / 2 + 1 = 3
-		{"hello你好", 4}, // 9 chars → 9 runes / 2 + 1 = 5... wait
+		{"hello", 1},
+		{"你好世界", 1},
+		{"hello你好", 1},
 	}
 
 	for _, tt := range tests {
-		got := EstimateTokenCount(tt.input)
+		got := CountTokens(tt.input, "qwen-plus")
 		if got <= 0 && tt.input != "" {
-			t.Errorf("EstimateTokenCount(%q) = %d, want > 0", tt.input, got)
+			t.Errorf("CountTokens(%q) = %d, want > 0", tt.input, got)
 		}
-		_ = got
+		if tt.input == "" && got != 0 {
+			t.Errorf("CountTokens(empty) = %d, want 0", got)
+		}
 	}
 }
 
@@ -145,7 +148,7 @@ func TestCloudflareWorkersAIProviderChatUsage(t *testing.T) {
 }
 
 func TestDashScopeProvider(t *testing.T) {
-	p := NewDashScopeProvider(true, "sk-test", "qwen-plus")
+	p := NewDashScopeProvider(true, "sk-test", "qwen-plus", 30*time.Second)
 	if p.Name() != ProviderDashScope {
 		t.Errorf("Name() = %s, want %s", p.Name(), ProviderDashScope)
 	}
@@ -153,7 +156,7 @@ func TestDashScopeProvider(t *testing.T) {
 		t.Error("Expected enabled provider")
 	}
 
-	p2 := NewDashScopeProvider(true, "", "")
+	p2 := NewDashScopeProvider(true, "", "", 30*time.Second)
 	if p2.Enabled() {
 		t.Error("Expected disabled when API key missing")
 	}
