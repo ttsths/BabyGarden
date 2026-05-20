@@ -112,7 +112,11 @@ func recordTypeLabel(recordType model.RecordType) string {
 	case model.RecordTypeSleep:
 		return "睡眠"
 	case model.RecordTypeDiaper:
+		return "尿布"
+	case model.RecordTypeExcretion:
 		return "排泄"
+	case model.RecordTypeTemperature:
+		return "测温"
 	case model.RecordTypeGrowth:
 		return "成长"
 	default:

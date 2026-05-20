@@ -294,16 +294,21 @@ func ListPhotos(c *gin.Context) {
 	}
 
 	provider := getStorageProvider()
+	userID := middleware.GetUserIDOrZero(c)
 	list := make([]PhotoResponse, 0, len(photos))
 	for _, photo := range photos {
+		likeCount, commentCount, likedByMe := photoInteractionStats(photo.ID, userID)
 		list = append(list, PhotoResponse{
-			ID:          photo.ID,
-			URL:         provider.GetURL(photo.OSSKey),
-			ThumbURL:    provider.GetThumbnailURL(photo.OSSKey, photoThumbWidth),
-			Width:       derefInt(photo.Width),
-			Height:      derefInt(photo.Height),
-			TakenAt:     formatTime(photo.TakenAt),
-			Description: photo.Description,
+			ID:           photo.ID,
+			URL:          provider.GetURL(photo.OSSKey),
+			ThumbURL:     provider.GetThumbnailURL(photo.OSSKey, photoThumbWidth),
+			Width:        derefInt(photo.Width),
+			Height:       derefInt(photo.Height),
+			TakenAt:      formatTime(photo.TakenAt),
+			Description:  photo.Description,
+			LikeCount:    likeCount,
+			CommentCount: commentCount,
+			LikedByMe:    likedByMe,
 		})
 	}
 
@@ -356,6 +361,88 @@ func DeletePhoto(c *gin.Context) {
 	})
 }
 
+// ListPhotoComments 获取照片评论。
+func ListPhotoComments(c *gin.Context) {
+	photo, _, err := loadPhotoWithMemberAccess(c)
+	if err != nil {
+		return
+	}
+	page := parsePage(c.DefaultQuery("page", "1"))
+	pageSize := parsePageSize(c.DefaultQuery("page_size", "50"))
+
+	query := mysql.DB.Model(&model.PhotoComment{}).Where("photo_id = ?", photo.ID)
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "查询评论失败"})
+		return
+	}
+	var comments []model.PhotoComment
+	if err := query.Preload("User").Order("created_at asc").Offset((page - 1) * pageSize).Limit(pageSize).Find(&comments).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "查询评论失败"})
+		return
+	}
+	list := make([]PhotoCommentResponse, 0, len(comments))
+	for _, item := range comments {
+		list = append(list, photoCommentResponse(item))
+	}
+	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "获取成功", Data: model.ListResponse{
+		List:       list,
+		Pagination: model.Pagination{Page: page, PageSize: pageSize, Total: total, TotalPages: calcTotalPages(total, pageSize)},
+	}})
+}
+
+// CreatePhotoComment 创建照片评论。
+func CreatePhotoComment(c *gin.Context) {
+	photo, _, err := loadPhotoWithMemberAccess(c)
+	if err != nil {
+		return
+	}
+	var req CreatePhotoCommentRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "请求参数错误"})
+		return
+	}
+	userID := middleware.GetUserIDOrZero(c)
+	comment := model.PhotoComment{PhotoID: photo.ID, FamilyID: photo.FamilyID, UserID: userID, Content: req.Content}
+	if err := mysql.DB.Create(&comment).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "评论失败"})
+		return
+	}
+	_ = mysql.DB.Preload("User").First(&comment, "id = ?", comment.ID).Error
+	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "评论成功", Data: photoCommentResponse(comment)})
+}
+
+// LikePhoto 点赞照片。
+func LikePhoto(c *gin.Context) {
+	photo, _, err := loadPhotoWithMemberAccess(c)
+	if err != nil {
+		return
+	}
+	userID := middleware.GetUserIDOrZero(c)
+	like := model.PhotoLike{PhotoID: photo.ID, FamilyID: photo.FamilyID, UserID: userID}
+	if err := mysql.DB.Where("photo_id = ? AND user_id = ?", photo.ID, userID).FirstOrCreate(&like).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "点赞失败"})
+		return
+	}
+	likeCount, commentCount, likedByMe := photoInteractionStats(photo.ID, userID)
+	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "点赞成功", Data: PhotoInteractionResponse{LikeCount: likeCount, CommentCount: commentCount, LikedByMe: likedByMe}})
+}
+
+// UnlikePhoto 取消点赞照片。
+func UnlikePhoto(c *gin.Context) {
+	photo, _, err := loadPhotoWithMemberAccess(c)
+	if err != nil {
+		return
+	}
+	userID := middleware.GetUserIDOrZero(c)
+	if err := mysql.DB.Where("photo_id = ? AND user_id = ?", photo.ID, userID).Delete(&model.PhotoLike{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "取消点赞失败"})
+		return
+	}
+	likeCount, commentCount, likedByMe := photoInteractionStats(photo.ID, userID)
+	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "取消点赞成功", Data: PhotoInteractionResponse{LikeCount: likeCount, CommentCount: commentCount, LikedByMe: likedByMe}})
+}
+
 // 请求响应结构
 
 type PhotoUploadURLRequest struct {
@@ -388,13 +475,36 @@ type PhotoConfirmRequest struct {
 }
 
 type PhotoResponse struct {
-	ID          string `json:"id"`
-	URL         string `json:"url"`
-	ThumbURL    string `json:"thumb_url"`
-	Width       int    `json:"width"`
-	Height      int    `json:"height"`
-	TakenAt     string `json:"taken_at"`
-	Description string `json:"description,omitempty"`
+	ID           string `json:"id"`
+	URL          string `json:"url"`
+	ThumbURL     string `json:"thumb_url"`
+	Width        int    `json:"width"`
+	Height       int    `json:"height"`
+	TakenAt      string `json:"taken_at"`
+	Description  string `json:"description,omitempty"`
+	LikeCount    int64  `json:"like_count"`
+	CommentCount int64  `json:"comment_count"`
+	LikedByMe    bool   `json:"liked_by_me"`
+}
+
+type CreatePhotoCommentRequest struct {
+	Content string `json:"content" binding:"required,max=500"`
+}
+
+type PhotoCommentResponse struct {
+	ID        string `json:"id"`
+	PhotoID   string `json:"photo_id"`
+	UserID    string `json:"user_id"`
+	Nickname  string `json:"nickname"`
+	AvatarURL string `json:"avatar_url,omitempty"`
+	Content   string `json:"content"`
+	CreatedAt string `json:"created_at"`
+}
+
+type PhotoInteractionResponse struct {
+	LikeCount    int64 `json:"like_count"`
+	CommentCount int64 `json:"comment_count"`
+	LikedByMe    bool  `json:"liked_by_me"`
 }
 
 func loadPhotoWithMemberAccess(c *gin.Context) (*model.Photo, *model.FamilyMember, error) {
@@ -445,6 +555,30 @@ func derefInt(value *int) int {
 		return 0
 	}
 	return *value
+}
+
+func photoInteractionStats(photoID, userID string) (int64, int64, bool) {
+	var likeCount int64
+	var commentCount int64
+	var likedCount int64
+	_ = mysql.DB.Model(&model.PhotoLike{}).Where("photo_id = ?", photoID).Count(&likeCount).Error
+	_ = mysql.DB.Model(&model.PhotoComment{}).Where("photo_id = ?", photoID).Count(&commentCount).Error
+	if userID != "" {
+		_ = mysql.DB.Model(&model.PhotoLike{}).Where("photo_id = ? AND user_id = ?", photoID, userID).Count(&likedCount).Error
+	}
+	return likeCount, commentCount, likedCount > 0
+}
+
+func photoCommentResponse(comment model.PhotoComment) PhotoCommentResponse {
+	return PhotoCommentResponse{
+		ID:        comment.ID,
+		PhotoID:   comment.PhotoID,
+		UserID:    comment.UserID,
+		Nickname:  comment.User.Nickname,
+		AvatarURL: comment.User.AvatarURL,
+		Content:   comment.Content,
+		CreatedAt: comment.CreatedAt.Format(time.RFC3339),
+	}
 }
 
 // confirmUploadedPhoto updates photo status from pending to active.

@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS records (
     id VARCHAR(36) PRIMARY KEY COMMENT '记录ID',
     baby_id VARCHAR(36) NOT NULL,
     family_id VARCHAR(36) NOT NULL,
-    type VARCHAR(20) NOT NULL COMMENT '类型: feeding/sleep/diaper/growth',
+    type VARCHAR(20) NOT NULL COMMENT '类型: feeding/sleep/diaper/excretion/temperature/growth',
     started_at DATETIME(3) NOT NULL COMMENT '开始时间',
     ended_at DATETIME(3) COMMENT '结束时间',
     content JSON NOT NULL COMMENT '类型特定内容',
@@ -113,6 +113,32 @@ CREATE TABLE IF NOT EXISTS photos (
     INDEX idx_taken_at (taken_at),
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='照片表';
+
+CREATE TABLE IF NOT EXISTS photo_comments (
+    id VARCHAR(36) PRIMARY KEY COMMENT '评论ID',
+    photo_id VARCHAR(36) NOT NULL,
+    family_id VARCHAR(36) NOT NULL,
+    user_id VARCHAR(36) NOT NULL,
+    content TEXT NOT NULL COMMENT '评论内容',
+    created_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+    updated_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+    deleted_at DATETIME(3),
+    INDEX idx_photo_id (photo_id),
+    INDEX idx_family_id (family_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_deleted_at (deleted_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='照片评论表';
+
+CREATE TABLE IF NOT EXISTS photo_likes (
+    id VARCHAR(36) PRIMARY KEY COMMENT '点赞ID',
+    photo_id VARCHAR(36) NOT NULL,
+    family_id VARCHAR(36) NOT NULL,
+    user_id VARCHAR(36) NOT NULL,
+    created_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+    UNIQUE KEY uk_photo_user (photo_id, user_id),
+    INDEX idx_family_id (family_id),
+    INDEX idx_user_id (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='照片点赞表';
 
 -- 7. AI问答记录表
 CREATE TABLE IF NOT EXISTS ai_chat_records (

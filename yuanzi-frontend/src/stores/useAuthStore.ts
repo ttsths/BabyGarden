@@ -28,11 +28,10 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
 
       login: async (token, refreshToken) => {
-        set({ isLoading: true });
+        set({ token, refreshToken, isLoading: true });
         try {
           // 获取用户信息
-          const res = await api.auth.getProfile();
-          const user = res.data;
+          const user = await api.auth.getProfile() as User;
           set({ 
             user, 
             token, 
@@ -62,8 +61,7 @@ export const useAuthStore = create<AuthState>()(
         }
         
         try {
-          const res = await api.auth.getProfile();
-          const user = res.data;
+          const user = await api.auth.getProfile() as User;
           set({ user, isAuthenticated: true });
           return true;
         } catch {

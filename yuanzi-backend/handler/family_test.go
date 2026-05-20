@@ -25,6 +25,9 @@ var familyTestSetupOnce sync.Once
 
 func setupFamilyTestDB(t *testing.T) {
 	t.Helper()
+	if os.Getenv("RUN_EXTERNAL_INTEGRATION_TESTS") != "1" {
+		t.Skip("跳过依赖 MySQL 的集成测试：设置 RUN_EXTERNAL_INTEGRATION_TESTS=1 后执行")
+	}
 	familyTestSetupOnce.Do(func() {
 		projectRoot := getFamilyProjectRoot(t)
 		viper.SetConfigName("config")
@@ -36,6 +39,9 @@ func setupFamilyTestDB(t *testing.T) {
 		gredis.Setup()
 		gin.SetMode(gin.TestMode)
 	})
+	if mysql.DB == nil || !mysql.IsConnected() {
+		t.Skip("跳过依赖 MySQL 的集成测试：数据库未连接")
+	}
 }
 
 func TestCreateFamilySuccess(t *testing.T) {
@@ -217,6 +223,8 @@ func cleanupFamilies(t *testing.T, familyIDs ...string) {
 	if len(familyIDs) == 0 {
 		return
 	}
+	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.PhotoComment{}).Error
+	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.PhotoLike{}).Error
 	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.Photo{}).Error
 	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.Baby{}).Error
 	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.Record{}).Error
@@ -348,5 +356,60 @@ func TestRemoveFamilyMemberRejectNonAdmin(t *testing.T) {
 
 	if recorder.Code != http.StatusForbidden {
 		t.Fatalf("非管理员移除应被拒绝: status=%d body=%s", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestJoinFamilyByInviteCode(t *testing.T) {
+	setupFamilyTestDB(t)
+
+	admin := createTestUser(t, uniquePhone("joinadmin"), "邀请管理员")
+	joiner := createTestUser(t, uniquePhone("joiner"), "加入成员")
+	family := createTestFamily(t, admin.ID, "邀请码家庭")
+	adminMember := createTestFamilyMember(t, family.ID, admin.ID, model.FamilyRoleAdmin)
+	defer cleanupFamilies(t, family.ID)
+	defer cleanupUsers(t, admin.ID, joiner.ID)
+	defer cleanupMembers(t, adminMember.ID)
+
+	body := mustMarshal(t, JoinFamilyRequest{InviteCode: family.InviteCode})
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	ctx.Request = httptest.NewRequest(http.MethodPost, "/family/join", bytes.NewReader(body))
+	ctx.Request.Header.Set("Content-Type", "application/json")
+	ctx.Set("userId", joiner.ID)
+
+	JoinFamily(ctx)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("加入家庭失败: status=%d body=%s", recorder.Code, recorder.Body.String())
+	}
+	var member model.FamilyMember
+	if err := mysql.DB.Where("family_id = ? AND user_id = ?", family.ID, joiner.ID).First(&member).Error; err != nil {
+		t.Fatalf("未创建加入成员: %v", err)
+	}
+	if member.Role != model.FamilyRoleMember {
+		t.Fatalf("加入成员角色错误: %s", member.Role)
+	}
+}
+
+func TestLeaveFamilyRejectLastAdmin(t *testing.T) {
+	setupFamilyTestDB(t)
+
+	admin := createTestUser(t, uniquePhone("leaveadmin"), "最后管理员")
+	family := createTestFamily(t, admin.ID, "退出家庭")
+	adminMember := createTestFamilyMember(t, family.ID, admin.ID, model.FamilyRoleAdmin)
+	defer cleanupFamilies(t, family.ID)
+	defer cleanupUsers(t, admin.ID)
+	defer cleanupMembers(t, adminMember.ID)
+
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	ctx.Request = httptest.NewRequest(http.MethodPost, fmt.Sprintf("/family/%s/leave", family.ID), nil)
+	ctx.Params = gin.Params{{Key: "id", Value: family.ID}}
+	ctx.Set("userId", admin.ID)
+
+	LeaveFamily(ctx)
+
+	if recorder.Code != http.StatusForbidden {
+		t.Fatalf("最后管理员退出应被拒绝: status=%d body=%s", recorder.Code, recorder.Body.String())
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"yuanzi-backend/model"
@@ -68,6 +69,45 @@ func TestAIChatSuccess(t *testing.T) {
 	var record model.AIChatRecord
 	if err := mysql.DB.Where("user_id = ? AND question = ?", admin.ID, "宝宝喝多少奶?").First(&record).Error; err != nil {
 		t.Fatalf("问答记录未保存: %v", err)
+	}
+}
+
+func TestListAIChats(t *testing.T) {
+	setupFamilyTestDB(t)
+
+	admin := createTestUser(t, uniquePhone("aihist"), "AI历史用户")
+	family := createTestFamily(t, admin.ID, "AI历史家庭")
+	member := createTestFamilyMember(t, family.ID, admin.ID, model.FamilyRoleAdmin)
+	baby := createTestBaby(t, family.ID, "AI历史宝宝")
+	defer cleanupFamilies(t, family.ID)
+	defer cleanupUsers(t, admin.ID)
+	defer cleanupMembers(t, member.ID)
+	defer cleanupAIChatRecords(t, admin.ID)
+
+	record := model.AIChatRecord{UserID: admin.ID, BabyID: &baby.ID, Question: "今天喝奶如何?", Answer: "正常记录。", TokensUsed: 8, Model: "test", CreatedAt: time.Now()}
+	if err := mysql.DB.Create(&record).Error; err != nil {
+		t.Fatalf("创建AI历史失败: %v", err)
+	}
+
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	ctx.Request = httptest.NewRequest(http.MethodGet, "/ai/chats?baby_id="+baby.ID, nil)
+	ctx.Set("userId", admin.ID)
+
+	ListAIChats(ctx)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("获取AI历史失败: status=%d body=%s", recorder.Code, recorder.Body.String())
+	}
+	var response struct {
+		Code int `json:"code"`
+		Data struct {
+			List []AIChatHistoryResponse `json:"list"`
+		} `json:"data"`
+	}
+	decodeResponse(t, recorder.Body.Bytes(), &response)
+	if len(response.Data.List) != 1 || response.Data.List[0].Question != record.Question {
+		t.Fatalf("AI历史返回错误: %+v", response.Data.List)
 	}
 }
 
