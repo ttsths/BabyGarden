@@ -23,27 +23,34 @@ export const ENDPOINTS = {
     CREATE: '/record',
     UPDATE: (id: string) => `/record/${id}`,
     DELETE: (id: string) => `/record/${id}`,
-    STATS: '/record/stats',
+    STATS_DAILY: '/stats/daily',
+    STATS_WEEKLY: '/stats/weekly',
+    STATS_SUMMARY: '/stats/summary',
   },
   // 照片
   PHOTO: {
     LIST: '/photo',
     UPLOAD_URL: '/photo/upload-url',
-    CONFIRM: (id: string) => `/photo/${id}/confirm`,
+    CONFIRM: '/photo/confirm',
     DELETE: (id: string) => `/photo/${id}`,
-    QUOTA: '/photo/quota',
+    COMMENTS: (id: string) => `/photo/${id}/comments`,
+    LIKE: (id: string) => `/photo/${id}/like`,
   },
   // AI
   AI: {
     CHAT: '/ai/chat',
-    SPEECH: '/ai/speech',
+    CHATS: '/ai/chats',
+    CHAT_DETAIL: (id: string) => `/ai/chats/${id}`,
+    SPEECH: '/ai/speech/recognize',
     QUOTA: '/ai/quota',
   },
   // 家庭
   FAMILY: {
-    DETAIL: '/family',
-    MEMBERS: '/family/members',
-    INVITE: '/family/invite',
+    DETAIL: (id: string) => `/family/${id}`,
+    MEMBERS: (id: string) => `/family/${id}/members`,
+    INVITE: (id: string) => `/family/${id}/invite`,
+    JOIN: '/family/join',
+    LEAVE: (id: string) => `/family/${id}/leave`,
   },
   // 同步
   SYNC: {

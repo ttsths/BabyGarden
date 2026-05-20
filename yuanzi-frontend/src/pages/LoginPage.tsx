@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { api } from '@/services/api';
 
 /**
  * 登录页面
@@ -21,9 +22,11 @@ export const LoginPage: React.FC = () => {
     if (!phone) return;
     
     setLoading(true);
-    // TODO: 调用 API 发送验证码
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setLoading(false);
+    try {
+      await api.auth.sendCode(phone);
+    } finally {
+      setLoading(false);
+    }
     
     // 开始倒计时
     setCountdown(60);
@@ -43,11 +46,13 @@ export const LoginPage: React.FC = () => {
     if (!phone || !code) return;
     
     setLoading(true);
-    // TODO: 调用 API 登录
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    login('test-token', 'test-refresh-token');
-    setLoading(false);
-    navigate('/');
+    try {
+      const result = await api.auth.login(phone, code);
+      await login(result.access_token, result.refresh_token);
+      navigate('/');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

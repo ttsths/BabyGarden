@@ -140,6 +140,70 @@ func AIChat(c *gin.Context) {
 	})
 }
 
+// ListAIChats 获取当前用户 AI 会话历史。
+func ListAIChats(c *gin.Context) {
+	userID := middleware.GetUserIDOrZero(c)
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, model.Response{Code: model.ERROR_NOT_AUTH, Msg: "未登录"})
+		return
+	}
+
+	babyID := c.Query("baby_id")
+	if babyID != "" {
+		if _, _, err := loadBabyForRecord(c, babyID); err != nil {
+			return
+		}
+	}
+	page := parsePage(c.DefaultQuery("page", "1"))
+	pageSize := parsePageSize(c.DefaultQuery("page_size", "20"))
+
+	query := mysql.DB.Model(&model.AIChatRecord{}).Where("user_id = ?", userID)
+	if babyID != "" {
+		query = query.Where("baby_id = ?", babyID)
+	}
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "查询失败"})
+		return
+	}
+
+	var records []model.AIChatRecord
+	if err := query.Order("created_at desc").Offset((page - 1) * pageSize).Limit(pageSize).Find(&records).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "查询失败"})
+		return
+	}
+	list := make([]AIChatHistoryResponse, 0, len(records))
+	for _, item := range records {
+		list = append(list, aiChatHistoryResponse(item))
+	}
+
+	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "获取成功", Data: model.ListResponse{
+		List: list,
+		Pagination: model.Pagination{
+			Page:       page,
+			PageSize:   pageSize,
+			Total:      total,
+			TotalPages: calcTotalPages(total, pageSize),
+		},
+	}})
+}
+
+// GetAIChat 获取当前用户 AI 会话详情。
+func GetAIChat(c *gin.Context) {
+	userID := middleware.GetUserIDOrZero(c)
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, model.Response{Code: model.ERROR_NOT_AUTH, Msg: "未登录"})
+		return
+	}
+
+	var record model.AIChatRecord
+	if err := mysql.DB.Where("id = ? AND user_id = ?", c.Param("id"), userID).First(&record).Error; err != nil {
+		c.JSON(http.StatusNotFound, model.Response{Code: model.ERROR_NOT_FUND, Msg: "会话不存在"})
+		return
+	}
+	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "获取成功", Data: aiChatHistoryResponse(record)})
+}
+
 // SpeechRecognize 语音识别
 // @Summary 语音识别
 // @Description 将语音转为文字
@@ -297,6 +361,17 @@ type AIChatResponse struct {
 	RemainingQuota int    `json:"remaining_quota"`
 }
 
+type AIChatHistoryResponse struct {
+	ID         string  `json:"id"`
+	UserID     string  `json:"user_id"`
+	BabyID     *string `json:"baby_id,omitempty"`
+	Question   string  `json:"question"`
+	Answer     string  `json:"answer"`
+	TokensUsed int     `json:"tokens_used"`
+	Model      string  `json:"model"`
+	CreatedAt  string  `json:"created_at"`
+}
+
 type SpeechRecognizeResponse struct {
 	Text           string  `json:"text"`
 	Confidence     float64 `json:"confidence"`
@@ -329,6 +404,19 @@ var (
 	aiChatFunc          = defaultChatFunc
 	speechRecognizeFunc = defaultSpeechFunc
 )
+
+func aiChatHistoryResponse(record model.AIChatRecord) AIChatHistoryResponse {
+	return AIChatHistoryResponse{
+		ID:         record.ID,
+		UserID:     record.UserID,
+		BabyID:     record.BabyID,
+		Question:   record.Question,
+		Answer:     record.Answer,
+		TokensUsed: record.TokensUsed,
+		Model:      record.Model,
+		CreatedAt:  record.CreatedAt.Format(time.RFC3339),
+	}
+}
 
 const (
 	quotaTypeChat    = "chat"

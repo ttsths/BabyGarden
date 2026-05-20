@@ -3,34 +3,37 @@ export interface User {
   id: string;
   phone: string;
   nickname?: string;
-  avatar?: string;
-  isPaid: boolean;
-  createdAt: string;
+  avatar_url?: string;
+  status?: number;
+  is_admin?: number;
 }
 
 // 宝宝信息
 export interface Baby {
   id: string;
-  familyId: string;
+  family_id: string;
   name: string;
-  avatar?: string;
+  avatar_url?: string;
   birthday: string;
-  gender: 'male' | 'female';
-  createdAt: string;
+  gender: number | 'male' | 'female';
+  created_at?: string;
 }
 
 // 记录类型
-export type RecordType = 'feeding' | 'sleep' | 'diaper' | 'temperature' | 'food' | 'medicine';
+export type RecordType = 'feeding' | 'sleep' | 'diaper' | 'excretion' | 'temperature' | 'growth';
 
 // 记录
 export interface Record {
   id: string;
-  familyId: string;
-  babyId: string;
+  family_id?: string;
+  baby_id: string;
   type: RecordType;
-  data: RecordData;
-  createdAt: string;
-  createdBy: string;
+  started_at: string;
+  ended_at?: string;
+  content: globalThis.Record<string, unknown>;
+  note?: string;
+  created_at?: string;
+  created_by?: string;
 }
 
 export interface FeedingData {
@@ -56,33 +59,33 @@ export type RecordData = FeedingData | SleepData | DiaperData;
 // 照片
 export interface Photo {
   id: string;
-  familyId: string;
-  babyId: string;
-  uploadedBy: string;
-  ossKey: string;
-  originalName: string;
-  thumbnailUrl: string;
-  originalUrl: string;
-  size: number;
-  contentType: string;
-  status: 'pending' | 'active' | 'failed';
-  createdAt: string;
+  url: string;
+  thumb_url: string;
+  width: number;
+  height: number;
+  taken_at: string;
+  description?: string;
+  like_count: number;
+  comment_count: number;
+  liked_by_me: boolean;
 }
 
 // 家庭
 export interface Family {
   id: string;
   name: string;
-  members: FamilyMember[];
-  isPaid: boolean;
-  storageQuota: number;
-  storageUsed: number;
+  invite_code: string;
+  is_paid: boolean;
+  storage_limit: number;
+  storage_used: number;
 }
 
 export interface FamilyMember {
-  userId: string;
-  role: 'admin' | 'member';
-  joinedAt: string;
+  user_id: string;
+  nickname: string;
+  avatar_url?: string;
+  role: 'admin' | 'member' | 'elder';
+  elder_mode: boolean;
 }
 
 // API 响应

@@ -12,6 +12,10 @@ import (
 
 // TestDBConnection 测试数据库连接
 func TestDBConnection(t *testing.T) {
+	if os.Getenv("RUN_EXTERNAL_INTEGRATION_TESTS") != "1" {
+		t.Skip("跳过外部 MySQL 集成测试：设置 RUN_EXTERNAL_INTEGRATION_TESTS=1 后执行")
+	}
+
 	// 设置配置文件路径为项目根目录
 	projectRoot := getProjectRoot()
 	t.Logf("项目根目录: %s", projectRoot)
@@ -80,6 +84,10 @@ func TestDBConnection(t *testing.T) {
 
 // TestGetDB 测试 GetDB 函数
 func TestGetDB(t *testing.T) {
+	if os.Getenv("RUN_EXTERNAL_INTEGRATION_TESTS") != "1" {
+		t.Skip("跳过外部 MySQL 集成测试：设置 RUN_EXTERNAL_INTEGRATION_TESTS=1 后执行")
+	}
+
 	projectRoot := getProjectRoot()
 
 	// 使用 config 包的 Setup
@@ -116,6 +124,10 @@ func TestGetDB(t *testing.T) {
 
 // TestClose 测试 Close 函数
 func TestClose(t *testing.T) {
+	if os.Getenv("RUN_EXTERNAL_INTEGRATION_TESTS") != "1" {
+		t.Skip("跳过外部 MySQL 集成测试：设置 RUN_EXTERNAL_INTEGRATION_TESTS=1 后执行")
+	}
+
 	config.Setup()
 	logger.Setup()
 	Setup()

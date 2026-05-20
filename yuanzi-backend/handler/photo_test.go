@@ -195,6 +195,63 @@ func TestListPhotosDateRange(t *testing.T) {
 	}
 }
 
+func TestPhotoCommentsAndLikes(t *testing.T) {
+	setupFamilyTestDB(t)
+
+	admin := createTestUser(t, uniquePhone("pinter"), "互动用户")
+	family := createTestFamily(t, admin.ID, "互动家庭")
+	member := createTestFamilyMember(t, family.ID, admin.ID, model.FamilyRoleAdmin)
+	baby := createTestBaby(t, family.ID, "互动宝宝")
+	defer cleanupFamilies(t, family.ID)
+	defer cleanupUsers(t, admin.ID)
+	defer cleanupMembers(t, member.ID)
+
+	photo := model.Photo{BabyID: baby.ID, FamilyID: family.ID, OSSKey: "families/test/interact.jpg", Size: 100, ContentType: "image/jpeg", UploadedBy: admin.ID, UploadedAt: time.Now(), Status: model.PhotoStatusActive}
+	if err := mysql.DB.Create(&photo).Error; err != nil {
+		t.Fatalf("创建照片失败: %v", err)
+	}
+
+	commentBody := mustMarshal(t, CreatePhotoCommentRequest{Content: "真可爱"})
+	commentRecorder := httptest.NewRecorder()
+	commentCtx, _ := gin.CreateTestContext(commentRecorder)
+	commentCtx.Request = httptest.NewRequest(http.MethodPost, "/photo/"+photo.ID+"/comments", bytes.NewReader(commentBody))
+	commentCtx.Request.Header.Set("Content-Type", "application/json")
+	commentCtx.Params = gin.Params{{Key: "id", Value: photo.ID}}
+	commentCtx.Set("userId", admin.ID)
+	CreatePhotoComment(commentCtx)
+	if commentRecorder.Code != http.StatusOK {
+		t.Fatalf("评论失败: status=%d body=%s", commentRecorder.Code, commentRecorder.Body.String())
+	}
+
+	likeRecorder := httptest.NewRecorder()
+	likeCtx, _ := gin.CreateTestContext(likeRecorder)
+	likeCtx.Request = httptest.NewRequest(http.MethodPost, "/photo/"+photo.ID+"/like", nil)
+	likeCtx.Params = gin.Params{{Key: "id", Value: photo.ID}}
+	likeCtx.Set("userId", admin.ID)
+	LikePhoto(likeCtx)
+	if likeRecorder.Code != http.StatusOK {
+		t.Fatalf("点赞失败: status=%d body=%s", likeRecorder.Code, likeRecorder.Body.String())
+	}
+
+	listRecorder := httptest.NewRecorder()
+	listCtx, _ := gin.CreateTestContext(listRecorder)
+	listCtx.Request = httptest.NewRequest(http.MethodGet, "/photo?baby_id="+baby.ID, nil)
+	listCtx.Set("userId", admin.ID)
+	ListPhotos(listCtx)
+	if listRecorder.Code != http.StatusOK {
+		t.Fatalf("获取照片列表失败: status=%d body=%s", listRecorder.Code, listRecorder.Body.String())
+	}
+	var response struct {
+		Data struct {
+			List []PhotoResponse `json:"list"`
+		} `json:"data"`
+	}
+	decodeResponse(t, listRecorder.Body.Bytes(), &response)
+	if len(response.Data.List) != 1 || response.Data.List[0].LikeCount != 1 || response.Data.List[0].CommentCount != 1 || !response.Data.List[0].LikedByMe {
+		t.Fatalf("互动统计错误: %+v", response.Data.List)
+	}
+}
+
 func TestDeletePhotoByUploader(t *testing.T) {
 	setupFamilyTestDB(t)
 

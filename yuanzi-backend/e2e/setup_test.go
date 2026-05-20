@@ -8,10 +8,10 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"time"
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -28,6 +28,9 @@ var e2eSetupOnce sync.Once
 // setupE2E initializes the full test environment once per test run.
 func setupE2E(t *testing.T) {
 	t.Helper()
+	if os.Getenv("RUN_EXTERNAL_INTEGRATION_TESTS") != "1" {
+		t.Skip("跳过依赖 MySQL 的 E2E 测试：设置 RUN_EXTERNAL_INTEGRATION_TESTS=1 后执行")
+	}
 	e2eSetupOnce.Do(func() {
 		projectRoot := findProjectRoot(t)
 		viper.SetConfigName("config")
@@ -39,6 +42,9 @@ func setupE2E(t *testing.T) {
 		gredis.Setup()
 		gin.SetMode(gin.TestMode)
 	})
+	if mysql.DB == nil || !mysql.IsConnected() {
+		t.Skip("跳过依赖 MySQL 的 E2E 测试：数据库未连接")
+	}
 }
 
 func findProjectRoot(t *testing.T) string {
@@ -205,10 +211,10 @@ func seedBaby(t *testing.T, familyID string) (model.Baby, func()) {
 	setupE2E(t)
 
 	baby := model.Baby{
-		Name:      "E2E测试宝宝",
-		FamilyID:  familyID,
-		Gender:    2, // female
-		Birthday:  time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
+		Name:     "E2E测试宝宝",
+		FamilyID: familyID,
+		Gender:   2, // female
+		Birthday: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 	}
 	if err := mysql.DB.Create(&baby).Error; err != nil {
 		t.Fatalf("创建E2E宝宝失败: %v", err)
@@ -232,10 +238,10 @@ func seedBabyWithGender(t *testing.T, familyID string, gender string) (model.Bab
 	}
 
 	baby := model.Baby{
-		Name:      "E2E性别宝宝",
-		FamilyID:  familyID,
-		Gender:    int8(genderInt),
-		Birthday:  time.Date(2026, 3, 15, 0, 0, 0, 0, time.UTC),
+		Name:     "E2E性别宝宝",
+		FamilyID: familyID,
+		Gender:   int8(genderInt),
+		Birthday: time.Date(2026, 3, 15, 0, 0, 0, 0, time.UTC),
 	}
 	if err := mysql.DB.Create(&baby).Error; err != nil {
 		t.Fatalf("创建E2E宝宝失败: %v", err)
