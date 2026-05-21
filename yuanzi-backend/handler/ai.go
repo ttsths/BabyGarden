@@ -311,8 +311,12 @@ func splitStreamChunks(answer string) []string {
 
 func streamAIEvent(c *gin.Context, event string, payload interface{}) {
 	data, _ := json.Marshal(payload)
-	c.Writer.WriteString("event: " + event + "\n")
-	c.Writer.WriteString("data: " + string(data) + "\n\n")
+	if _, err := c.Writer.WriteString("event: " + event + "\n"); err != nil {
+		return
+	}
+	if _, err := c.Writer.WriteString("data: " + string(data) + "\n\n"); err != nil {
+		return
+	}
 	c.Writer.Flush()
 }
 
