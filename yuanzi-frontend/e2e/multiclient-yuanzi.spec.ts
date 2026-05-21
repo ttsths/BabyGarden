@@ -173,6 +173,10 @@ test.describe('BabyGarden 多端登录与小园子真实链路', () => {
     await page.getByPlaceholder('请输入密码').fill('yuanzi123');
     await page.getByRole('button', { name: '登录' }).click();
     await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByText('数据源：后端 API')).toBeVisible();
+    await expect(page.getByText('配方奶')).toBeVisible();
+    await expect(page.getByText('小园子照片')).toBeVisible();
+    await expect(page.getByText('本地示例')).toHaveCount(0);
 
     await page.goto('/app/login');
     await page.getByRole('button', { name: '账号密码' }).click();

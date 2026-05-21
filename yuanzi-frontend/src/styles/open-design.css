@@ -128,6 +128,22 @@
   line-height: 1.65;
 }
 
+.od-inline-notice,
+.od-empty-state {
+  border: 1px solid #f0e6de;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #6b7280;
+  padding: 14px 16px;
+  line-height: 1.6;
+}
+
+.od-inline-notice.danger {
+  border-color: #fecaca;
+  background: #fff1f2;
+  color: #be123c;
+}
+
 .od-baby-card p {
   margin: 8px 0 0;
   font-size: 13px;

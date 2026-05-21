@@ -46,7 +46,7 @@ function App() {
         <Route path="/app/login" element={<LoginPage mode="app" />} />
         <Route path="/app/*" element={<AuthGate loginPath="/app/login"><FamilyLivePage /></AuthGate>} />
         <Route path="/baby/setup" element={<BabySetupPage />} />
-        <Route path="/*" element={<OpenDesignApp />} />
+        <Route path="/*" element={<AuthGate loginPath="/login"><OpenDesignApp /></AuthGate>} />
       </Routes>
     </div>
   );
