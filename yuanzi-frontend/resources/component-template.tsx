@@ -1,10 +1,8 @@
 import React from 'react';
 
-interface StitchComponentProps {
-  // Add props here
-}
+type StitchComponentProps = object;
 
-export const StitchComponent: React.FC<StitchComponentProps> = (props) => {
+export const StitchComponent: React.FC<StitchComponentProps> = () => {
   return (
     <div>
       {/* Component content */}

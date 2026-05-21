@@ -1,10 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 const BASE_URL = process.env.E2E_BASE_URL || 'https://babygarden.pages.dev';
 const ADMIN_PHONE = process.env.E2E_ADMIN_PHONE || '13800000001';
 const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'admin123';
 
-async function loginAsAdmin(page: any) {
+async function loginAsAdmin(page: Page) {
   await page.goto(`${BASE_URL}/admin/login`);
   await page.fill('input[placeholder="手机号"]', ADMIN_PHONE);
   await page.fill('input[placeholder="密码"]', ADMIN_PASSWORD);

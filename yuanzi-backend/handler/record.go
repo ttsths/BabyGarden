@@ -18,7 +18,7 @@ import (
 
 // CreateRecord 创建记录
 // @Summary 创建记录
-// @Description 创建喂养/睡眠/排泄/成长记录
+// @Description 创建喂养/睡眠/排泄/成长/测温记录
 // @Tags 记录
 // @Accept json
 // @Produce json
@@ -124,7 +124,7 @@ func CreateRecord(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param baby_id query string true "宝宝ID"
-// @Param type query string false "记录类型: feeding/sleep/diaper/growth"
+// @Param type query string false "记录类型: feeding/sleep/diaper/growth/temperature"
 // @Param page query int false "页码，默认1" default(1)
 // @Param page_size query int false "每页数量，默认20" default(20)
 // @Success 200 {object} model.Response{data=model.ListResponse{list=[]RecordResponse}}
@@ -364,7 +364,7 @@ func DeleteRecord(c *gin.Context) {
 
 type CreateRecordRequest struct {
 	BabyID    string                 `json:"baby_id" binding:"required" example:"550e8400-e29b-41d4-a716-446655440001"`
-	Type      string                 `json:"type" binding:"required,oneof=feeding sleep diaper growth" example:"feeding"`
+	Type      string                 `json:"type" binding:"required,oneof=feeding sleep diaper growth temperature" example:"feeding"`
 	StartedAt string                 `json:"started_at" binding:"required,datetime=2006-01-02T15:04:05Z07:00" example:"2024-03-08T10:00:00Z"`
 	EndedAt   *string                `json:"ended_at,omitempty" example:"2024-03-08T10:15:00Z"`
 	Content   map[string]interface{} `json:"content" binding:"required"`
@@ -483,6 +483,11 @@ func normalizeRecordContent(recordType model.RecordType, content map[string]inte
 		var payload model.GrowthContent
 		if err := json.Unmarshal(raw, &payload); err != nil || payload.Weight <= 0 || payload.Height <= 0 {
 			return nil, errors.New("成长记录内容不完整")
+		}
+	case model.RecordTypeTemp:
+		var payload model.TemperatureContent
+		if err := json.Unmarshal(raw, &payload); err != nil || payload.Value < 30 || payload.Value > 45 {
+			return nil, errors.New("测温记录内容不完整")
 		}
 	default:
 		return nil, errors.New("记录类型不支持")

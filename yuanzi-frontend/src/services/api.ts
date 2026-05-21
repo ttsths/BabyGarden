@@ -35,7 +35,6 @@ apiClient.interceptors.response.use(
     // 401 未授权，跳转登录
     if (error.response?.status === 401) {
       useAuthStore.getState().logout();
-      window.location.href = '/login';
       return Promise.reject(error);
     }
 
@@ -79,7 +78,7 @@ export const api = {
   // 记录
   record: {
     getList: (babyId: string, params?: Record<string, unknown>) => 
-      apiClient.get(ENDPOINTS.RECORD.LIST, { params: { babyId, ...params } }),
+      apiClient.get(ENDPOINTS.RECORD.LIST, { params: { baby_id: babyId, ...params } }),
     getDetail: (id: string) => 
       apiClient.get(ENDPOINTS.RECORD.DETAIL(id)),
     create: (data: Record<string, unknown>) => 
@@ -95,21 +94,29 @@ export const api = {
   // 照片
   photo: {
     getList: (babyId: string, params?: Record<string, unknown>) => 
-      apiClient.get(ENDPOINTS.PHOTO.LIST, { params: { babyId, ...params } }),
+      apiClient.get(ENDPOINTS.PHOTO.LIST, { params: { baby_id: babyId, ...params } }),
     getUploadUrl: (data: Record<string, unknown>) => 
       apiClient.post(ENDPOINTS.PHOTO.UPLOAD_URL, data),
-    confirmUpload: (id: string) => 
-      apiClient.post(ENDPOINTS.PHOTO.CONFIRM(id)),
+    confirmUpload: (photoId: string, size?: number) =>
+      apiClient.post(ENDPOINTS.PHOTO.CONFIRM, { photo_id: photoId, size }),
     delete: (id: string) => 
       apiClient.delete(ENDPOINTS.PHOTO.DELETE(id)),
+    getComments: (id: string) =>
+      apiClient.get(ENDPOINTS.PHOTO.COMMENTS(id)),
+    comment: (id: string, content: string) =>
+      apiClient.post(ENDPOINTS.PHOTO.COMMENTS(id), { content }),
+    like: (id: string) =>
+      apiClient.post(ENDPOINTS.PHOTO.LIKE(id)),
+    unlike: (id: string) =>
+      apiClient.delete(ENDPOINTS.PHOTO.LIKE(id)),
     getQuota: () => 
       apiClient.get(ENDPOINTS.PHOTO.QUOTA),
   },
   
   // AI
   ai: {
-    chat: (message: string, context?: Record<string, unknown>) => 
-      apiClient.post(ENDPOINTS.AI.CHAT, { message, context }),
+    chat: (question: string, options?: { baby_id?: string; history?: Array<{ role: string; content: string }> }) =>
+      apiClient.post(ENDPOINTS.AI.CHAT, { question, ...options }),
     speech: (audioBlob: Blob) => {
       const formData = new FormData();
       formData.append('audio', audioBlob);
@@ -119,15 +126,35 @@ export const api = {
     },
     getQuota: () => 
       apiClient.get(ENDPOINTS.AI.QUOTA),
+    history: (params?: Record<string, unknown>) =>
+      apiClient.get(ENDPOINTS.AI.HISTORY, { params }),
   },
   
   // 家庭
   family: {
-    getDetail: () => 
-      apiClient.get(ENDPOINTS.FAMILY.DETAIL),
-    getMembers: () => 
-      apiClient.get(ENDPOINTS.FAMILY.MEMBERS),
-    invite: (phone: string) => 
-      apiClient.post(ENDPOINTS.FAMILY.INVITE, { phone }),
+    create: (name: string) =>
+      apiClient.post(ENDPOINTS.FAMILY.CREATE, { name }),
+    getDetail: (familyId: string) =>
+      apiClient.get(ENDPOINTS.FAMILY.DETAIL(familyId)),
+    getMembers: (familyId: string) =>
+      apiClient.get(ENDPOINTS.FAMILY.MEMBERS(familyId)),
+    invite: (familyId: string, phone: string, role: 'member' | 'elder') =>
+      apiClient.post(ENDPOINTS.FAMILY.INVITE(familyId), { phone, role }),
+    join: (inviteCode: string, role: 'member' | 'elder' = 'member') =>
+      apiClient.post(ENDPOINTS.FAMILY.JOIN, { invite_code: inviteCode, role }),
+    leave: (familyId: string) =>
+      apiClient.delete(ENDPOINTS.FAMILY.LEAVE(familyId)),
+  },
+
+  // 统计
+  stats: {
+    daily: (babyId: string, date?: string) =>
+      apiClient.get('/stats/daily', { params: { baby_id: babyId, date } }),
+    weekly: (babyId: string, date?: string) =>
+      apiClient.get('/stats/weekly', { params: { baby_id: babyId, date } }),
+    monthly: (babyId: string, date?: string) =>
+      apiClient.get('/stats/monthly', { params: { baby_id: babyId, date } }),
+    range: (babyId: string, startDate: string, endDate: string) =>
+      apiClient.get('/stats/range', { params: { baby_id: babyId, start_date: startDate, end_date: endDate } }),
   },
 };

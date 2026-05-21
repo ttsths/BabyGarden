@@ -83,7 +83,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "获取用户当日 AI 使用配额情况",
+                "description": "获取用户当日 AI 使用配额情况，含 Provider 链与 Cloudflare 估算额度",
                 "consumes": [
                     "application/json"
                 ],
@@ -316,6 +316,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/photo/confirm": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "客户端完成直传后确认上传（用于 R2 等无服务端回调的存储后端）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "照片"
+                ],
+                "summary": "照片上传确认",
+                "parameters": [
+                    {
+                        "description": "请求参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.PhotoConfirmRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/photo/upload-url": {
             "post": {
                 "security": [
@@ -432,7 +471,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "记录类型: feeding/sleep/diaper/growth",
+                        "description": "记录类型: feeding/sleep/diaper/growth/temperature",
                         "name": "type",
                         "in": "query"
                     },
@@ -493,7 +532,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "创建喂养/睡眠/排泄/成长记录",
+                "description": "创建喂养/睡眠/排泄/成长/测温记录",
                 "consumes": [
                     "application/json"
                 ],
@@ -836,10 +875,25 @@ const docTemplate = `{
                 "answer": {
                     "type": "string"
                 },
+                "cached_tokens": {
+                    "type": "integer"
+                },
+                "input_tokens": {
+                    "type": "integer"
+                },
+                "output_tokens": {
+                    "type": "integer"
+                },
+                "provider": {
+                    "type": "string"
+                },
                 "remaining_quota": {
                     "type": "integer"
                 },
                 "tokens_used": {
+                    "type": "integer"
+                },
+                "total_tokens": {
                     "type": "integer"
                 }
             }
@@ -849,6 +903,15 @@ const docTemplate = `{
             "properties": {
                 "ai_chat": {
                     "$ref": "#/definitions/handler.QuotaDetail"
+                },
+                "cloudflare": {
+                    "$ref": "#/definitions/handler.CloudflareQuotaDetail"
+                },
+                "provider_chain": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "speech": {
                     "$ref": "#/definitions/handler.QuotaDetail"
@@ -865,6 +928,32 @@ const docTemplate = `{
                 "role": {
                     "type": "string",
                     "example": "user"
+                }
+            }
+        },
+        "handler.CloudflareQuotaDetail": {
+            "type": "object",
+            "properties": {
+                "daily_neuron_budget": {
+                    "type": "integer"
+                },
+                "estimated_neurons_remaining": {
+                    "type": "integer"
+                },
+                "estimated_neurons_used_today": {
+                    "type": "integer"
+                },
+                "hard_neuron_budget": {
+                    "type": "integer"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "reset_at_utc": {
+                    "type": "string"
+                },
+                "source_of_truth": {
+                    "type": "string"
                 }
             }
         },
@@ -903,7 +992,8 @@ const docTemplate = `{
                         "feeding",
                         "sleep",
                         "diaper",
-                        "growth"
+                        "growth",
+                        "temperature"
                     ],
                     "example": "feeding"
                 }
@@ -920,6 +1010,9 @@ const docTemplate = `{
                 },
                 "sleep": {
                     "$ref": "#/definitions/handler.SleepStats"
+                },
+                "temperature": {
+                    "$ref": "#/definitions/handler.TemperatureStats"
                 }
             }
         },
@@ -934,6 +1027,9 @@ const docTemplate = `{
         "handler.FeedingStats": {
             "type": "object",
             "properties": {
+                "average_amount": {
+                    "type": "number"
+                },
                 "count": {
                     "type": "integer"
                 },
@@ -961,9 +1057,55 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.PhotoCommentResponse": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "photo_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.PhotoConfirmRequest": {
+            "type": "object",
+            "required": [
+                "photo_id"
+            ],
+            "properties": {
+                "etag": {
+                    "type": "string"
+                },
+                "photo_id": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
         "handler.PhotoResponse": {
             "type": "object",
             "properties": {
+                "comments_count": {
+                    "type": "integer"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -972,6 +1114,18 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "liked_by_me": {
+                    "type": "boolean"
+                },
+                "likes_count": {
+                    "type": "integer"
+                },
+                "recent_comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.PhotoCommentResponse"
+                    }
                 },
                 "taken_at": {
                     "type": "string"
@@ -1029,6 +1183,12 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "headers": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "photo_id": {
                     "type": "string"
                 },
@@ -1048,6 +1208,9 @@ const docTemplate = `{
                 },
                 "remaining": {
                     "type": "integer"
+                },
+                "tokens": {
+                    "$ref": "#/definitions/handler.TokenQuotaStats"
                 },
                 "used": {
                     "type": "integer"
@@ -1150,8 +1313,14 @@ const docTemplate = `{
         "handler.SleepStats": {
             "type": "object",
             "properties": {
+                "average_duration_hours": {
+                    "type": "number"
+                },
                 "count": {
                     "type": "integer"
+                },
+                "daytime_single_hours": {
+                    "type": "number"
                 },
                 "total_hours": {
                     "type": "number"
@@ -1169,6 +1338,37 @@ const docTemplate = `{
                 },
                 "text": {
                     "type": "string"
+                }
+            }
+        },
+        "handler.TemperatureStats": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "latest": {
+                    "type": "number"
+                }
+            }
+        },
+        "handler.TokenQuotaStats": {
+            "type": "object",
+            "properties": {
+                "month_total_tokens": {
+                    "type": "integer"
+                },
+                "today_cached_tokens": {
+                    "type": "integer"
+                },
+                "today_input_tokens": {
+                    "type": "integer"
+                },
+                "today_output_tokens": {
+                    "type": "integer"
+                },
+                "today_total_tokens": {
+                    "type": "integer"
                 }
             }
         },
@@ -1193,10 +1393,28 @@ const docTemplate = `{
         "handler.WeeklyStatsResponse": {
             "type": "object",
             "properties": {
+                "daily_average_milk_amount": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "daily_average_sleep_hours": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
                 "dates": {
                     "type": "array",
                     "items": {
                         "type": "string"
+                    }
+                },
+                "daytime_single_sleep_hours": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
                     }
                 },
                 "diaper": {
@@ -1212,6 +1430,12 @@ const docTemplate = `{
                     }
                 },
                 "sleep": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "temperature_latest": {
                     "type": "array",
                     "items": {
                         "type": "number"

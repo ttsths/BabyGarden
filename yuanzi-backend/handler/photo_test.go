@@ -61,6 +61,62 @@ func TestGetPhotoUploadURLCreatesPending(t *testing.T) {
 	}
 }
 
+func TestPhotoCommentsAndLikes(t *testing.T) {
+	setupFamilyTestDB(t)
+
+	admin := createTestUser(t, uniquePhone("pint"), "互动用户")
+	family := createTestFamily(t, admin.ID, "互动家庭")
+	member := createTestFamilyMember(t, family.ID, admin.ID, model.FamilyRoleAdmin)
+	baby := createTestBaby(t, family.ID, "互动宝宝")
+	defer cleanupFamilies(t, family.ID)
+	defer cleanupUsers(t, admin.ID)
+	defer cleanupMembers(t, member.ID)
+
+	photo := model.Photo{
+		BabyID:      baby.ID,
+		FamilyID:    family.ID,
+		OSSKey:      "tests/photo.jpg",
+		Size:        1024,
+		ContentType: "image/jpeg",
+		UploadedBy:  admin.ID,
+		UploadedAt:  time.Now(),
+		Status:      model.PhotoStatusActive,
+	}
+	if err := mysql.DB.Create(&photo).Error; err != nil {
+		t.Fatalf("创建照片失败: %v", err)
+	}
+
+	commentBody := mustMarshal(t, PhotoCommentRequest{Content: "今天笑得真甜"})
+	commentRecorder := httptest.NewRecorder()
+	commentCtx, _ := gin.CreateTestContext(commentRecorder)
+	commentCtx.Request = httptest.NewRequest(http.MethodPost, "/photo/"+photo.ID+"/comments", bytes.NewReader(commentBody))
+	commentCtx.Request.Header.Set("Content-Type", "application/json")
+	commentCtx.Params = gin.Params{{Key: "id", Value: photo.ID}}
+	commentCtx.Set("userId", admin.ID)
+	CreatePhotoComment(commentCtx)
+	if commentRecorder.Code != http.StatusOK {
+		t.Fatalf("评论失败: status=%d body=%s", commentRecorder.Code, commentRecorder.Body.String())
+	}
+
+	likeRecorder := httptest.NewRecorder()
+	likeCtx, _ := gin.CreateTestContext(likeRecorder)
+	likeCtx.Request = httptest.NewRequest(http.MethodPost, "/photo/"+photo.ID+"/like", nil)
+	likeCtx.Params = gin.Params{{Key: "id", Value: photo.ID}}
+	likeCtx.Set("userId", admin.ID)
+	LikePhoto(likeCtx)
+	if likeRecorder.Code != http.StatusOK {
+		t.Fatalf("点赞失败: status=%d body=%s", likeRecorder.Code, likeRecorder.Body.String())
+	}
+
+	var response struct {
+		Data PhotoInteractionSummary `json:"data"`
+	}
+	decodeResponse(t, likeRecorder.Body.Bytes(), &response)
+	if response.Data.LikesCount != 1 || !response.Data.LikedByMe || response.Data.CommentsCount != 1 {
+		t.Fatalf("互动统计错误: %+v", response.Data)
+	}
+}
+
 func TestPhotoUploadCallbackActivatesPhoto(t *testing.T) {
 	setupFamilyTestDB(t)
 

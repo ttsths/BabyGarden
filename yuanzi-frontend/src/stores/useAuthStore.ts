@@ -28,11 +28,11 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
 
       login: async (token, refreshToken) => {
-        set({ isLoading: true });
+        set({ token, refreshToken, isLoading: true });
         try {
           // 获取用户信息
           const res = await api.auth.getProfile();
-          const user = res.data;
+          const user = unwrapResponse<User>(res.data);
           set({ 
             user, 
             token, 
@@ -63,7 +63,7 @@ export const useAuthStore = create<AuthState>()(
         
         try {
           const res = await api.auth.getProfile();
-          const user = res.data;
+          const user = unwrapResponse<User>(res.data);
           set({ user, isAuthenticated: true });
           return true;
         } catch {
@@ -87,3 +87,10 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+function unwrapResponse<T>(response: unknown): T {
+  if (typeof response === 'object' && response !== null && 'data' in response) {
+    return (response as { data: T }).data;
+  }
+  return response as T;
+}

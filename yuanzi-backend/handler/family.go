@@ -147,6 +147,63 @@ func InviteFamilyMember(c *gin.Context) {
 	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "邀请已发送", Data: InviteMemberResponse{InviteCode: family.InviteCode, ExpiresIn: defaultInviteTTLSeconds}})
 }
 
+// JoinFamilyByInviteCode 使用邀请码加入家庭。
+func JoinFamilyByInviteCode(c *gin.Context) {
+	userID := middleware.GetUserIDOrZero(c)
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, model.Response{Code: model.ERROR_NOT_AUTH, Msg: "未登录"})
+		return
+	}
+
+	var req JoinFamilyRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "请求参数错误"})
+		return
+	}
+	if err := ensureUserNotInAnotherFamily(userID); err != nil {
+		c.JSON(http.StatusConflict, model.Response{Code: model.ERROR_INVALID, Msg: "用户已加入家庭"})
+		return
+	}
+
+	var family model.Family
+	if err := mysql.DB.Where("invite_code = ?", req.InviteCode).First(&family).Error; err != nil {
+		c.JSON(http.StatusNotFound, model.Response{Code: model.ERROR_NOT_FUND, Msg: "邀请码无效"})
+		return
+	}
+	role := normalizeInviteRole(req.Role)
+	member := model.FamilyMember{FamilyID: family.ID, UserID: userID, Role: role, ElderMode: elderModeFromRole(role), Notifications: model.JSON([]byte(`{"feed":true,"sleep":true}`)), JoinedAt: time.Now()}
+	if err := mysql.DB.Create(&member).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "加入家庭失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "加入成功", Data: FamilyResponse{ID: family.ID, Name: family.Name, InviteCode: family.InviteCode}})
+}
+
+// LeaveFamily 当前成员主动离开家庭。
+func LeaveFamily(c *gin.Context) {
+	family, member, err := loadFamilyWithMemberAccess(c)
+	if err != nil {
+		return
+	}
+	if member.Role == model.FamilyRoleAdmin {
+		var adminCount int64
+		if err := mysql.DB.Model(&model.FamilyMember{}).Where("family_id = ? AND role = ?", family.ID, model.FamilyRoleAdmin).Count(&adminCount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "校验管理员失败"})
+			return
+		}
+		if adminCount <= 1 {
+			c.JSON(http.StatusForbidden, model.Response{Code: model.ERROR_FORBID, Msg: "最后一个管理员不能离开家庭"})
+			return
+		}
+	}
+	if err := mysql.DB.Delete(member).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "离开家庭失败"})
+		return
+	}
+	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "已离开家庭"})
+}
+
 // GetFamilyMembers 获取家庭成员列表。
 func GetFamilyMembers(c *gin.Context) {
 	family, _, err := loadFamilyWithMemberAccess(c)
@@ -237,6 +294,11 @@ type FamilyDetailResponse struct {
 type InviteMemberRequest struct {
 	Phone string `json:"phone" binding:"required,len=11" example:"13900139000"`
 	Role  string `json:"role" binding:"omitempty,oneof=member elder" example:"member"`
+}
+
+type JoinFamilyRequest struct {
+	InviteCode string `json:"invite_code" binding:"required,len=8" example:"ABC12345"`
+	Role       string `json:"role" binding:"omitempty,oneof=member elder" example:"member"`
 }
 
 type InviteMemberResponse struct {

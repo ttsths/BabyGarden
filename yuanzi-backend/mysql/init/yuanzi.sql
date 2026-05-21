@@ -114,6 +114,33 @@ CREATE TABLE IF NOT EXISTS photos (
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='照片表';
 
+-- 6.1 照片评论表
+CREATE TABLE IF NOT EXISTS photo_comments (
+    id VARCHAR(36) PRIMARY KEY COMMENT '评论ID',
+    photo_id VARCHAR(36) NOT NULL,
+    family_id VARCHAR(36) NOT NULL,
+    user_id VARCHAR(36) NOT NULL,
+    content VARCHAR(500) NOT NULL COMMENT '评论内容',
+    created_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+    deleted_at DATETIME(3) COMMENT '软删除时间',
+    INDEX idx_photo_comments_photo (photo_id),
+    INDEX idx_photo_comments_family (family_id),
+    INDEX idx_photo_comments_user (user_id),
+    INDEX idx_photo_comments_deleted (deleted_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='照片评论表';
+
+-- 6.2 照片点赞表
+CREATE TABLE IF NOT EXISTS photo_likes (
+    id VARCHAR(36) PRIMARY KEY COMMENT '点赞ID',
+    photo_id VARCHAR(36) NOT NULL,
+    family_id VARCHAR(36) NOT NULL,
+    user_id VARCHAR(36) NOT NULL,
+    created_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+    UNIQUE KEY uk_photo_user (photo_id, user_id),
+    INDEX idx_photo_likes_family (family_id),
+    INDEX idx_photo_likes_user (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='照片点赞表';
+
 -- 7. AI问答记录表
 CREATE TABLE IF NOT EXISTS ai_chat_records (
     id VARCHAR(36) PRIMARY KEY COMMENT '问答记录ID',
@@ -163,7 +190,7 @@ CREATE TABLE IF NOT EXISTS push_devices (
 -- 创建示例用户和家庭
 INSERT INTO users (id, phone, nickname, is_admin, password) VALUES 
 ('100e8400-e29b-41d4-a716-446655440000', '13800138000', '妈妈', 1, 'admin123'),
-('100e8400-e29b-41d4-a716-446655440010', '139001390010', '奶奶');
+('100e8400-e29b-41d4-a716-446655440010', '13900139010', '奶奶');
 
 -- 创建示例家庭
 INSERT INTO families (id, name, invite_code, created_by, is_paid) VALUES 
@@ -177,6 +204,22 @@ INSERT INTO family_members (id, family_id, user_id, role) VALUES
 -- 创建示例宝宝
 INSERT INTO babies (id, family_id, name, birthday, gender, birth_weight, birth_height) VALUES 
 ('400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', '小园子', '2024-01-01', 2, 3.20, 50.0);
+
+-- 创建小园子示例真实记录
+INSERT INTO records (id, baby_id, family_id, type, started_at, ended_at, content, note, created_by) VALUES
+('500e8400-e29b-41d4-a716-446655440001', '400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', 'feeding', NOW(3) - INTERVAL 3 HOUR, NULL, JSON_OBJECT('type','formula','amount',120,'unit','ml'), '配方奶喂养，状态安稳', '100e8400-e29b-41d4-a716-446655440000'),
+('500e8400-e29b-41d4-a716-446655440002', '400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', 'diaper', NOW(3) - INTERVAL 2 HOUR, NULL, JSON_OBJECT('type','mixed','color','黄色','consistency','糊状'), '排泄正常', '100e8400-e29b-41d4-a716-446655440000'),
+('500e8400-e29b-41d4-a716-446655440003', '400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', 'sleep', NOW(3) - INTERVAL 6 HOUR, NOW(3) - INTERVAL 4 HOUR, JSON_OBJECT('quality','stable','location','crib'), '白天小睡 2 小时', '100e8400-e29b-41d4-a716-446655440000'),
+('500e8400-e29b-41d4-a716-446655440004', '400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', 'temperature', NOW(3) - INTERVAL 1 HOUR, NULL, JSON_OBJECT('value',36.5,'unit','C','position','armpit'), '体温正常', '100e8400-e29b-41d4-a716-446655440000');
+
+INSERT INTO photos (id, baby_id, family_id, oss_key, size, content_type, description, uploaded_by, uploaded_at, status) VALUES
+('600e8400-e29b-41d4-a716-446655440001', '400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', 'demo/yuanzi/smile.jpg', 102400, 'image/jpeg', '小园子今天笑了', '100e8400-e29b-41d4-a716-446655440000', NOW(3), 'active');
+
+INSERT INTO photo_comments (id, photo_id, family_id, user_id, content) VALUES
+('610e8400-e29b-41d4-a716-446655440001', '600e8400-e29b-41d4-a716-446655440001', '200e8400-e29b-41d4-a716-446655440000', '100e8400-e29b-41d4-a716-446655440010', '今天笑得真甜');
+
+INSERT INTO photo_likes (id, photo_id, family_id, user_id) VALUES
+('620e8400-e29b-41d4-a716-446655440001', '600e8400-e29b-41d4-a716-446655440001', '200e8400-e29b-41d4-a716-446655440000', '100e8400-e29b-41d4-a716-446655440000');
 
 -- 初始化完成
 SELECT 'Database yuanzi initialized successfully!' AS status;

@@ -34,6 +34,9 @@ func setupFamilyTestDB(t *testing.T) {
 		logger.Setup()
 		mysql.Setup()
 		gredis.Setup()
+		if mysql.DB != nil {
+			_ = mysql.DB.AutoMigrate(&model.PhotoComment{}, &model.PhotoLike{})
+		}
 		gin.SetMode(gin.TestMode)
 	})
 }
@@ -176,6 +179,55 @@ func TestInviteFamilyMemberRejectUserAlreadyInOtherFamily(t *testing.T) {
 	}
 }
 
+func TestJoinAndLeaveFamily(t *testing.T) {
+	setupFamilyTestDB(t)
+
+	admin := createTestUser(t, uniquePhone("joinown"), "邀请家庭所有者")
+	joining := createTestUser(t, uniquePhone("joiner"), "加入用户")
+	family := createTestFamily(t, admin.ID, "可加入家庭")
+	adminMember := createTestFamilyMember(t, family.ID, admin.ID, model.FamilyRoleAdmin)
+	defer cleanupFamilies(t, family.ID)
+	defer cleanupUsers(t, admin.ID, joining.ID)
+	defer cleanupMembers(t, adminMember.ID)
+
+	joinBody := mustMarshal(t, JoinFamilyRequest{InviteCode: family.InviteCode, Role: "elder"})
+	joinRecorder := httptest.NewRecorder()
+	joinCtx, _ := gin.CreateTestContext(joinRecorder)
+	joinCtx.Request = httptest.NewRequest(http.MethodPost, "/family/join", bytes.NewReader(joinBody))
+	joinCtx.Request.Header.Set("Content-Type", "application/json")
+	joinCtx.Set("userId", joining.ID)
+
+	JoinFamilyByInviteCode(joinCtx)
+
+	if joinRecorder.Code != http.StatusOK {
+		t.Fatalf("加入家庭失败: status=%d body=%s", joinRecorder.Code, joinRecorder.Body.String())
+	}
+	var member model.FamilyMember
+	if err := mysql.DB.Where("family_id = ? AND user_id = ?", family.ID, joining.ID).First(&member).Error; err != nil {
+		t.Fatalf("未创建加入成员: %v", err)
+	}
+	if member.Role != model.FamilyRoleElder || member.ElderMode != 1 {
+		t.Fatalf("加入角色错误: %+v", member)
+	}
+
+	leaveRecorder := httptest.NewRecorder()
+	leaveCtx, _ := gin.CreateTestContext(leaveRecorder)
+	leaveCtx.Request = httptest.NewRequest(http.MethodDelete, "/family/"+family.ID+"/leave", nil)
+	leaveCtx.Params = gin.Params{{Key: "id", Value: family.ID}}
+	leaveCtx.Set("userId", joining.ID)
+
+	LeaveFamily(leaveCtx)
+
+	if leaveRecorder.Code != http.StatusOK {
+		t.Fatalf("离开家庭失败: status=%d body=%s", leaveRecorder.Code, leaveRecorder.Body.String())
+	}
+	var count int64
+	mysql.DB.Model(&model.FamilyMember{}).Where("family_id = ? AND user_id = ?", family.ID, joining.ID).Count(&count)
+	if count != 0 {
+		t.Fatalf("成员未离开家庭")
+	}
+}
+
 func uniquePhone(prefix string) string {
 	seed := time.Now().UnixNano() % 1000000000
 	return fmt.Sprintf("13%09d", (seed+int64(len(prefix))*97)%1000000000)
@@ -218,6 +270,8 @@ func cleanupFamilies(t *testing.T, familyIDs ...string) {
 		return
 	}
 	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.Photo{}).Error
+	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.PhotoComment{}).Error
+	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.PhotoLike{}).Error
 	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.Baby{}).Error
 	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.Record{}).Error
 	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.FamilyMember{}).Error

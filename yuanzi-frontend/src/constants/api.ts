@@ -1,5 +1,7 @@
 // API 端点常量
-export const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+export const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  'https://yuanzi-backend.shentuhaisan.workers.dev/api/v1';
 
 export const ENDPOINTS = {
   // 认证
@@ -7,7 +9,7 @@ export const ENDPOINTS = {
     SEND_CODE: '/auth/send-code',
     LOGIN: '/auth/login',
     LOGOUT: '/auth/logout',
-    PROFILE: '/auth/profile',
+    PROFILE: '/user/profile',
   },
   // 宝宝
   BABY: {
@@ -29,21 +31,27 @@ export const ENDPOINTS = {
   PHOTO: {
     LIST: '/photo',
     UPLOAD_URL: '/photo/upload-url',
-    CONFIRM: (id: string) => `/photo/${id}/confirm`,
+    CONFIRM: '/photo/confirm',
     DELETE: (id: string) => `/photo/${id}`,
+    COMMENTS: (id: string) => `/photo/${id}/comments`,
+    LIKE: (id: string) => `/photo/${id}/like`,
     QUOTA: '/photo/quota',
   },
   // AI
   AI: {
     CHAT: '/ai/chat',
-    SPEECH: '/ai/speech',
+    SPEECH: '/ai/speech/recognize',
     QUOTA: '/ai/quota',
+    HISTORY: '/ai/history',
   },
   // 家庭
   FAMILY: {
-    DETAIL: '/family',
-    MEMBERS: '/family/members',
-    INVITE: '/family/invite',
+    CREATE: '/family',
+    DETAIL: (id: string) => `/family/${id}`,
+    MEMBERS: (id: string) => `/family/${id}/members`,
+    INVITE: (id: string) => `/family/${id}/invite`,
+    JOIN: '/family/join',
+    LEAVE: (id: string) => `/family/${id}/leave`,
   },
   // 同步
   SYNC: {

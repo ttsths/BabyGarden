@@ -257,6 +257,48 @@ func GetAIQuota(c *gin.Context) {
 	})
 }
 
+// GetAIHistory 获取当前用户的 AI 历史会话。
+func GetAIHistory(c *gin.Context) {
+	userID := middleware.GetUserIDOrZero(c)
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, model.Response{Code: model.ERROR_NOT_AUTH, Msg: "未登录"})
+		return
+	}
+
+	page := parsePage(c.DefaultQuery("page", "1"))
+	pageSize := parsePageSize(c.DefaultQuery("page_size", "20"))
+	babyID := c.Query("baby_id")
+
+	query := mysql.DB.Model(&model.AIChatRecord{}).Where("user_id = ?", userID)
+	if babyID != "" {
+		query = query.Where("baby_id = ?", babyID)
+	}
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "查询历史失败"})
+		return
+	}
+
+	var records []model.AIChatRecord
+	if err := query.Order("created_at desc").Offset((page - 1) * pageSize).Limit(pageSize).Find(&records).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "查询历史失败"})
+		return
+	}
+	list := make([]AIChatHistoryItem, 0, len(records))
+	for _, item := range records {
+		list = append(list, AIChatHistoryItem{
+			ID:         item.ID,
+			BabyID:     item.BabyID,
+			Question:   item.Question,
+			Answer:     item.Answer,
+			TokensUsed: item.TokensUsed,
+			Model:      item.Model,
+			CreatedAt:  item.CreatedAt.Format(time.RFC3339),
+		})
+	}
+	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "获取成功", Data: model.ListResponse{List: list, Pagination: model.Pagination{Page: page, PageSize: pageSize, Total: total, TotalPages: calcTotalPages(total, pageSize)}}})
+}
+
 // CloudflareQuotaDetail Cloudflare Workers AI 额度明细
 type CloudflareQuotaDetail struct {
 	Model             string `json:"model"`
@@ -290,6 +332,16 @@ type AIChatResponse struct {
 	TotalTokens    int    `json:"total_tokens"`
 	Provider       string `json:"provider"`
 	RemainingQuota int    `json:"remaining_quota"`
+}
+
+type AIChatHistoryItem struct {
+	ID         string  `json:"id"`
+	BabyID     *string `json:"baby_id,omitempty"`
+	Question   string  `json:"question"`
+	Answer     string  `json:"answer"`
+	TokensUsed int     `json:"tokens_used"`
+	Model      string  `json:"model"`
+	CreatedAt  string  `json:"created_at"`
 }
 
 type SpeechRecognizeResponse struct {

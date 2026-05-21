@@ -115,6 +115,8 @@ func recordTypeLabel(recordType model.RecordType) string {
 		return "排泄"
 	case model.RecordTypeGrowth:
 		return "成长"
+	case model.RecordTypeTemp:
+		return "测温"
 	default:
 		return string(recordType)
 	}

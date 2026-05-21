@@ -15,6 +15,7 @@ const (
 	RecordTypeSleep   RecordType = "sleep"
 	RecordTypeDiaper  RecordType = "diaper"
 	RecordTypeGrowth  RecordType = "growth"
+	RecordTypeTemp    RecordType = "temperature"
 )
 
 type Record struct {
@@ -97,4 +98,9 @@ type GrowthContent struct {
 	Weight            float64 `json:"weight"`
 	Height            float64 `json:"height"`
 	HeadCircumference float64 `json:"head_circumference,omitempty"`
+}
+type TemperatureContent struct {
+	Value    float64 `json:"value"`
+	Unit     string  `json:"unit,omitempty"`
+	Position string  `json:"position,omitempty"`
 }
