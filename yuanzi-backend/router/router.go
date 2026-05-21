@@ -98,6 +98,7 @@ func registerAPIRoutes(r *gin.Engine, base string) {
 	auth.POST("/send-code", handler.SendVerificationCode)
 	auth.POST("/sms", handler.SendVerificationCode)
 	auth.POST("/login", handler.Login)
+	auth.POST("/password-login", handler.PasswordLogin)
 	auth.POST("/refresh", handler.RefreshToken)
 	auth.POST("/logout", handler.Logout)
 
@@ -156,6 +157,7 @@ func registerAPIRoutes(r *gin.Engine, base string) {
 
 	ai := authorized.Group("/ai")
 	ai.POST("/chat", handler.AIChat)
+	ai.POST("/chat/stream", handler.AIChatStream)
 	ai.GET("/chats", handler.ListAIChats)
 	ai.GET("/chats/:id", handler.GetAIChat)
 	ai.POST("/speech/recognize", handler.SpeechRecognize)

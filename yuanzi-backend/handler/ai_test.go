@@ -6,6 +6,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -69,6 +70,55 @@ func TestAIChatSuccess(t *testing.T) {
 	var record model.AIChatRecord
 	if err := mysql.DB.Where("user_id = ? AND question = ?", admin.ID, "宝宝喝多少奶?").First(&record).Error; err != nil {
 		t.Fatalf("问答记录未保存: %v", err)
+	}
+}
+
+func TestAIChatStreamSuccess(t *testing.T) {
+	setupFamilyTestDB(t)
+
+	admin := createTestUser(t, uniquePhone("aistream"), "AI流用户")
+	family := createTestFamily(t, admin.ID, "AI流家庭")
+	member := createTestFamilyMember(t, family.ID, admin.ID, model.FamilyRoleAdmin)
+	baby := createTestBaby(t, family.ID, "AI流宝宝")
+	defer cleanupFamilies(t, family.ID)
+	defer cleanupUsers(t, admin.ID)
+	defer cleanupMembers(t, member.ID)
+	defer cleanupAIChatRecords(t, admin.ID)
+	clearAIQuota(t, admin.ID)
+
+	aiChatFunc = func(_ context.Context, messages []ai.ChatMessage) (*ai.ChatResponse, error) {
+		return &ai.ChatResponse{
+			Content:  "睡眠平稳，奶量正常，排泄规律。",
+			Provider: ai.ProviderDashScope,
+			Model:    "qwen-turbo",
+			Usage:    ai.Usage{InputTokens: 6, OutputTokens: 8, TotalTokens: 14},
+		}, nil
+	}
+	defer resetAIHandlers()
+
+	body := mustMarshal(t, AIChatRequest{Question: "分析近一周趋势", BabyID: &baby.ID})
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	ctx.Request = httptest.NewRequest(http.MethodPost, "/ai/chat/stream", bytes.NewReader(body))
+	ctx.Request.Header.Set("Content-Type", "application/json")
+	ctx.Set("userId", admin.ID)
+
+	AIChatStream(ctx)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("AI流式问答失败: status=%d body=%s", recorder.Code, recorder.Body.String())
+	}
+	if got := recorder.Header().Get("Content-Type"); !strings.Contains(got, "text/event-stream") {
+		t.Fatalf("Content-Type 错误: %s", got)
+	}
+	bodyText := recorder.Body.String()
+	if !strings.Contains(bodyText, "event: delta") || !strings.Contains(bodyText, "event: done") {
+		t.Fatalf("流式响应缺少事件: %s", bodyText)
+	}
+
+	var record model.AIChatRecord
+	if err := mysql.DB.Where("user_id = ? AND question = ?", admin.ID, "分析近一周趋势").First(&record).Error; err != nil {
+		t.Fatalf("流式问答记录未保存: %v", err)
 	}
 }
 

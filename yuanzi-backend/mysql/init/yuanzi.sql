@@ -10,6 +10,7 @@ USE yuanzi;
 CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(36) PRIMARY KEY COMMENT '用户ID',
     phone VARCHAR(11) UNIQUE NOT NULL COMMENT '手机号',
+    username VARCHAR(50) UNIQUE COMMENT '用户名',
     nickname VARCHAR(50) COMMENT '昵称',
     avatar_url VARCHAR(500) COMMENT '头像URL',
     status TINYINT DEFAULT 1 COMMENT '状态: 0-禁用 1-正常',
@@ -187,9 +188,13 @@ CREATE TABLE IF NOT EXISTS push_devices (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='推送设备表';
 
 -- 创建示例用户和家庭
-INSERT INTO users (id, phone, nickname, is_admin, password) VALUES 
-('100e8400-e29b-41d4-a716-446655440000', '13800138000', '妈妈', 1, 'admin123'),
-('100e8400-e29b-41d4-a716-446655440010', '13900139010', '奶奶');
+INSERT INTO users (id, phone, username, nickname, is_admin, password) VALUES
+('100e8400-e29b-41d4-a716-446655440000', '13800138000', 'mom', '妈妈', 1, 'yuanzi123'),
+('100e8400-e29b-41d4-a716-446655440001', '13800138001', 'dad', '爸爸', 0, 'yuanzi123'),
+('100e8400-e29b-41d4-a716-446655440002', '13800138002', 'grandpa', '爷爷', 0, 'yuanzi123'),
+('100e8400-e29b-41d4-a716-446655440003', '13800138003', 'grandma', '奶奶', 0, 'yuanzi123'),
+('100e8400-e29b-41d4-a716-446655440004', '13800138004', 'waigong', '外公', 0, 'yuanzi123'),
+('100e8400-e29b-41d4-a716-446655440005', '13800138005', 'waipo', '外婆', 0, 'yuanzi123');
 
 -- 创建示例家庭
 INSERT INTO families (id, name, invite_code, created_by, is_paid) VALUES 
@@ -198,7 +203,11 @@ INSERT INTO families (id, name, invite_code, created_by, is_paid) VALUES
 -- 创建家庭成员
 INSERT INTO family_members (id, family_id, user_id, role) VALUES 
 ('300e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', '100e8400-e29b-41d4-a716-446655440000', 'admin'),
-('300e8400-e29b-41d4-a716-446655440010', '200e8400-e29b-41d4-a716-446655440000', '100e8400-e29b-41d4-a716-446655440010', 'member'];
+('300e8400-e29b-41d4-a716-446655440001', '200e8400-e29b-41d4-a716-446655440000', '100e8400-e29b-41d4-a716-446655440001', 'member'),
+('300e8400-e29b-41d4-a716-446655440002', '200e8400-e29b-41d4-a716-446655440000', '100e8400-e29b-41d4-a716-446655440002', 'elder'),
+('300e8400-e29b-41d4-a716-446655440003', '200e8400-e29b-41d4-a716-446655440000', '100e8400-e29b-41d4-a716-446655440003', 'elder'),
+('300e8400-e29b-41d4-a716-446655440004', '200e8400-e29b-41d4-a716-446655440000', '100e8400-e29b-41d4-a716-446655440004', 'elder'),
+('300e8400-e29b-41d4-a716-446655440005', '200e8400-e29b-41d4-a716-446655440000', '100e8400-e29b-41d4-a716-446655440005', 'elder');
 
 -- 创建示例宝宝
 INSERT INTO babies (id, family_id, name, birthday, gender, birth_weight, birth_height) VALUES 
@@ -209,7 +218,10 @@ INSERT INTO records (id, baby_id, family_id, type, started_at, ended_at, content
 ('500e8400-e29b-41d4-a716-446655440001', '400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', 'feeding', NOW(3) - INTERVAL 3 HOUR, NULL, JSON_OBJECT('type','formula','amount',120,'unit','ml'), '配方奶喂养，状态安稳', '100e8400-e29b-41d4-a716-446655440000'),
 ('500e8400-e29b-41d4-a716-446655440002', '400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', 'diaper', NOW(3) - INTERVAL 2 HOUR, NULL, JSON_OBJECT('type','mixed','color','黄色','consistency','糊状'), '排泄正常', '100e8400-e29b-41d4-a716-446655440000'),
 ('500e8400-e29b-41d4-a716-446655440003', '400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', 'sleep', NOW(3) - INTERVAL 6 HOUR, NOW(3) - INTERVAL 4 HOUR, JSON_OBJECT('quality','stable','location','crib'), '白天小睡 2 小时', '100e8400-e29b-41d4-a716-446655440000'),
-('500e8400-e29b-41d4-a716-446655440004', '400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', 'temperature', NOW(3) - INTERVAL 1 HOUR, NULL, JSON_OBJECT('value',36.5,'unit','C','position','armpit'), '体温正常', '100e8400-e29b-41d4-a716-446655440000');
+('500e8400-e29b-41d4-a716-446655440004', '400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', 'temperature', NOW(3) - INTERVAL 1 HOUR, NULL, JSON_OBJECT('value',36.5,'unit','C','position','armpit'), '体温正常', '100e8400-e29b-41d4-a716-446655440000'),
+('500e8400-e29b-41d4-a716-446655440005', '400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', 'excretion', NOW(3) - INTERVAL 30 MINUTE, NULL, JSON_OBJECT('type','poop','color','黄色','consistency','糊状','amount','normal'), '排便正常', '100e8400-e29b-41d4-a716-446655440001'),
+('500e8400-e29b-41d4-a716-446655440006', '400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', 'feeding', NOW(3) - INTERVAL 1 DAY, NULL, JSON_OBJECT('type','left_breast','side','left','duration',18,'unit','minute'), '左侧母乳', '100e8400-e29b-41d4-a716-446655440000'),
+('500e8400-e29b-41d4-a716-446655440007', '400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', 'feeding', NOW(3) - INTERVAL 2 DAY, NULL, JSON_OBJECT('type','right_breast','side','right','duration',16,'unit','minute'), '右侧母乳', '100e8400-e29b-41d4-a716-446655440000');
 
 INSERT INTO photos (id, baby_id, family_id, oss_key, size, content_type, description, uploaded_by, uploaded_at, status) VALUES
 ('600e8400-e29b-41d4-a716-446655440001', '400e8400-e29b-41d4-a716-446655440000', '200e8400-e29b-41d4-a716-446655440000', 'demo/yuanzi/smile.jpg', 102400, 'image/jpeg', '小园子今天笑了', '100e8400-e29b-41d4-a716-446655440000', NOW(3), 'active');
@@ -219,6 +231,10 @@ INSERT INTO photo_comments (id, photo_id, family_id, user_id, content) VALUES
 
 INSERT INTO photo_likes (id, photo_id, family_id, user_id) VALUES
 ('620e8400-e29b-41d4-a716-446655440001', '600e8400-e29b-41d4-a716-446655440001', '200e8400-e29b-41d4-a716-446655440000', '100e8400-e29b-41d4-a716-446655440000');
+
+INSERT INTO ai_chat_records (id, user_id, baby_id, question, answer, tokens_used, model, created_at) VALUES
+('700e8400-e29b-41d4-a716-446655440001', '100e8400-e29b-41d4-a716-446655440000', '400e8400-e29b-41d4-a716-446655440000', '近一周小园子睡眠和喝奶趋势怎么样？', '近一周睡眠整体平稳，奶量记录充足，排泄没有异常信号。', 96, 'seed-model', NOW(3) - INTERVAL 1 DAY),
+('700e8400-e29b-41d4-a716-446655440002', '100e8400-e29b-41d4-a716-446655440001', '400e8400-e29b-41d4-a716-446655440000', '今天排泄需要注意什么？', '目前记录看排泄正常，继续观察颜色、次数和精神状态。', 72, 'seed-model', NOW(3) - INTERVAL 2 HOUR);
 
 -- 初始化完成
 SELECT 'Database yuanzi initialized successfully!' AS status;

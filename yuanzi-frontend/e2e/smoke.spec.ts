@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 const ADMIN = {
   phone: '13800138000',
-  password: 'admin123',
+  password: 'yuanzi123',
 };
 
 // ============================================================

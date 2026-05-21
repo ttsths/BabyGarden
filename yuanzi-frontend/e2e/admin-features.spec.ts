@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test';
 
 // Test against deployed environment
 const BASE_URL = 'https://babygarden.pages.dev';
+const ADMIN_PHONE = '13800138000';
+const ADMIN_PASSWORD = 'yuanzi123';
 
 // Skip tests if deployed env is not ready
 test.beforeEach(async ({ page }) => {
@@ -13,15 +15,15 @@ test.beforeEach(async ({ page }) => {
 
 test.describe('Admin Pages Load (Issue #38)', () => {
   test('admin login page loads', async ({ page }) => {
-    await expect(page.locator('input[placeholder="手机号"]')).toBeVisible();
-    await expect(page.locator('input[placeholder="密码"]')).toBeVisible();
+    await expect(page.locator('input[placeholder*="手机号"]')).toBeVisible();
+    await expect(page.locator('input[placeholder*="密码"]')).toBeVisible();
     await expect(page.locator('button:has-text("登录")')).toBeVisible();
   });
 
   test('admin dashboard loads after login', async ({ page }) => {
     // Login with test credentials
-    await page.fill('input[placeholder="手机号"]', '13800000001');
-    await page.fill('input[placeholder="密码"]', 'admin123');
+    await page.fill('input[placeholder*="手机号"]', ADMIN_PHONE);
+    await page.fill('input[placeholder*="密码"]', ADMIN_PASSWORD);
     await page.click('button:has-text("登录")');
     
     // Wait for dashboard
@@ -34,8 +36,8 @@ test.describe('Admin Pages Load (Issue #38)', () => {
 
   test('user management page has add button', async ({ page }) => {
     // Login first
-    await page.fill('input[placeholder="手机号"]', '13800000001');
-    await page.fill('input[placeholder="密码"]', 'admin123');
+    await page.fill('input[placeholder*="手机号"]', ADMIN_PHONE);
+    await page.fill('input[placeholder*="密码"]', ADMIN_PASSWORD);
     await page.click('button:has-text("登录")');
     await page.waitForURL('**/admin/dashboard');
     
@@ -51,8 +53,8 @@ test.describe('Admin Pages Load (Issue #38)', () => {
 test.describe('Photo Management Page (Issue #39)', () => {
   test('photo page loads with upload button', async ({ page }) => {
     // Login
-    await page.fill('input[placeholder="手机号"]', '13800000001');
-    await page.fill('input[placeholder="密码"]', 'admin123');
+    await page.fill('input[placeholder*="手机号"]', ADMIN_PHONE);
+    await page.fill('input[placeholder*="密码"]', ADMIN_PASSWORD);
     await page.click('button:has-text("登录")');
     await page.waitForURL('**/admin/dashboard');
     
