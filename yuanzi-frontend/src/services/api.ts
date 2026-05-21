@@ -78,6 +78,12 @@ export const api = {
     delete: (id: string) => unwrap(apiClient.delete(ENDPOINTS.RECORD.DELETE(id))),
     getDailyStats: (babyId: string, date?: string) =>
       unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_DAILY, { params: { baby_id: babyId, date } })),
+    getWeeklyStats: (babyId: string, date?: string) =>
+      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_WEEKLY, { params: { baby_id: babyId, date } })),
+    getMonthlyStats: (babyId: string, date?: string) =>
+      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_MONTHLY, { params: { baby_id: babyId, date } })),
+    getRangeStats: (babyId: string, startDate: string, endDate: string) =>
+      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_RANGE, { params: { baby_id: babyId, start_date: startDate, end_date: endDate } })),
     getSummaryStats: (babyId: string, params: Record<string, string>) =>
       unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_SUMMARY, { params: { baby_id: babyId, ...params } })),
   },
@@ -96,9 +102,14 @@ export const api = {
   },
 
   ai: {
-    chat: (question: string, babyId?: string, history?: Array<{ role: string; content: string }>) =>
-      unwrap(apiClient.post(ENDPOINTS.AI.CHAT, { question, baby_id: babyId, history })),
+    chat: (question: string, babyIdOrOptions?: string | { baby_id?: string; history?: Array<{ role: string; content: string }> }, history?: Array<{ role: string; content: string }>) => {
+      const payload = typeof babyIdOrOptions === 'object'
+        ? { question, ...babyIdOrOptions }
+        : { question, baby_id: babyIdOrOptions, history };
+      return unwrap(apiClient.post(ENDPOINTS.AI.CHAT, payload));
+    },
     getHistory: (params?: Record<string, unknown>) => unwrap(apiClient.get(ENDPOINTS.AI.CHATS, { params })),
+    history: (params?: Record<string, unknown>) => unwrap(apiClient.get(ENDPOINTS.AI.HISTORY, { params })),
     getDetail: (id: string) => unwrap(apiClient.get(ENDPOINTS.AI.CHAT_DETAIL(id))),
     speech: (audioBlob: Blob) => {
       const formData = new FormData();
@@ -113,7 +124,17 @@ export const api = {
     getMembers: (id: string) => unwrap(apiClient.get(ENDPOINTS.FAMILY.MEMBERS(id))),
     invite: (id: string, phone: string, role = 'member') =>
       unwrap(apiClient.post(ENDPOINTS.FAMILY.INVITE(id), { phone, role })),
-    join: (inviteCode: string) => unwrap(apiClient.post(ENDPOINTS.FAMILY.JOIN, { invite_code: inviteCode })),
-    leave: (id: string) => unwrap(apiClient.post(ENDPOINTS.FAMILY.LEAVE(id))),
+    join: (inviteCode: string, role = 'member') => unwrap(apiClient.post(ENDPOINTS.FAMILY.JOIN, { invite_code: inviteCode, role })),
+    leave: (id: string) => unwrap(apiClient.delete(ENDPOINTS.FAMILY.LEAVE(id))),
+  },
+  stats: {
+    daily: (babyId: string, date?: string) =>
+      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_DAILY, { params: { baby_id: babyId, date } })),
+    weekly: (babyId: string, date?: string) =>
+      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_WEEKLY, { params: { baby_id: babyId, date } })),
+    monthly: (babyId: string, date?: string) =>
+      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_MONTHLY, { params: { baby_id: babyId, date } })),
+    range: (babyId: string, startDate: string, endDate: string) =>
+      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_RANGE, { params: { baby_id: babyId, start_date: startDate, end_date: endDate } })),
   },
 };

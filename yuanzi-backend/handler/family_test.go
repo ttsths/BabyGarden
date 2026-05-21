@@ -203,7 +203,7 @@ func TestJoinAndLeaveFamily(t *testing.T) {
 	joinCtx.Request.Header.Set("Content-Type", "application/json")
 	joinCtx.Set("userId", joining.ID)
 
-	JoinFamilyByInviteCode(joinCtx)
+	JoinFamily(joinCtx)
 
 	if joinRecorder.Code != http.StatusOK {
 		t.Fatalf("加入家庭失败: status=%d body=%s", joinRecorder.Code, joinRecorder.Body.String())

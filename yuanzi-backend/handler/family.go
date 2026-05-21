@@ -171,11 +171,12 @@ func JoinFamily(c *gin.Context) {
 		return
 	}
 
+	role := normalizeInviteRole(req.Role)
 	member := model.FamilyMember{
 		FamilyID:      family.ID,
 		UserID:        userID,
-		Role:          model.FamilyRoleMember,
-		ElderMode:     0,
+		Role:          role,
+		ElderMode:     elderModeFromRole(role),
 		Notifications: model.JSON([]byte(`{"feed":true,"sleep":true}`)),
 		JoinedAt:      time.Now(),
 	}
@@ -312,10 +313,6 @@ type JoinFamilyRequest struct {
 type InviteMemberResponse struct {
 	InviteCode string `json:"invite_code" example:"ABC12345"`
 	ExpiresIn  int    `json:"expires_in" example:"86400"`
-}
-
-type JoinFamilyRequest struct {
-	InviteCode string `json:"invite_code" binding:"required,len=8" example:"ABC12345"`
 }
 
 type FamilyMemberResponse struct {

@@ -494,11 +494,6 @@ func normalizeRecordContent(recordType model.RecordType, content map[string]inte
 		if err := json.Unmarshal(raw, &payload); err != nil || payload.Weight <= 0 || payload.Height <= 0 {
 			return nil, errors.New("成长记录内容不完整")
 		}
-	case model.RecordTypeTemp:
-		var payload model.TemperatureContent
-		if err := json.Unmarshal(raw, &payload); err != nil || payload.Value < 30 || payload.Value > 45 {
-			return nil, errors.New("测温记录内容不完整")
-		}
 	default:
 		return nil, errors.New("记录类型不支持")
 	}

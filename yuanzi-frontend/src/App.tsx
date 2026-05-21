@@ -13,6 +13,7 @@ function App() {
         <Route path="/baby/setup" element={<BabySetupPage />} />
         <Route path="/*" element={<OpenDesignApp />} />
       </Routes>
+    </div>
   );
 }
 

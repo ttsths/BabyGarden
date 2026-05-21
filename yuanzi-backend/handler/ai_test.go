@@ -188,7 +188,7 @@ func TestGetAIHistory(t *testing.T) {
 	ctx.Request = httptest.NewRequest(http.MethodGet, "/ai/history?page=1&page_size=10", nil)
 	ctx.Set("userId", user.ID)
 
-	GetAIHistory(ctx)
+	ListAIChats(ctx)
 
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("获取AI历史失败: status=%d body=%s", recorder.Code, recorder.Body.String())

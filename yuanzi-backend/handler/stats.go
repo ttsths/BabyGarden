@@ -387,7 +387,7 @@ func buildDailyStats(records []model.Record) DailyStatsResponse {
 			}
 		case model.RecordTypeDiaper:
 			stats.Diaper.Count++
-		case model.RecordTypeTemp:
+		case model.RecordTypeTemperature:
 			var payload model.TemperatureContent
 			_ = json.Unmarshal(record.Content, &payload)
 			stats.Temperature.Count++

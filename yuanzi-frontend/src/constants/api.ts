@@ -27,6 +27,8 @@ export const ENDPOINTS = {
     DELETE: (id: string) => `/record/${id}`,
     STATS_DAILY: '/stats/daily',
     STATS_WEEKLY: '/stats/weekly',
+    STATS_MONTHLY: '/stats/monthly',
+    STATS_RANGE: '/stats/range',
     STATS_SUMMARY: '/stats/summary',
   },
   // 照片

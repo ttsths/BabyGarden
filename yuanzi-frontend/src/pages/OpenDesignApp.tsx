@@ -139,7 +139,7 @@ function useYuanziContext() {
       if (!token && !isAuthenticated) return;
       try {
         const response = await api.baby.getList();
-        const babies = unwrap<Array<Record<string, unknown>>>(response.data, []);
+        const babies = unwrap<Array<Record<string, unknown>>>(response, []);
         const current = babies[0];
         if (!active || !current) return;
         const nextBabyId = String(current.id || '');
@@ -205,9 +205,9 @@ function DashboardScreen() {
           api.photo.getList(babyId, { page: 1, page_size: 3 }),
         ]);
         if (!active) return;
-        setStats(unwrap<DailyStats>(daily.data, fallbackStats));
-        setRecords(unwrapList<YuanziRecord>(recordList.data, fallbackRecords));
-        setPhotos(unwrapList<YuanziPhoto>(photoList.data, fallbackPhotos));
+        setStats(unwrap<DailyStats>(daily, fallbackStats));
+        setRecords(unwrapList<YuanziRecord>(recordList, fallbackRecords));
+        setPhotos(unwrapList<YuanziPhoto>(photoList, fallbackPhotos));
         setSource('api');
       } catch {
         setSource(contextSource);
@@ -306,7 +306,7 @@ function RecordScreen() {
     try {
       if (!babyId) throw new Error('missing baby id');
       const response = await api.record.create({ baby_id: babyId, ...payload });
-      const saved = unwrap<YuanziRecord>(response.data, { id: `local-${Date.now()}`, baby_id: babyId, ...payload });
+      const saved = unwrap<YuanziRecord>(response, { id: `local-${Date.now()}`, baby_id: babyId, ...payload });
       setLastRecord(saved);
       setStatus('已保存到后端');
     } catch {
@@ -383,9 +383,9 @@ function StatsScreen() {
           api.record.getList(babyId, { page: 1, page_size: 10, date: today }),
         ]);
         if (!active) return;
-        setDaily(unwrap<DailyStats>(dailyRes.data, fallbackStats));
-        setWeekly(unwrap<WeeklyStats>(rangeRes.data, fallbackWeekly));
-        setRecords(unwrapList<YuanziRecord>(recordRes.data, fallbackRecords));
+        setDaily(unwrap<DailyStats>(dailyRes, fallbackStats));
+        setWeekly(unwrap<WeeklyStats>(rangeRes, fallbackWeekly));
+        setRecords(unwrapList<YuanziRecord>(recordRes, fallbackRecords));
       } catch {
         // 保留 mock，页面仍可交互。
       }
@@ -430,7 +430,7 @@ function PhotosScreen() {
       if (!babyId) return;
       try {
         const response = await api.photo.getList(babyId, { page: 1, page_size: 20 });
-        const list = unwrapList<YuanziPhoto>(response.data, fallbackPhotos);
+        const list = unwrapList<YuanziPhoto>(response, fallbackPhotos);
         setPhotoList(list);
         setSelectedPhoto(list[0] || fallbackPhotos[0]);
       } catch {
@@ -445,7 +445,7 @@ function PhotosScreen() {
     try {
       if (!babyId) throw new Error('missing baby id');
       const response = await api.photo.getUploadUrl({ baby_id: babyId, filename: file.name, content_type: file.type || 'image/jpeg', size: file.size });
-      const data = unwrap<Record<string, string | number>>(response.data, {});
+      const data = unwrap<Record<string, string | number>>(response, {});
       setUploadStatus(`已获取上传地址：${String(data.upload_url || 'upload_url 返回为空')}`);
     } catch {
       setUploadStatus('后端上传地址暂不可用，已停留在上传组件。');
@@ -455,7 +455,7 @@ function PhotosScreen() {
   async function toggleLike() {
     try {
       const response = selectedPhoto.liked_by_me ? await api.photo.unlike(selectedPhoto.id) : await api.photo.like(selectedPhoto.id);
-      const summary = unwrap<Partial<YuanziPhoto>>(response.data, {});
+      const summary = unwrap<Partial<YuanziPhoto>>(response, {});
       const updated = { ...selectedPhoto, ...summary };
       setSelectedPhoto(updated);
       setPhotoList((items) => items.map((item) => item.id === updated.id ? updated : item));
@@ -468,7 +468,7 @@ function PhotosScreen() {
     if (!comment.trim()) return;
     try {
       const response = await api.photo.comment(selectedPhoto.id, comment.trim());
-      const created = unwrap<PhotoComment>(response.data, {
+      const created = unwrap<PhotoComment>(response, {
         id: `local-${Date.now()}`,
         photo_id: selectedPhoto.id,
         user_id: 'local',
@@ -519,7 +519,7 @@ function FamilyScreen() {
       if (!familyId) return;
       try {
         const response = await api.family.getMembers(familyId);
-        setMembers(unwrap<FamilyMember[]>(response.data, fallbackMembers));
+        setMembers(unwrap<FamilyMember[]>(response, fallbackMembers));
       } catch {
         // 使用本地示例。
       }
@@ -531,7 +531,7 @@ function FamilyScreen() {
     try {
       if (!familyId) throw new Error('missing family id');
       const response = await api.family.invite(familyId, invitePhone, inviteRole);
-      const data = unwrap<Record<string, string | number>>(response.data, {});
+      const data = unwrap<Record<string, string | number>>(response, {});
       setInviteResult(`邀请已发送，邀请码 ${String(data.invite_code || '已生成')}`);
     } catch {
       setInviteResult('后端邀请接口暂不可用，已保留输入。');
@@ -541,7 +541,7 @@ function FamilyScreen() {
   async function joinFamily() {
     try {
       const response = await api.family.join(joinCode, inviteRole);
-      const data = unwrap<Record<string, string>>(response.data, {});
+      const data = unwrap<Record<string, string>>(response, {});
       setInviteResult(`已加入家庭：${data.name || data.id || joinCode}`);
     } catch {
       setInviteResult('加入失败，请检查邀请码或登录状态。');
@@ -605,7 +605,7 @@ function RecordsScreen() {
       if (!babyId) return;
       try {
         const response = await api.record.getList(babyId, { page: 1, page_size: 30 });
-        setRecords(unwrapList<YuanziRecord>(response.data, fallbackRecords));
+        setRecords(unwrapList<YuanziRecord>(response, fallbackRecords));
       } catch {
         // 使用本地示例。
       }
@@ -623,7 +623,7 @@ function RecordDetailScreen() {
       if (!id || id.startsWith('mock')) return;
       try {
         const response = await api.record.getDetail(id);
-        setRecord((current) => unwrap<YuanziRecord>(response.data, current));
+        setRecord((current) => unwrap<YuanziRecord>(response, current));
       } catch {
         // 保留当前展示。
       }
@@ -645,7 +645,7 @@ function AiScreen() {
     async function load() {
       try {
         const response = await api.ai.history({ baby_id: babyId, page: 1, page_size: 8 });
-        setHistory(unwrapList(response.data, []));
+        setHistory(unwrapList(response, []));
         setStatus('历史会话');
       } catch {
         setStatus('历史会话暂不可用');
@@ -665,7 +665,7 @@ function AiScreen() {
           { role: 'assistant', content: item.answer },
         ]),
       });
-      const data = unwrap<{ answer: string }>(response.data, { answer: 'AI暂时无法回答，请稍后再试。' });
+      const data = unwrap<{ answer: string }>(response, { answer: 'AI暂时无法回答，请稍后再试。' });
       setAnswer(data.answer);
       setHistory((items) => [{ id: `local-${Date.now()}`, question, answer: data.answer, created_at: new Date().toISOString() }, ...items]);
       setQuestion('');
@@ -697,7 +697,7 @@ function LoginScreen() {
   async function login() {
     try {
       const response = await api.auth.login(phone.replace(/\D/g, ''), code);
-      const data = unwrap<{ access_token: string; refresh_token: string }>(response.data, { access_token: '', refresh_token: '' });
+      const data = unwrap<{ access_token: string; refresh_token: string }>(response, { access_token: '', refresh_token: '' });
       await loginStore(data.access_token, data.refresh_token);
       navigate('/');
     } catch {

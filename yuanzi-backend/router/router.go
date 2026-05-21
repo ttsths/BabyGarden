@@ -160,5 +160,5 @@ func registerAPIRoutes(r *gin.Engine, base string) {
 	ai.GET("/chats/:id", handler.GetAIChat)
 	ai.POST("/speech/recognize", handler.SpeechRecognize)
 	ai.GET("/quota", handler.GetAIQuota)
-	ai.GET("/history", handler.GetAIHistory)
+	ai.GET("/history", handler.ListAIChats)
 }
