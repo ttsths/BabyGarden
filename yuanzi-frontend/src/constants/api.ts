@@ -1,5 +1,7 @@
 // API 端点常量
-export const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+export const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  'https://yuanzi-backend.shentuhaisan.workers.dev/api/v1';
 
 export const ENDPOINTS = {
   // 认证
@@ -7,7 +9,7 @@ export const ENDPOINTS = {
     SEND_CODE: '/auth/send-code',
     LOGIN: '/auth/login',
     LOGOUT: '/auth/logout',
-    PROFILE: '/auth/profile',
+    PROFILE: '/user/profile',
   },
   // 宝宝
   BABY: {
@@ -25,6 +27,8 @@ export const ENDPOINTS = {
     DELETE: (id: string) => `/record/${id}`,
     STATS_DAILY: '/stats/daily',
     STATS_WEEKLY: '/stats/weekly',
+    STATS_MONTHLY: '/stats/monthly',
+    STATS_RANGE: '/stats/range',
     STATS_SUMMARY: '/stats/summary',
   },
   // 照片
@@ -43,6 +47,7 @@ export const ENDPOINTS = {
     CHAT_DETAIL: (id: string) => `/ai/chats/${id}`,
     SPEECH: '/ai/speech/recognize',
     QUOTA: '/ai/quota',
+    HISTORY: '/ai/history',
   },
   // 家庭
   FAMILY: {

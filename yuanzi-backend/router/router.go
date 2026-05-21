@@ -116,6 +116,7 @@ func registerAPIRoutes(r *gin.Engine, base string) {
 	family.POST("/:id/invite", handler.InviteFamilyMember)
 	family.POST("/:id/leave", handler.LeaveFamily)
 	family.GET("/:id/members", handler.GetFamilyMembers)
+	family.DELETE("/:id/leave", handler.LeaveFamily)
 	family.DELETE("/:id/members/:userId", handler.RemoveFamilyMember)
 
 	baby := authorized.Group("/baby")
@@ -159,4 +160,5 @@ func registerAPIRoutes(r *gin.Engine, base string) {
 	ai.GET("/chats/:id", handler.GetAIChat)
 	ai.POST("/speech/recognize", handler.SpeechRecognize)
 	ai.GET("/quota", handler.GetAIQuota)
+	ai.GET("/history", handler.ListAIChats)
 }

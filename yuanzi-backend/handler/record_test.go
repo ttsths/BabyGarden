@@ -67,6 +67,43 @@ func TestCreateRecordFeedingHoursSinceLastFeed(t *testing.T) {
 	}
 }
 
+func TestCreateRecordTemperature(t *testing.T) {
+	setupFamilyTestDB(t)
+
+	admin := createTestUser(t, uniquePhone("temp"), "测温用户")
+	family := createTestFamily(t, admin.ID, "测温家庭")
+	member := createTestFamilyMember(t, family.ID, admin.ID, model.FamilyRoleAdmin)
+	baby := createTestBaby(t, family.ID, "测温宝宝")
+	defer cleanupFamilies(t, family.ID)
+	defer cleanupUsers(t, admin.ID)
+	defer cleanupMembers(t, member.ID)
+
+	body := mustMarshal(t, CreateRecordRequest{
+		BabyID:    baby.ID,
+		Type:      "temperature",
+		StartedAt: time.Now().UTC().Truncate(time.Second).Format(time.RFC3339),
+		Content:   map[string]interface{}{"value": 36.6, "unit": "C", "position": "armpit"},
+	})
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	ctx.Request = httptest.NewRequest(http.MethodPost, "/record", bytes.NewReader(body))
+	ctx.Request.Header.Set("Content-Type", "application/json")
+	ctx.Set("userId", admin.ID)
+
+	CreateRecord(ctx)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("创建测温记录失败: status=%d body=%s", recorder.Code, recorder.Body.String())
+	}
+	var response struct {
+		Data RecordResponse `json:"data"`
+	}
+	decodeResponse(t, recorder.Body.Bytes(), &response)
+	if response.Data.Type != "temperature" || response.Data.Content["value"] == nil {
+		t.Fatalf("测温记录响应错误: %+v", response.Data)
+	}
+}
+
 func TestUpdateRecordRejectNonCreator(t *testing.T) {
 	setupFamilyTestDB(t)
 

@@ -377,7 +377,7 @@ func ListPhotoComments(c *gin.Context) {
 		return
 	}
 	var comments []model.PhotoComment
-	if err := query.Preload("User").Order("created_at asc").Offset((page - 1) * pageSize).Limit(pageSize).Find(&comments).Error; err != nil {
+	if err := query.Order("created_at asc").Offset((page - 1) * pageSize).Limit(pageSize).Find(&comments).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "查询评论失败"})
 		return
 	}
@@ -408,7 +408,6 @@ func CreatePhotoComment(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "评论失败"})
 		return
 	}
-	_ = mysql.DB.Preload("User").First(&comment, "id = ?", comment.ID).Error
 	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "评论成功", Data: photoCommentResponse(comment)})
 }
 
@@ -570,15 +569,24 @@ func photoInteractionStats(photoID, userID string) (int64, int64, bool) {
 }
 
 func photoCommentResponse(comment model.PhotoComment) PhotoCommentResponse {
+	user := loadUserForPhotoInteraction(comment.UserID)
 	return PhotoCommentResponse{
 		ID:        comment.ID,
 		PhotoID:   comment.PhotoID,
 		UserID:    comment.UserID,
-		Nickname:  comment.User.Nickname,
-		AvatarURL: comment.User.AvatarURL,
+		Nickname:  user.Nickname,
+		AvatarURL: user.AvatarURL,
 		Content:   comment.Content,
 		CreatedAt: comment.CreatedAt.Format(time.RFC3339),
 	}
+}
+
+func loadUserForPhotoInteraction(userID string) model.User {
+	var user model.User
+	if userID != "" {
+		_ = mysql.DB.Select("id", "nickname", "avatar_url").Where("id = ?", userID).First(&user).Error
+	}
+	return user
 }
 
 // confirmUploadedPhoto updates photo status from pending to active.

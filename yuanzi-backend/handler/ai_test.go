@@ -164,6 +164,44 @@ func TestGetAIQuota(t *testing.T) {
 	}
 }
 
+func TestGetAIHistory(t *testing.T) {
+	setupFamilyTestDB(t)
+
+	user := createTestUser(t, uniquePhone("aihist"), "AI历史用户")
+	defer cleanupUsers(t, user.ID)
+	defer cleanupAIChatRecords(t, user.ID)
+
+	record := model.AIChatRecord{
+		UserID:     user.ID,
+		Question:   "怎么安排午睡？",
+		Answer:     "先观察困倦信号。",
+		TokensUsed: 8,
+		Model:      "test-model",
+		CreatedAt:  time.Now(),
+	}
+	if err := mysql.DB.Create(&record).Error; err != nil {
+		t.Fatalf("创建AI历史失败: %v", err)
+	}
+
+	recorder := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(recorder)
+	ctx.Request = httptest.NewRequest(http.MethodGet, "/ai/history?page=1&page_size=10", nil)
+	ctx.Set("userId", user.ID)
+
+	ListAIChats(ctx)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("获取AI历史失败: status=%d body=%s", recorder.Code, recorder.Body.String())
+	}
+	var response struct {
+		Data model.ListResponse `json:"data"`
+	}
+	decodeResponse(t, recorder.Body.Bytes(), &response)
+	if response.Data.Pagination.Total < 1 {
+		t.Fatalf("AI历史为空: %+v", response.Data)
+	}
+}
+
 func cleanupAIChatRecords(t *testing.T, userIDs ...string) {
 	t.Helper()
 	if len(userIDs) == 0 {

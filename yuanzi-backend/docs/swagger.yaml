@@ -19,15 +19,31 @@ definitions:
     properties:
       answer:
         type: string
+      cached_tokens:
+        type: integer
+      input_tokens:
+        type: integer
+      output_tokens:
+        type: integer
+      provider:
+        type: string
       remaining_quota:
         type: integer
       tokens_used:
+        type: integer
+      total_tokens:
         type: integer
     type: object
   handler.AIQuotaResponse:
     properties:
       ai_chat:
         $ref: '#/definitions/handler.QuotaDetail'
+      cloudflare:
+        $ref: '#/definitions/handler.CloudflareQuotaDetail'
+      provider_chain:
+        items:
+          type: string
+        type: array
       speech:
         $ref: '#/definitions/handler.QuotaDetail'
     type: object
@@ -38,6 +54,23 @@ definitions:
         type: string
       role:
         example: user
+        type: string
+    type: object
+  handler.CloudflareQuotaDetail:
+    properties:
+      daily_neuron_budget:
+        type: integer
+      estimated_neurons_remaining:
+        type: integer
+      estimated_neurons_used_today:
+        type: integer
+      hard_neuron_budget:
+        type: integer
+      model:
+        type: string
+      reset_at_utc:
+        type: string
+      source_of_truth:
         type: string
     type: object
   handler.CreateRecordRequest:
@@ -63,6 +96,7 @@ definitions:
         - sleep
         - diaper
         - growth
+        - temperature
         example: feeding
         type: string
     required:
@@ -79,6 +113,8 @@ definitions:
         $ref: '#/definitions/handler.FeedingStats'
       sleep:
         $ref: '#/definitions/handler.SleepStats'
+      temperature:
+        $ref: '#/definitions/handler.TemperatureStats'
     type: object
   handler.DiaperStats:
     properties:
@@ -87,6 +123,8 @@ definitions:
     type: object
   handler.FeedingStats:
     properties:
+      average_amount:
+        type: number
       count:
         type: integer
       total_amount:
@@ -105,14 +143,52 @@ definitions:
     - photo_id
     - size
     type: object
+  handler.PhotoCommentResponse:
+    properties:
+      avatar_url:
+        type: string
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      nickname:
+        type: string
+      photo_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  handler.PhotoConfirmRequest:
+    properties:
+      etag:
+        type: string
+      photo_id:
+        type: string
+      size:
+        type: integer
+    required:
+    - photo_id
+    type: object
   handler.PhotoResponse:
     properties:
+      comments_count:
+        type: integer
       description:
         type: string
       height:
         type: integer
       id:
         type: string
+      liked_by_me:
+        type: boolean
+      likes_count:
+        type: integer
+      recent_comments:
+        items:
+          $ref: '#/definitions/handler.PhotoCommentResponse'
+        type: array
       taken_at:
         type: string
       thumb_url:
@@ -152,6 +228,10 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      headers:
+        additionalProperties:
+          type: string
+        type: object
       photo_id:
         type: string
       thumb_url:
@@ -165,6 +245,8 @@ definitions:
         type: integer
       remaining:
         type: integer
+      tokens:
+        $ref: '#/definitions/handler.TokenQuotaStats'
       used:
         type: integer
     type: object
@@ -233,8 +315,12 @@ definitions:
     type: object
   handler.SleepStats:
     properties:
+      average_duration_hours:
+        type: number
       count:
         type: integer
+      daytime_single_hours:
+        type: number
       total_hours:
         type: number
     type: object
@@ -246,6 +332,26 @@ definitions:
         type: integer
       text:
         type: string
+    type: object
+  handler.TemperatureStats:
+    properties:
+      count:
+        type: integer
+      latest:
+        type: number
+    type: object
+  handler.TokenQuotaStats:
+    properties:
+      month_total_tokens:
+        type: integer
+      today_cached_tokens:
+        type: integer
+      today_input_tokens:
+        type: integer
+      today_output_tokens:
+        type: integer
+      today_total_tokens:
+        type: integer
     type: object
   handler.UpdateRecordRequest:
     properties:
@@ -261,9 +367,21 @@ definitions:
     type: object
   handler.WeeklyStatsResponse:
     properties:
+      daily_average_milk_amount:
+        items:
+          type: number
+        type: array
+      daily_average_sleep_hours:
+        items:
+          type: number
+        type: array
       dates:
         items:
           type: string
+        type: array
+      daytime_single_sleep_hours:
+        items:
+          type: number
         type: array
       diaper:
         items:
@@ -274,6 +392,10 @@ definitions:
           type: integer
         type: array
       sleep:
+        items:
+          type: number
+        type: array
+      temperature_latest:
         items:
           type: number
         type: array
@@ -350,7 +472,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 获取用户当日 AI 使用配额情况
+      description: 获取用户当日 AI 使用配额情况，含 Provider 链与 Cloudflare 估算额度
       produces:
       - application/json
       responses:
@@ -510,6 +632,30 @@ paths:
       summary: 照片上传回调
       tags:
       - 照片
+  /api/v1/photo/confirm:
+    post:
+      consumes:
+      - application/json
+      description: 客户端完成直传后确认上传（用于 R2 等无服务端回调的存储后端）
+      parameters:
+      - description: 请求参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handler.PhotoConfirmRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Response'
+      security:
+      - Bearer: []
+      summary: 照片上传确认
+      tags:
+      - 照片
   /api/v1/photo/upload-url:
     post:
       consumes:
@@ -550,7 +696,7 @@ paths:
         name: baby_id
         required: true
         type: string
-      - description: '记录类型: feeding/sleep/diaper/growth'
+      - description: '记录类型: feeding/sleep/diaper/growth/temperature'
         in: query
         name: type
         type: string
@@ -591,7 +737,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 创建喂养/睡眠/排泄/成长记录
+      description: 创建喂养/睡眠/排泄/成长/测温记录
       parameters:
       - description: 记录信息
         in: body

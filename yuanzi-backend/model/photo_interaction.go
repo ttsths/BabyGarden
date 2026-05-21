@@ -15,7 +15,7 @@ type PhotoComment struct {
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	User      User           `gorm:"foreignKey:UserID;references:ID" json:"user,omitempty"`
+	User      User           `gorm:"-" json:"user,omitempty"`
 }
 
 func (c *PhotoComment) BeforeCreate(_ *gorm.DB) error {

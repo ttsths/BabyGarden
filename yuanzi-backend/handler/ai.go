@@ -361,17 +361,6 @@ type AIChatResponse struct {
 	RemainingQuota int    `json:"remaining_quota"`
 }
 
-type AIChatHistoryResponse struct {
-	ID         string  `json:"id"`
-	UserID     string  `json:"user_id"`
-	BabyID     *string `json:"baby_id,omitempty"`
-	Question   string  `json:"question"`
-	Answer     string  `json:"answer"`
-	TokensUsed int     `json:"tokens_used"`
-	Model      string  `json:"model"`
-	CreatedAt  string  `json:"created_at"`
-}
-
 type SpeechRecognizeResponse struct {
 	Text           string  `json:"text"`
 	Confidence     float64 `json:"confidence"`
@@ -398,6 +387,17 @@ type TokenQuotaStats struct {
 	TodayCachedTokens int `json:"today_cached_tokens"`
 	TodayTotalTokens  int `json:"today_total_tokens"`
 	MonthTotalTokens  int `json:"month_total_tokens"`
+}
+
+type AIChatHistoryResponse struct {
+	ID         string  `json:"id"`
+	UserID     string  `json:"user_id"`
+	BabyID     *string `json:"baby_id,omitempty"`
+	Question   string  `json:"question"`
+	Answer     string  `json:"answer"`
+	TokensUsed int     `json:"tokens_used"`
+	Model      string  `json:"model"`
+	CreatedAt  string  `json:"created_at"`
 }
 
 var (
