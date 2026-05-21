@@ -52,6 +52,7 @@ const tabs: Array<{ key: TabKey; label: string }> = [
 export const FamilyLivePage: React.FC = () => {
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<TabKey>('home');
+  const [recordInitialType, setRecordInitialType] = useState<RecordKind>('feeding');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [babies, setBabies] = useState<Baby[]>([]);
@@ -64,6 +65,7 @@ export const FamilyLivePage: React.FC = () => {
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [aiHistory, setAIHistory] = useState<AIChatItem[]>([]);
   const [commentsByPhoto, setCommentsByPhoto] = useState<Record<string, PhotoComment[]>>({});
+  const [photoUploadMessage, setPhotoUploadMessage] = useState('');
 
   const currentBaby = useMemo(
     () => babies.find((baby) => baby.id === currentBabyId) ?? babies[0],
@@ -167,10 +169,13 @@ export const FamilyLivePage: React.FC = () => {
                   dailyStats={dailyStats}
                   records={records}
                   photos={photos}
-                  onQuickRecord={(type) => setActiveTab(type === 'feeding' ? 'record' : 'record')}
+                  onQuickRecord={(type) => {
+                    setRecordInitialType(type);
+                    setActiveTab('record');
+                  }}
                 />
               )}
-              {activeTab === 'record' && <RecordSection babyId={currentBaby.id} onSaved={() => void refresh()} />}
+              {activeTab === 'record' && <RecordSection babyId={currentBaby.id} initialType={recordInitialType} />}
               {activeTab === 'stats' && <StatsSection babyId={currentBaby.id} initialSummary={summaryStats} />}
               {activeTab === 'ai' && <AISection babyId={currentBaby.id} history={aiHistory} onUpdated={() => void refresh()} />}
               {activeTab === 'family' && (
@@ -179,7 +184,10 @@ export const FamilyLivePage: React.FC = () => {
               {activeTab === 'photos' && (
                 <PhotoSection
                   photos={photos}
+                  babyId={currentBaby.id}
                   commentsByPhoto={commentsByPhoto}
+                  uploadMessage={photoUploadMessage}
+                  onUploadMessage={setPhotoUploadMessage}
                   onLoadComments={async (photoId) => {
                     const response = (await api.photo.getComments(photoId)) as ListResponse<PhotoComment>;
                     setCommentsByPhoto((prev) => ({ ...prev, [photoId]: response.list }));
@@ -252,17 +260,39 @@ const Metric: React.FC<{ label: string; value: string }> = ({ label, value }) =>
   </div>
 );
 
-const RecordSection: React.FC<{ babyId: string; onSaved: () => void }> = ({ babyId, onSaved }) => {
+const RecordSection: React.FC<{ babyId: string; initialType: RecordKind }> = ({ babyId, initialType }) => {
   const [type, setType] = useState<RecordKind>('feeding');
+  const [startedAt, setStartedAt] = useState(toDateTimeLocal(new Date()));
+  const [endedAt, setEndedAt] = useState(toDateTimeLocal(new Date(Date.now() + 60 * 60000)));
   const [amount, setAmount] = useState(120);
   const [duration, setDuration] = useState(60);
   const [temperature, setTemperature] = useState(36.8);
   const [note, setNote] = useState('');
+  const [records, setRecords] = useState<BabyRecord[]>([]);
+  const [editing, setEditing] = useState<BabyRecord | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const loadRecords = useCallback(async () => {
+    const response = (await api.record.getList(babyId, { page_size: 20, type })) as ListResponse<BabyRecord>;
+    setRecords(response.list);
+  }, [babyId, type]);
+
+  useEffect(() => {
+    setType(initialType);
+  }, [initialType]);
+
+  useEffect(() => {
+    void loadRecords();
+  }, [loadRecords]);
+
+  const resetEditing = () => {
+    setEditing(null);
+    setNote('');
+  };
 
   const save = async () => {
     setSaving(true);
-    const started = new Date();
+    const started = new Date(startedAt);
     const body: Record<string, unknown> = {
       baby_id: babyId,
       type,
@@ -271,37 +301,101 @@ const RecordSection: React.FC<{ babyId: string; onSaved: () => void }> = ({ baby
       content: buildRecordContent(type, amount, temperature),
     };
     if (type === 'sleep') {
-      body.ended_at = new Date(started.getTime() + duration * 60000).toISOString();
+      body.ended_at = new Date(endedAt).toISOString();
     }
     try {
-      await api.record.create(body);
-      setNote('');
-      onSaved();
+      if (editing) {
+        await api.record.update(editing.id, {
+          started_at: body.started_at,
+          ended_at: body.ended_at,
+          content: body.content,
+          note,
+        });
+      } else {
+        await api.record.create(body);
+      }
+      resetEditing();
+      await loadRecords();
     } finally {
       setSaving(false);
     }
   };
 
+  const startEdit = (record: BabyRecord) => {
+    setEditing(record);
+    setType(record.type as RecordKind);
+    setStartedAt(toDateTimeLocal(new Date(record.started_at)));
+    if (record.ended_at) setEndedAt(toDateTimeLocal(new Date(record.ended_at)));
+    setNote(record.note ?? '');
+    if (record.type === 'feeding') setAmount(Number(record.content?.amount ?? amount));
+    if (record.type === 'temperature') setTemperature(Number(record.content?.value ?? temperature));
+  };
+
+  const deleteRecord = async (record: BabyRecord) => {
+    await api.record.delete(record.id);
+    await loadRecords();
+  };
+
   return (
-    <Panel>
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label className="text-sm font-medium">记录类型</label>
-          <select value={type} onChange={(event) => setType(event.target.value as RecordKind)} className="mt-2 w-full rounded-md border px-3 py-2">
-            {(['feeding', 'diaper', 'excretion', 'temperature', 'sleep'] as RecordKind[]).map((item) => (
-              <option key={item} value={item}>{recordLabel(item)}</option>
-            ))}
-          </select>
+    <div className="grid gap-4 lg:grid-cols-2">
+      <Panel>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="text-sm font-medium">记录类型</label>
+            <select disabled={Boolean(editing)} value={type} onChange={(event) => setType(event.target.value as RecordKind)} className="mt-2 w-full rounded-md border px-3 py-2">
+              {(['feeding', 'diaper', 'excretion', 'temperature', 'sleep'] as RecordKind[]).map((item) => (
+                <option key={item} value={item}>{recordLabel(item)}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-sm font-medium">开始时间</label>
+            <input type="datetime-local" value={startedAt} onChange={(event) => setStartedAt(event.target.value)} className="mt-2 w-full rounded-md border px-3 py-2" />
+          </div>
+          {type === 'feeding' && <NumberInput label="奶量 ml" value={amount} onChange={setAmount} />}
+          {type === 'sleep' && (
+            <>
+              <NumberInput label="睡眠分钟" value={duration} onChange={(value) => {
+                setDuration(value);
+                setEndedAt(toDateTimeLocal(new Date(new Date(startedAt).getTime() + value * 60000)));
+              }} />
+              <div>
+                <label className="text-sm font-medium">结束时间</label>
+                <input type="datetime-local" value={endedAt} onChange={(event) => setEndedAt(event.target.value)} className="mt-2 w-full rounded-md border px-3 py-2" />
+              </div>
+            </>
+          )}
+          {type === 'temperature' && <NumberInput label="体温 °C" value={temperature} onChange={setTemperature} step="0.1" />}
         </div>
-        {type === 'feeding' && <NumberInput label="奶量 ml" value={amount} onChange={setAmount} />}
-        {type === 'sleep' && <NumberInput label="睡眠分钟" value={duration} onChange={setDuration} />}
-        {type === 'temperature' && <NumberInput label="体温 °C" value={temperature} onChange={setTemperature} step="0.1" />}
-      </div>
-      <textarea value={note} onChange={(event) => setNote(event.target.value)} placeholder="备注" className="mt-4 min-h-24 w-full rounded-md border px-3 py-2" />
-      <button disabled={saving} onClick={() => void save()} className="mt-4 rounded-md bg-slate-900 px-4 py-2 text-white disabled:opacity-50">
-        {saving ? '保存中...' : '保存记录'}
-      </button>
-    </Panel>
+        <textarea value={note} onChange={(event) => setNote(event.target.value)} placeholder="备注" className="mt-4 min-h-24 w-full rounded-md border px-3 py-2" />
+        <div className="mt-4 flex gap-2">
+          <button disabled={saving} onClick={() => void save()} className="rounded-md bg-slate-900 px-4 py-2 text-white disabled:opacity-50">
+            {saving ? '保存中...' : editing ? '保存修改' : '保存记录'}
+          </button>
+          {editing && <button onClick={resetEditing} className="rounded-md bg-slate-100 px-4 py-2">取消编辑</button>}
+        </div>
+      </Panel>
+      <Panel>
+        <h3 className="mb-3 font-semibold">{recordLabel(type)}记录</h3>
+        <div className="space-y-2">
+          {records.map((record) => (
+            <div key={record.id} className="rounded-md bg-slate-50 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="font-medium">{recordLabel(record.type as RecordKind)}</div>
+                  <div className="text-sm text-slate-500">{new Date(record.started_at).toLocaleString()}</div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => startEdit(record)} className="rounded bg-white px-3 py-1 text-sm">修改</button>
+                  <button onClick={() => void deleteRecord(record)} className="rounded bg-red-50 px-3 py-1 text-sm text-red-600">删除</button>
+                </div>
+              </div>
+              {record.note && <div className="mt-2 text-sm text-slate-600">{record.note}</div>}
+            </div>
+          ))}
+        </div>
+      </Panel>
+    </div>
   );
 };
 
@@ -315,6 +409,8 @@ const NumberInput: React.FC<{ label: string; value: number; onChange: (value: nu
 const StatsSection: React.FC<{ babyId: string; initialSummary: SummaryStats | null }> = ({ babyId, initialSummary }) => {
   const [range, setRange] = useState('week');
   const [summary, setSummary] = useState<SummaryStats | null>(initialSummary);
+  const [startDate, setStartDate] = useState(() => new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10));
+  const [endDate, setEndDate] = useState(() => new Date().toISOString().slice(0, 10));
 
   useEffect(() => {
     setSummary(initialSummary);
@@ -322,7 +418,10 @@ const StatsSection: React.FC<{ babyId: string; initialSummary: SummaryStats | nu
 
   const load = async (nextRange: string) => {
     setRange(nextRange);
-    setSummary((await api.record.getSummaryStats(babyId, { range: nextRange })) as SummaryStats);
+    const params: Record<string, string> = nextRange === 'custom'
+      ? { range: nextRange, start_date: startDate, end_date: endDate }
+      : { range: nextRange };
+    setSummary((await api.record.getSummaryStats(babyId, params)) as SummaryStats);
   };
 
   const max = Math.max(1, ...(summary?.daily_avg_sleep_hours ?? []), ...(summary?.daily_avg_milk_amount ?? []));
@@ -330,12 +429,19 @@ const StatsSection: React.FC<{ babyId: string; initialSummary: SummaryStats | nu
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
-        {['day', 'week', 'month'].map((item) => (
+        {['day', 'week', 'month', 'custom'].map((item) => (
           <button key={item} onClick={() => void load(item)} className={`rounded-md px-4 py-2 ${range === item ? 'bg-[#ef7868] text-white' : 'bg-white'}`}>
-            {item === 'day' ? '日' : item === 'week' ? '周' : '月'}
+            {item === 'day' ? '日' : item === 'week' ? '周' : item === 'month' ? '月' : '自定义'}
           </button>
         ))}
       </div>
+      {range === 'custom' && (
+        <div className="flex flex-wrap gap-2">
+          <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className="rounded-md border px-3 py-2" />
+          <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className="rounded-md border px-3 py-2" />
+          <button onClick={() => void load('custom')} className="rounded-md bg-slate-900 px-4 py-2 text-white">更新区间</button>
+        </div>
+      )}
       <Panel>
         <div className="grid gap-3 md:grid-cols-3">
           <Metric label="每日平均睡眠" value={`${summary?.summary.avg_daily_sleep_hours ?? 0} h`} />
@@ -372,17 +478,37 @@ const AISection: React.FC<{ babyId: string; history: AIChatItem[]; onUpdated: ()
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [asking, setAsking] = useState(false);
+  const [trendLoading, setTrendLoading] = useState(false);
 
   const ask = async () => {
     if (!question.trim()) return;
     setAsking(true);
+    setAnswer('');
     try {
-      const response = (await api.ai.chat(question, babyId)) as { answer: string };
-      setAnswer(response.answer);
+      await api.ai.chatStream(question, {
+        baby_id: babyId,
+        onDelta: (delta) => setAnswer((prev) => prev + delta),
+      });
       setQuestion('');
       onUpdated();
     } finally {
       setAsking(false);
+    }
+  };
+
+  const analyzeTrend = async () => {
+    setTrendLoading(true);
+    setAnswer('');
+    try {
+      const stats = await api.record.getSummaryStats(babyId, { range: 'week' }) as SummaryStats;
+      const prompt = `请分析小园子近一周统计趋势，必须包含睡眠、奶量、排泄。统计摘要：${JSON.stringify(stats.summary)}，日期：${stats.dates.join(',')}`;
+      await api.ai.chatStream(prompt, {
+        baby_id: babyId,
+        onDelta: (delta) => setAnswer((prev) => prev + delta),
+      });
+      onUpdated();
+    } finally {
+      setTrendLoading(false);
     }
   };
 
@@ -391,9 +517,14 @@ const AISection: React.FC<{ babyId: string; history: AIChatItem[]; onUpdated: ()
       <Panel>
         <h3 className="mb-3 font-semibold">AI 育儿问答</h3>
         <textarea value={question} onChange={(event) => setQuestion(event.target.value)} className="min-h-28 w-full rounded-md border px-3 py-2" placeholder="输入你的问题" />
-        <button disabled={asking} onClick={() => void ask()} className="mt-3 rounded-md bg-slate-900 px-4 py-2 text-white disabled:opacity-50">
-          {asking ? '回答中...' : '提问'}
-        </button>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button disabled={asking || trendLoading} onClick={() => void ask()} className="rounded-md bg-slate-900 px-4 py-2 text-white disabled:opacity-50">
+            {asking ? '流式回答中...' : '提问'}
+          </button>
+          <button disabled={asking || trendLoading} onClick={() => void analyzeTrend()} className="rounded-md bg-[#ef7868] px-4 py-2 text-white disabled:opacity-50">
+            {trendLoading ? '分析中...' : '分析近一周趋势'}
+          </button>
+        </div>
         {answer && <div className="mt-4 rounded-md bg-slate-50 p-3">{answer}</div>}
       </Panel>
       <Panel>
@@ -447,46 +578,97 @@ const FamilySection: React.FC<{ family: Family | null; members: FamilyMember[]; 
 
 const PhotoSection: React.FC<{
   photos: Photo[];
+  babyId: string;
   commentsByPhoto: Record<string, PhotoComment[]>;
+  uploadMessage: string;
+  onUploadMessage: (message: string) => void;
   onLoadComments: (photoId: string) => Promise<void>;
   onChanged: () => void;
-}> = ({ photos, commentsByPhoto, onLoadComments, onChanged }) => {
+}> = ({ photos, babyId, commentsByPhoto, uploadMessage, onUploadMessage, onLoadComments, onChanged }) => {
   const [commentText, setCommentText] = useState<Record<string, string>>({});
+  const [uploading, setUploading] = useState(false);
+
+  const uploadPhoto = async (file: File) => {
+    if (!babyId) {
+      onUploadMessage('请先选择宝宝后再上传照片');
+      return;
+    }
+    setUploading(true);
+    onUploadMessage('正在上传...');
+    try {
+      const result = await api.photo.getUploadUrl({
+        baby_id: babyId,
+        filename: file.name,
+        content_type: file.type || 'image/jpeg',
+        size: file.size,
+      }) as { upload_url: string; photo_id: string; upload_headers?: Record<string, string> };
+      await fetch(result.upload_url, {
+        method: 'PUT',
+        headers: result.upload_headers,
+        body: file,
+      });
+      await api.photo.confirmUpload(result.photo_id, file.size);
+      onUploadMessage('上传成功');
+      onChanged();
+    } catch (err) {
+      onUploadMessage(err instanceof Error ? err.message : '上传失败');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {photos.map((photo) => (
-        <Panel key={photo.id}>
-          <img src={photo.url} alt="" className="aspect-square w-full rounded-md object-cover" />
-          <div className="mt-3 flex items-center justify-between text-sm text-slate-600">
-            <span>{photo.like_count} 赞 · {photo.comment_count} 评论</span>
-            <button onClick={() => void (photo.liked_by_me ? api.photo.unlike(photo.id) : api.photo.like(photo.id)).then(onChanged)} className="rounded bg-slate-100 px-3 py-1">
-              {photo.liked_by_me ? '取消赞' : '点赞'}
-            </button>
-          </div>
-          <button onClick={() => void onLoadComments(photo.id)} className="mt-2 text-sm text-[#ef7868]">查看评论</button>
-          <div className="mt-2 space-y-2">
-            {(commentsByPhoto[photo.id] ?? []).map((comment) => (
-              <div key={comment.id} className="rounded bg-slate-50 p-2 text-sm">
-                <b>{comment.nickname || '成员'}：</b>{comment.content}
-              </div>
-            ))}
-          </div>
-          <div className="mt-3 flex gap-2">
-            <input value={commentText[photo.id] ?? ''} onChange={(event) => setCommentText((prev) => ({ ...prev, [photo.id]: event.target.value }))} placeholder="写评论" className="min-w-0 flex-1 rounded-md border px-3 py-2" />
-            <button
-              onClick={() => void api.photo.comment(photo.id, commentText[photo.id] ?? '').then(async () => {
-                setCommentText((prev) => ({ ...prev, [photo.id]: '' }));
-                await onLoadComments(photo.id);
-                onChanged();
-              })}
-              className="rounded-md bg-slate-900 px-3 py-2 text-white"
-            >
-              发送
-            </button>
-          </div>
-        </Panel>
-      ))}
+    <div className="space-y-4">
+      <Panel>
+        <label className="inline-flex cursor-pointer items-center rounded-md bg-slate-900 px-4 py-2 text-white">
+          {uploading ? '上传中...' : '上传照片'}
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            disabled={uploading}
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) void uploadPhoto(file);
+            }}
+          />
+        </label>
+        {uploadMessage && <span className="ml-3 text-sm text-slate-500">{uploadMessage}</span>}
+      </Panel>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {photos.map((photo) => (
+          <Panel key={photo.id}>
+            <img src={photo.url} alt="" className="aspect-square w-full rounded-md object-cover" />
+            <div className="mt-3 flex items-center justify-between text-sm text-slate-600">
+              <span>{photo.like_count} 赞 · {photo.comment_count} 评论</span>
+              <button onClick={() => void (photo.liked_by_me ? api.photo.unlike(photo.id) : api.photo.like(photo.id)).then(onChanged)} className="rounded bg-slate-100 px-3 py-1">
+                {photo.liked_by_me ? '取消赞' : '点赞'}
+              </button>
+            </div>
+            <button onClick={() => void onLoadComments(photo.id)} className="mt-2 text-sm text-[#ef7868]">查看评论</button>
+            <div className="mt-2 space-y-2">
+              {(commentsByPhoto[photo.id] ?? []).map((comment) => (
+                <div key={comment.id} className="rounded bg-slate-50 p-2 text-sm">
+                  <b>{comment.nickname || '成员'}：</b>{comment.content}
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 flex gap-2">
+              <input value={commentText[photo.id] ?? ''} onChange={(event) => setCommentText((prev) => ({ ...prev, [photo.id]: event.target.value }))} placeholder="写评论" className="min-w-0 flex-1 rounded-md border px-3 py-2" />
+              <button
+                onClick={() => void api.photo.comment(photo.id, commentText[photo.id] ?? '').then(async () => {
+                  setCommentText((prev) => ({ ...prev, [photo.id]: '' }));
+                  await onLoadComments(photo.id);
+                  onChanged();
+                })}
+                className="rounded-md bg-slate-900 px-3 py-2 text-white"
+              >
+                发送
+              </button>
+            </div>
+          </Panel>
+        ))}
+      </div>
     </div>
   );
 };
@@ -528,6 +710,12 @@ function recordLabel(type: RecordKind): string {
     temperature: '测温',
   };
   return labels[type];
+}
+
+function toDateTimeLocal(date: Date): string {
+  const offset = date.getTimezoneOffset();
+  const local = new Date(date.getTime() - offset * 60000);
+  return local.toISOString().slice(0, 16);
 }
 
 export default FamilyLivePage;

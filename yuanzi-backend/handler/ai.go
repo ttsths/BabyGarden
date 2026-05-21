@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -140,6 +141,110 @@ func AIChat(c *gin.Context) {
 	})
 }
 
+// AIChatStream AI 流式问答。
+func AIChatStream(c *gin.Context) {
+	var req AIChatRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "请求参数错误"})
+		return
+	}
+
+	userID := middleware.GetUserIDOrZero(c)
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, model.Response{Code: model.ERROR_NOT_AUTH, Msg: "未登录"})
+		return
+	}
+
+	_, remaining, err := consumeQuota(userID, quotaTypeChat, chatDailyLimit)
+	if err != nil {
+		if errors.Is(err, errQuotaExceeded) {
+			c.JSON(http.StatusConflict, model.Response{Code: model.ERROR_QUOTA_EXCEEDED, Msg: "AI配额已用完"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "配额检查失败"})
+		return
+	}
+
+	var baby *model.Baby
+	if req.BabyID != nil && *req.BabyID != "" {
+		loaded, _, err := loadBabyForRecord(c, *req.BabyID)
+		if err != nil {
+			_ = rollbackQuota(userID, quotaTypeChat)
+			return
+		}
+		baby = loaded
+	}
+
+	firstProvider := firstEnabledProvider()
+	messages := buildChatMessages(req, baby, firstProvider)
+	requestID := model.NewID()
+	resp, err := aiChatFunc(c.Request.Context(), messages)
+	if err != nil {
+		_ = rollbackQuota(userID, quotaTypeChat)
+		logAIUsageAsync(model.AIUsageLog{
+			RequestID:    requestID,
+			UserID:       userID,
+			FamilyID:     familyIDFromBaby(baby),
+			RequestType:  "chat_stream",
+			Status:       "error",
+			ErrorMessage: err.Error(),
+		})
+		streamAIEvent(c, "error", gin.H{"message": "AI服务异常"})
+		return
+	}
+
+	answer := strings.TrimSpace(resp.Content)
+	if answer == "" {
+		answer = "AI暂时无法回答，请稍后再试"
+	}
+	totalTokens := resp.Usage.TotalTokens
+	if totalTokens == 0 {
+		totalTokens = resp.Usage.InputTokens + resp.Usage.OutputTokens
+	}
+
+	c.Header("Content-Type", "text/event-stream")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Header("X-Accel-Buffering", "no")
+	for _, chunk := range splitStreamChunks(answer) {
+		streamAIEvent(c, "delta", gin.H{"delta": chunk})
+	}
+
+	record := model.AIChatRecord{
+		UserID:     userID,
+		BabyID:     req.BabyID,
+		Question:   req.Question,
+		Answer:     answer,
+		TokensUsed: totalTokens,
+		Model:      resp.Model,
+		CreatedAt:  time.Now(),
+	}
+	if err := mysql.DB.Create(&record).Error; err != nil {
+		streamAIEvent(c, "error", gin.H{"message": "保存问答记录失败"})
+		return
+	}
+	logAIUsageAsync(model.AIUsageLog{
+		RequestID:    requestID,
+		UserID:       userID,
+		FamilyID:     familyIDFromBaby(baby),
+		Provider:     string(resp.Provider),
+		Model:        resp.Model,
+		InputTokens:  resp.Usage.InputTokens,
+		OutputTokens: resp.Usage.OutputTokens,
+		CachedTokens: resp.Usage.CachedTokens,
+		TotalTokens:  totalTokens,
+		RequestType:  "chat_stream",
+		Status:       "success",
+	})
+	streamAIEvent(c, "done", gin.H{
+		"id":              record.ID,
+		"answer":          answer,
+		"tokens_used":     totalTokens,
+		"provider":        string(resp.Provider),
+		"remaining_quota": remaining,
+	})
+}
+
 // ListAIChats 获取当前用户 AI 会话历史。
 func ListAIChats(c *gin.Context) {
 	userID := middleware.GetUserIDOrZero(c)
@@ -186,6 +291,33 @@ func ListAIChats(c *gin.Context) {
 			TotalPages: calcTotalPages(total, pageSize),
 		},
 	}})
+}
+
+func splitStreamChunks(answer string) []string {
+	runes := []rune(answer)
+	if len(runes) <= 12 {
+		return []string{answer}
+	}
+	chunks := make([]string, 0, len(runes)/12+1)
+	for start := 0; start < len(runes); start += 12 {
+		end := start + 12
+		if end > len(runes) {
+			end = len(runes)
+		}
+		chunks = append(chunks, string(runes[start:end]))
+	}
+	return chunks
+}
+
+func streamAIEvent(c *gin.Context, event string, payload interface{}) {
+	data, _ := json.Marshal(payload)
+	if _, err := c.Writer.WriteString("event: " + event + "\n"); err != nil {
+		return
+	}
+	if _, err := c.Writer.WriteString("data: " + string(data) + "\n\n"); err != nil {
+		return
+	}
+	c.Writer.Flush()
 }
 
 // GetAIChat 获取当前用户 AI 会话详情。

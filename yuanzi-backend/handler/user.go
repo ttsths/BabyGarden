@@ -29,6 +29,7 @@ func GetUserProfile(c *gin.Context) {
 		Data: UserProfileResponse{
 			ID:        user.ID,
 			Phone:     user.Phone,
+			Username:  user.Username,
 			Nickname:  user.Nickname,
 			AvatarURL: user.AvatarURL,
 		},
@@ -75,6 +76,7 @@ func UpdateUserProfile(c *gin.Context) {
 		Data: UserProfileResponse{
 			ID:        user.ID,
 			Phone:     user.Phone,
+			Username:  user.Username,
 			Nickname:  user.Nickname,
 			AvatarURL: user.AvatarURL,
 		},
@@ -84,6 +86,7 @@ func UpdateUserProfile(c *gin.Context) {
 type UserProfileResponse struct {
 	ID        string `json:"id" example:"1"`
 	Phone     string `json:"phone" example:"13800138000"`
+	Username  string `json:"username,omitempty" example:"mom"`
 	Nickname  string `json:"nickname" example:"小园子妈妈"`
 	AvatarURL string `json:"avatar_url" example:"https://cdn.yuanzi.com/avatar.jpg"`
 }

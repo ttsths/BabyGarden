@@ -10,6 +10,7 @@ import (
 type User struct {
 	ID          string     `gorm:"type:varchar(36);primaryKey" json:"id"`
 	Phone       string     `gorm:"type:varchar(32);uniqueIndex;not null" json:"phone"`
+	Username    string     `gorm:"type:varchar(50);uniqueIndex" json:"username,omitempty"`
 	Nickname    string     `gorm:"type:varchar(50)" json:"nickname"`
 	AvatarURL   string     `gorm:"type:varchar(500)" json:"avatar_url"`
 	Status      int8       `gorm:"type:tinyint;default:1" json:"status"`
@@ -33,6 +34,7 @@ func (User) TableName() string { return "users" }
 type UserInfo struct {
 	ID        string `json:"id"`
 	Phone     string `json:"phone"`
+	Username  string `json:"username,omitempty"`
 	Nickname  string `json:"nickname"`
 	AvatarURL string `json:"avatar_url"`
 	Status    int8   `json:"status"`
@@ -40,7 +42,7 @@ type UserInfo struct {
 }
 
 func (u *User) ToUserInfo() UserInfo {
-	return UserInfo{ID: u.ID, Phone: u.Phone, Nickname: u.Nickname, AvatarURL: u.AvatarURL, Status: u.Status, IsAdmin: u.IsAdmin}
+	return UserInfo{ID: u.ID, Phone: u.Phone, Username: u.Username, Nickname: u.Nickname, AvatarURL: u.AvatarURL, Status: u.Status, IsAdmin: u.IsAdmin}
 }
 
 func (u *User) SetPassword(password string) {

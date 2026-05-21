@@ -58,6 +58,8 @@ export const api = {
     sendCode: (phone: string) => unwrap<unknown>(apiClient.post(ENDPOINTS.AUTH.SEND_CODE, { phone })),
     login: (phone: string, code: string) =>
       unwrap<{ access_token: string; refresh_token: string }>(apiClient.post(ENDPOINTS.AUTH.LOGIN, { phone, code })),
+    passwordLogin: (identifier: string, password: string) =>
+      unwrap<{ access_token: string; refresh_token: string }>(apiClient.post(ENDPOINTS.AUTH.PASSWORD_LOGIN, { identifier, password })),
     logout: () => unwrap<unknown>(apiClient.post(ENDPOINTS.AUTH.LOGOUT)),
     getProfile: () => unwrap(apiClient.get(ENDPOINTS.AUTH.PROFILE)),
   },
@@ -81,9 +83,9 @@ export const api = {
     getWeeklyStats: (babyId: string, date?: string) =>
       unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_WEEKLY, { params: { baby_id: babyId, date } })),
     getMonthlyStats: (babyId: string, date?: string) =>
-      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_MONTHLY, { params: { baby_id: babyId, date } })),
+      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_SUMMARY, { params: { baby_id: babyId, range: 'month', end_date: date } })),
     getRangeStats: (babyId: string, startDate: string, endDate: string) =>
-      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_RANGE, { params: { baby_id: babyId, start_date: startDate, end_date: endDate } })),
+      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_SUMMARY, { params: { baby_id: babyId, range: 'custom', start_date: startDate, end_date: endDate } })),
     getSummaryStats: (babyId: string, params: Record<string, string>) =>
       unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_SUMMARY, { params: { baby_id: babyId, ...params } })),
   },
@@ -107,6 +109,52 @@ export const api = {
         ? { question, ...babyIdOrOptions }
         : { question, baby_id: babyIdOrOptions, history };
       return unwrap(apiClient.post(ENDPOINTS.AI.CHAT, payload));
+    },
+    chatStream: async (
+      question: string,
+      options: { baby_id?: string; history?: Array<{ role: string; content: string }>; onDelta?: (delta: string) => void }
+    ) => {
+      const token = useAuthStore.getState().token;
+      const response = await fetch(`${API_BASE}${ENDPOINTS.AI.CHAT_STREAM}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ question, baby_id: options.baby_id, history: options.history }),
+      });
+      if (!response.ok || !response.body) {
+        throw new Error('AI stream failed');
+      }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let answer = '';
+      let donePayload: Record<string, unknown> | null = null;
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const events = buffer.split('\n\n');
+        buffer = events.pop() ?? '';
+        for (const eventText of events) {
+          const lines = eventText.split('\n');
+          const event = lines.find((line) => line.startsWith('event: '))?.slice(7);
+          const dataLine = lines.find((line) => line.startsWith('data: '));
+          if (!dataLine) continue;
+          const data = JSON.parse(dataLine.slice(6)) as Record<string, unknown>;
+          if (event === 'delta') {
+            const delta = String(data.delta ?? '');
+            answer += delta;
+            options.onDelta?.(delta);
+          } else if (event === 'done') {
+            donePayload = data;
+          } else if (event === 'error') {
+            throw new Error(String(data.message ?? 'AI stream failed'));
+          }
+        }
+      }
+      return { answer, ...donePayload };
     },
     getHistory: (params?: Record<string, unknown>) => unwrap(apiClient.get(ENDPOINTS.AI.CHATS, { params })),
     history: (params?: Record<string, unknown>) => unwrap(apiClient.get(ENDPOINTS.AI.HISTORY, { params })),
@@ -133,8 +181,8 @@ export const api = {
     weekly: (babyId: string, date?: string) =>
       unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_WEEKLY, { params: { baby_id: babyId, date } })),
     monthly: (babyId: string, date?: string) =>
-      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_MONTHLY, { params: { baby_id: babyId, date } })),
+      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_SUMMARY, { params: { baby_id: babyId, range: 'month', end_date: date } })),
     range: (babyId: string, startDate: string, endDate: string) =>
-      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_RANGE, { params: { baby_id: babyId, start_date: startDate, end_date: endDate } })),
+      unwrap(apiClient.get(ENDPOINTS.RECORD.STATS_SUMMARY, { params: { baby_id: babyId, range: 'custom', start_date: startDate, end_date: endDate } })),
   },
 };

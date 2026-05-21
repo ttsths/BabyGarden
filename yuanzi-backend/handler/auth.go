@@ -31,6 +31,12 @@ type LoginRequest struct {
 	Code  string `json:"code" binding:"required,len=6"`
 }
 
+// PasswordLoginRequest 用户名/手机号密码登录请求。
+type PasswordLoginRequest struct {
+	Identifier string `json:"identifier" binding:"required"`
+	Password   string `json:"password" binding:"required"`
+}
+
 // LoginResponse 登录响应
 type LoginResponse struct {
 	User         *model.UserInfo `json:"user"`
@@ -166,6 +172,52 @@ func Login(c *gin.Context) {
 	})
 }
 
+// PasswordLogin 用户名或手机号 + 密码登录。
+func PasswordLogin(c *gin.Context) {
+	var req PasswordLoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, model.Response{Code: model.ERROR_INVALID, Msg: "请求参数错误"})
+		return
+	}
+
+	var user model.User
+	if err := mysql.DB.Where("phone = ? OR username = ?", req.Identifier, req.Identifier).First(&user).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, model.Response{Code: model.ERROR_NOT_AUTH, Msg: "账号或密码错误"})
+		return
+	}
+	if user.Status != 1 || !user.CheckPassword(req.Password) {
+		c.JSON(http.StatusUnauthorized, model.Response{Code: model.ERROR_NOT_AUTH, Msg: "账号或密码错误"})
+		return
+	}
+
+	if err := mysql.DB.Model(&model.User{}).Where("id = ?", user.ID).Updates(map[string]interface{}{
+		"last_login_at": time.Now(),
+		"last_login_ip": c.ClientIP(),
+	}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "更新登录信息失败"})
+		return
+	}
+
+	accessToken, refreshToken, err := middleware.GenerateTokenPair(user.ID, user.Phone)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "生成Token失败"})
+		return
+	}
+
+	userInfo := user.ToUserInfo()
+	c.JSON(http.StatusOK, model.Response{
+		Code: model.SUCCESS,
+		Msg:  "登录成功",
+		Data: LoginResponse{
+			User:         &userInfo,
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+			ExpiresIn:    7200,
+			IsNewUser:    false,
+		},
+	})
+}
+
 // Logout 退出登录
 func Logout(c *gin.Context) {
 	var req LogoutRequest
@@ -277,6 +329,7 @@ func findOrCreateUser(phone string) (*model.User, bool, error) {
 
 	user = model.User{
 		Phone:    phone,
+		Username: phone,
 		Nickname: "用户" + phone[len(phone)-4:],
 		Status:   1,
 	}

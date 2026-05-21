@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { NavLink, Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../stores/useAuthStore';
+import { useThemeStore } from '../stores/useThemeStore';
 import '../styles/open-design.css';
 
 type NavItem = { to: string; label: string; short: string; description: string };
@@ -21,8 +22,10 @@ type WeeklyStats = {
   feeding: number[];
   sleep: number[];
   diaper: number[];
-  daily_average_sleep_hours?: number[];
+  daily_avg_sleep_hours?: number[];
   daytime_single_sleep_hours?: number[];
+  daily_avg_milk_amount?: number[];
+  daily_average_sleep_hours?: number[];
   daily_average_milk_amount?: number[];
   temperature_latest?: number[];
 };
@@ -397,9 +400,9 @@ function StatsScreen() {
   const chartValues = mode === '日'
     ? [daily.feeding.count, daily.sleep.total_hours, daily.diaper.count, 1]
     : mode === '周'
-      ? weekly.daily_average_milk_amount || weekly.feeding
+      ? weekly.daily_avg_milk_amount || weekly.daily_average_milk_amount || weekly.feeding
       : mode === '月'
-        ? weekly.daily_average_sleep_hours || weekly.sleep
+        ? weekly.daily_avg_sleep_hours || weekly.daily_average_sleep_hours || weekly.sleep
         : weekly.daytime_single_sleep_hours || weekly.sleep;
 
   return (
@@ -573,6 +576,7 @@ function FamilyScreen() {
 }
 
 function SettingsScreen() {
+  const { isDarkMode, toggleDarkMode } = useThemeStore();
   const [mode, setMode] = useState('标准模式');
   const [phoneOpen, setPhoneOpen] = useState(false);
   const [picker, setPicker] = useState<'feed' | 'practice' | null>(null);
@@ -585,7 +589,7 @@ function SettingsScreen() {
       <ScreenTitle eyebrow="SETTINGS · PRIVACY" title="把高风险设置放在清晰分组里" desc="设置页覆盖提醒、显示模式、家庭权限和隐私声明；儿童数据相关动作必须说明影响范围。" action={<button className="od-btn primary">保存设置</button>} />
       <div className="od-content-grid equal">
         <section className="od-panel od-pad"><h2>照护提醒</h2><Metric label="喂奶间隔" value={`${feedInterval} 小时`} note="点击更换" onClick={() => setPicker('feed')} /><Metric label="睡眠结束" value="开启" note="计时器提醒" /><Metric label="成长练习" value={`${practiceHour}:00`} note="点击选择小时" onClick={() => setPicker('practice')} /></section>
-        <section className="od-panel od-pad od-stack"><h2>显示与模式</h2>{['夜间暗色模式', '祖辈极简模式', '标准模式'].map((item) => <Choice key={item} active={mode === item} title={item} desc={item === '祖辈极简模式' ? '大字体、高对比、一键记录' : '点击切换显示偏好'} onClick={() => setMode(item)} />)}</section>
+        <section className="od-panel od-pad od-stack"><h2>显示与模式</h2><Choice active={isDarkMode} title="夜间暗色模式" desc="一键切换全局暗色模式" onClick={() => { toggleDarkMode(); setMode('夜间暗色模式'); }} />{['祖辈极简模式', '标准模式'].map((item) => <Choice key={item} active={mode === item} title={item} desc={item === '祖辈极简模式' ? '大字体、高对比、一键记录' : '点击切换显示偏好'} onClick={() => setMode(item)} />)}</section>
         <section className="od-panel od-pad"><h2>隐私与数据</h2><p className="od-muted">展示儿童隐私保护声明、照片上传范围、家庭成员权限、AI 问答上下文使用说明。MVP 不提供数据导出入口。</p></section>
         <section className="od-panel od-pad"><h2>账号安全</h2><Metric label="手机号" value={phone} note="点击更换" onClick={() => setPhoneOpen(true)} /><Metric label="登录设备" value="2 台" note="iPhone / Web" /></section>
       </div>
@@ -656,18 +660,23 @@ function AiScreen() {
 
   async function sendQuestion() {
     if (!question.trim()) return;
-    setStatus('AI 正在思考');
+    setStatus('AI 正在流式回答');
+    setAnswer('');
     try {
-      const response = await api.ai.chat(question.trim(), {
+      let streamedAnswer = '';
+      await api.ai.chatStream(question.trim(), {
         baby_id: babyId || undefined,
         history: history.slice(0, 4).flatMap((item) => [
           { role: 'user', content: item.question },
           { role: 'assistant', content: item.answer },
         ]),
+        onDelta: (delta) => {
+          streamedAnswer += delta;
+          setAnswer((prev) => prev + delta);
+        },
       });
-      const data = unwrap<{ answer: string }>(response, { answer: 'AI暂时无法回答，请稍后再试。' });
-      setAnswer(data.answer);
-      setHistory((items) => [{ id: `local-${Date.now()}`, question, answer: data.answer, created_at: new Date().toISOString() }, ...items]);
+      const savedQuestion = question;
+      setHistory((items) => [{ id: `local-${Date.now()}`, question: savedQuestion, answer: streamedAnswer, created_at: new Date().toISOString() }, ...items]);
       setQuestion('');
       setStatus('已保存到历史会话');
     } catch {
@@ -675,7 +684,8 @@ function AiScreen() {
     }
   }
 
-  return <><ScreenTitle eyebrow="AI CHAT · VOICE INPUT" title="抱娃时也能开口问" desc="AI 回答引用近期记录，但避免医疗诊断式结论；历史会话由后端保存。" action={<button className="od-btn primary">按住说话</button>} /><div className="od-content-grid"><section className="od-panel od-pad od-stack"><article className="od-event"><span className="od-dot brand" /><div><strong>{history[0]?.question || '宝宝今天午睡少 25 分钟，要不要提前哄睡？'}</strong><p>{status}</p></div><time>{history[0] ? formatClock(history[0].created_at) : '10:42'}</time></article><article className="od-advice"><h2>Yuanzi 建议</h2><p>{answer}</p></article><form className="od-ask-box light"><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="继续追问：今晚睡前怎么安排？" /><button type="button" onClick={sendQuestion}>发送</button></form></section><aside className="od-voice"><h2>历史 AI 会话</h2><div className="od-stack">{history.map((item) => <button className="od-choice" key={item.id} onClick={() => setAnswer(item.answer)}><strong>{item.question}</strong><small>{formatTime(item.created_at)}</small></button>)}</div><div className="od-wave">{[14, 36, 24, 58, 30, 68, 42, 76, 44, 64, 28, 48, 22, 36, 18, 30, 12].map((height, index) => <span key={index} style={{ height: `${18 + height}px` }} />)}</div><button>按住说话</button></aside></div></>;
+  return <><ScreenTitle eyebrow="AI CHAT · STREAM" title="用文字和 AI 一起看趋势" desc="AI 回答引用近期记录，但避免医疗诊断式结论；历史会话由后端按用户保存。" action={<button className="od-btn primary" onClick={sendQuestion}>发送文字问题</button>} /><div className="od-content-grid"><section className="od-panel od-pad od-stack"><article className="od-event"><span className="od-dot brand" /><div><strong>{history[0]?.question || '宝宝今天午睡少 25 分钟，要不要提前哄睡？'}</strong><p>{status}</p></div><time>{history[0] ? formatClock(history[0].created_at) : '10:42'}</time></article><article className="od-advice"><h2>Yuanzi 建议</h2><p>{answer}</p></article><form className="od-ask-box light"><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="继续追问：今晚睡前怎么安排？" /><button type="button" onClick={sendQuestion}>发送</button></form></section><aside className="od-voice"><h2>历史 AI 会话</h2><div className="od-stack">{history.map((item) => <button className="od-choice" key={item.id} onClick={() => setAnswer(item.answer)}><strong>{item.question}</strong><small>{formatTime(item.created_at)}</small></button>)}</div></aside></div></>;
+  return <><ScreenTitle eyebrow="AI CHAT · STREAM" title="用文字和 AI 一起看趋势" desc="AI 回答引用近期记录，但避免医疗诊断式结论；历史会话由后端按用户保存。" action={<button className="od-btn primary" onClick={sendQuestion}>发送文字问题</button>} /><div className="od-content-grid"><section className="od-panel od-pad od-stack"><article className="od-event"><span className="od-dot brand" /><div><strong>{history[0]?.question || '宝宝今天午睡少 25 分钟，要不要提前哄睡？'}</strong><p>{status}</p></div><time>{history[0] ? formatClock(history[0].created_at) : '10:42'}</time></article><article className="od-advice"><h2>Yuanzi 建议</h2><p>{answer}</p></article><form className="od-ask-box light"><input value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="继续追问：今晚睡前怎么安排？" /><button type="button" onClick={sendQuestion}>发送</button></form></section><aside className="od-voice"><h2>历史 AI 会话</h2><div className="od-stack">{history.map((item) => <button className="od-choice" key={item.id} onClick={() => setAnswer(item.answer)}><strong>{item.question}</strong><small>{formatTime(item.created_at)}</small></button>)}</div></aside></div></>;
 }
 
 function LoginScreen() {

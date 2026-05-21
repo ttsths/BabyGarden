@@ -14,8 +14,8 @@ export default defineConfig({
   ],
 
   use: {
-    // 测试目标：已部署的前端
-    baseURL: 'https://babygarden.pages.dev',
+    // 默认仍可跑部署站点；功能验收可用 E2E_BASE_URL 指向本地 dev server。
+    baseURL: process.env.E2E_BASE_URL || 'https://babygarden.pages.dev',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },

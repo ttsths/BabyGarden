@@ -1,13 +1,13 @@
 import { test, expect, type Page } from '@playwright/test';
 
 const BASE_URL = process.env.E2E_BASE_URL || 'https://babygarden.pages.dev';
-const ADMIN_PHONE = process.env.E2E_ADMIN_PHONE || '13800000001';
-const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'admin123';
+const ADMIN_PHONE = process.env.E2E_ADMIN_PHONE || '13800138000';
+const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD || 'yuanzi123';
 
 async function loginAsAdmin(page: Page) {
   await page.goto(`${BASE_URL}/admin/login`);
-  await page.fill('input[placeholder="手机号"]', ADMIN_PHONE);
-  await page.fill('input[placeholder="密码"]', ADMIN_PASSWORD);
+  await page.fill('input[placeholder*="手机号"]', ADMIN_PHONE);
+  await page.fill('input[placeholder*="密码"]', ADMIN_PASSWORD);
   await page.click('button:has-text("登录")');
   await page.waitForURL('**/admin/dashboard', { timeout: 15000 });
 }

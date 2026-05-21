@@ -8,6 +8,7 @@ export const ENDPOINTS = {
   AUTH: {
     SEND_CODE: '/auth/send-code',
     LOGIN: '/auth/login',
+    PASSWORD_LOGIN: '/auth/password-login',
     LOGOUT: '/auth/logout',
     PROFILE: '/user/profile',
   },
@@ -43,6 +44,7 @@ export const ENDPOINTS = {
   // AI
   AI: {
     CHAT: '/ai/chat',
+    CHAT_STREAM: '/ai/chat/stream',
     CHATS: '/ai/chats',
     CHAT_DETAIL: (id: string) => `/ai/chats/${id}`,
     SPEECH: '/ai/speech/recognize',
