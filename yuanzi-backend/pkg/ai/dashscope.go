@@ -25,11 +25,17 @@ type DashScopeProvider struct {
 	enabled bool
 	apiKey  string
 	model   string
+	client  *http.Client
 }
 
 // NewDashScopeProvider 创建 DashScope Provider
-func NewDashScopeProvider(enabled bool, apiKey, model string) *DashScopeProvider {
-	return &DashScopeProvider{enabled: enabled, apiKey: apiKey, model: model}
+func NewDashScopeProvider(enabled bool, apiKey, model string, timeout time.Duration) *DashScopeProvider {
+	return &DashScopeProvider{
+		enabled: enabled,
+		apiKey:  apiKey,
+		model:   model,
+		client:  &http.Client{Timeout: timeout},
+	}
 }
 
 func (p *DashScopeProvider) Name() ProviderName { return ProviderDashScope }
@@ -44,8 +50,8 @@ func (p *DashScopeProvider) Chat(ctx context.Context, req ChatRequest) (*ChatRes
 		dashMessages[i] = ChatMessage{Role: m.Role, Content: m.Content}
 	}
 
-	client := &dashClient{apiKey: p.apiKey}
-	resp, err := client.chat(dashMessages, p.model, req.MaxTokens, req.Temperature)
+	client := &dashClient{apiKey: p.apiKey, httpClient: p.client}
+	resp, err := client.chat(ctx, dashMessages, p.model, req.MaxTokens, req.Temperature)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +101,7 @@ func NewClient() *Client {
 
 // Chat 旧版 Chat（向后兼容）
 func (c *Client) Chat(messages []ChatMessage) (*LegacyChatResponse, error) {
-	return (&dashClient{apiKey: c.apiKey}).chat(messages, "qwen-turbo", 1000, 0.7)
+	return (&dashClient{apiKey: c.apiKey}).chat(context.Background(), messages, "qwen-turbo", 1000, 0.7)
 }
 
 // ============================================================================
@@ -120,11 +126,12 @@ type dashParameters struct {
 
 // dashClient 内部客户端
 type dashClient struct {
-	apiKey string
+	apiKey     string
+	httpClient *http.Client
 }
 
 // chat 内部实现
-func (c *dashClient) chat(messages []ChatMessage, model string, maxTokens int, temperature float64) (*LegacyChatResponse, error) {
+func (c *dashClient) chat(ctx context.Context, messages []ChatMessage, model string, maxTokens int, temperature float64) (*LegacyChatResponse, error) {
 	if model == "" {
 		model = "qwen-turbo"
 	}
@@ -151,7 +158,7 @@ func (c *dashClient) chat(messages []ChatMessage, model string, maxTokens int, t
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", dashScopeAPIURL, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, dashScopeAPIURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +166,10 @@ func (c *dashClient) chat(messages []ChatMessage, model string, maxTokens int, t
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 30 * time.Second}
+	client := c.httpClient
+	if client == nil {
+		client = &http.Client{Timeout: 30 * time.Second}
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		logger.Error("AI chat request failed", logger.Err(err))
@@ -184,12 +194,29 @@ func (c *dashClient) chat(messages []ChatMessage, model string, maxTokens int, t
 	return &result, nil
 }
 
-// BuildSystemPrompt 构建系统提示（旧版）
-func BuildSystemPrompt() string {
-	return `你是「小园子」育儿助手，专注于0-3岁婴幼儿护理。
+// BuildSystemPrompt 构建系统提示（按 Provider 动态微调）
+func BuildSystemPrompt(provider ProviderName) string {
+	base := config.GlobalConfig.AI.Safety.SystemPrompt
+	if base == "" {
+		base = `你是「小园子」育儿助手，专注于0-3岁婴幼儿护理。
 回答要求：
 1. 简洁易懂，适合新手父母
 2. 必要时给出具体操作步骤
 3. 涉及医疗建议时添加免责声明
 4. 不确定时建议咨询专业医生`
+	}
+
+	// 按 Provider 微调提示词风格
+	switch provider {
+	case ProviderGrokAI:
+		return base + "\n\n回答风格：简洁直接，中文回答，避免冗余。"
+	case ProviderCloudflareWorkersAI:
+		return base + "\n\n回答风格：用简洁中文回答，涉及医疗问题务必提醒咨询医生。回答控制在200字以内。"
+	case ProviderDashScope:
+		return base + "\n\n回答风格：结构化回答，必要时分点说明，中文回答。"
+	case ProviderCLIProxyAPI:
+		return base + "\n\n回答风格：简洁实用，中文回答。"
+	default:
+		return base
+	}
 }

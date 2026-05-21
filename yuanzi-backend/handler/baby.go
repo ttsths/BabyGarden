@@ -126,6 +126,18 @@ func DeleteBaby(c *gin.Context) {
 		if err := tx.Where("baby_id = ?", baby.ID).Delete(&model.Record{}).Error; err != nil {
 			return err
 		}
+		var photoIDs []string
+		if err := tx.Model(&model.Photo{}).Where("baby_id = ?", baby.ID).Pluck("id", &photoIDs).Error; err != nil {
+			return err
+		}
+		if len(photoIDs) > 0 {
+			if err := tx.Where("photo_id IN ?", photoIDs).Delete(&model.PhotoComment{}).Error; err != nil {
+				return err
+			}
+			if err := tx.Where("photo_id IN ?", photoIDs).Delete(&model.PhotoLike{}).Error; err != nil {
+				return err
+			}
+		}
 		if err := tx.Where("baby_id = ?", baby.ID).Delete(&model.Photo{}).Error; err != nil {
 			return err
 		}

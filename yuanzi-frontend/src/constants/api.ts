@@ -25,7 +25,9 @@ export const ENDPOINTS = {
     CREATE: '/record',
     UPDATE: (id: string) => `/record/${id}`,
     DELETE: (id: string) => `/record/${id}`,
-    STATS: '/record/stats',
+    STATS_DAILY: '/stats/daily',
+    STATS_WEEKLY: '/stats/weekly',
+    STATS_SUMMARY: '/stats/summary',
   },
   // 照片
   PHOTO: {
@@ -35,18 +37,18 @@ export const ENDPOINTS = {
     DELETE: (id: string) => `/photo/${id}`,
     COMMENTS: (id: string) => `/photo/${id}/comments`,
     LIKE: (id: string) => `/photo/${id}/like`,
-    QUOTA: '/photo/quota',
   },
   // AI
   AI: {
     CHAT: '/ai/chat',
+    CHATS: '/ai/chats',
+    CHAT_DETAIL: (id: string) => `/ai/chats/${id}`,
     SPEECH: '/ai/speech/recognize',
     QUOTA: '/ai/quota',
     HISTORY: '/ai/history',
   },
   // 家庭
   FAMILY: {
-    CREATE: '/family',
     DETAIL: (id: string) => `/family/${id}`,
     MEMBERS: (id: string) => `/family/${id}/members`,
     INVITE: (id: string) => `/family/${id}/invite`,

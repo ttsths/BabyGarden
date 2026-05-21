@@ -105,7 +105,7 @@ func GetRecord(c *gin.Context) {
 // POST /api/v1/admin/records
 func CreateRecord(c *gin.Context) {
 	var req struct {
-		Type      string                 `json:"type" binding:"required,oneof=feeding sleep diaper growth"`
+		Type      string                 `json:"type" binding:"required,oneof=feeding sleep diaper excretion temperature growth"`
 		BabyID    string                 `json:"baby_id" binding:"required"`
 		FamilyID  string                 `json:"family_id" binding:"required"`
 		StartedAt string                 `json:"started_at" binding:"required"`
@@ -209,7 +209,7 @@ func UpdateRecord(c *gin.Context) {
 	}
 
 	var req struct {
-		Type      string                 `json:"type" binding:"omitempty,oneof=feeding sleep diaper growth"`
+		Type      string                 `json:"type" binding:"omitempty,oneof=feeding sleep diaper excretion temperature growth"`
 		BabyID    string                 `json:"baby_id" binding:"omitempty"`
 		FamilyID  string                 `json:"family_id" binding:"omitempty"`
 		StartedAt string                 `json:"started_at" binding:"omitempty"`

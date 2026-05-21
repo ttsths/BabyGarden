@@ -68,11 +68,15 @@ func AIChat(c *gin.Context) {
 		baby = loaded
 	}
 
-	messages := buildChatMessages(req, baby)
-	resp, err := aiChatFunc(messages)
+	// 确定首选 Provider 用于动态系统提示词
+	firstProvider := firstEnabledProvider()
+	messages := buildChatMessages(req, baby, firstProvider)
+	requestID := model.NewID() // 生成 request_id 用于跨 Provider 追踪
+	resp, err := aiChatFunc(c.Request.Context(), messages)
 	if err != nil {
 		_ = rollbackQuota(userID, quotaTypeChat)
 		logAIUsageAsync(model.AIUsageLog{
+			RequestID:    requestID,
 			UserID:       userID,
 			FamilyID:     familyIDFromBaby(baby),
 			RequestType:  "chat",
@@ -107,6 +111,7 @@ func AIChat(c *gin.Context) {
 		return
 	}
 	logAIUsageAsync(model.AIUsageLog{
+		RequestID:    requestID,
 		UserID:       userID,
 		FamilyID:     familyIDFromBaby(baby),
 		Provider:     string(resp.Provider),
@@ -133,6 +138,70 @@ func AIChat(c *gin.Context) {
 			RemainingQuota: remaining,
 		},
 	})
+}
+
+// ListAIChats 获取当前用户 AI 会话历史。
+func ListAIChats(c *gin.Context) {
+	userID := middleware.GetUserIDOrZero(c)
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, model.Response{Code: model.ERROR_NOT_AUTH, Msg: "未登录"})
+		return
+	}
+
+	babyID := c.Query("baby_id")
+	if babyID != "" {
+		if _, _, err := loadBabyForRecord(c, babyID); err != nil {
+			return
+		}
+	}
+	page := parsePage(c.DefaultQuery("page", "1"))
+	pageSize := parsePageSize(c.DefaultQuery("page_size", "20"))
+
+	query := mysql.DB.Model(&model.AIChatRecord{}).Where("user_id = ?", userID)
+	if babyID != "" {
+		query = query.Where("baby_id = ?", babyID)
+	}
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "查询失败"})
+		return
+	}
+
+	var records []model.AIChatRecord
+	if err := query.Order("created_at desc").Offset((page - 1) * pageSize).Limit(pageSize).Find(&records).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "查询失败"})
+		return
+	}
+	list := make([]AIChatHistoryResponse, 0, len(records))
+	for _, item := range records {
+		list = append(list, aiChatHistoryResponse(item))
+	}
+
+	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "获取成功", Data: model.ListResponse{
+		List: list,
+		Pagination: model.Pagination{
+			Page:       page,
+			PageSize:   pageSize,
+			Total:      total,
+			TotalPages: calcTotalPages(total, pageSize),
+		},
+	}})
+}
+
+// GetAIChat 获取当前用户 AI 会话详情。
+func GetAIChat(c *gin.Context) {
+	userID := middleware.GetUserIDOrZero(c)
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, model.Response{Code: model.ERROR_NOT_AUTH, Msg: "未登录"})
+		return
+	}
+
+	var record model.AIChatRecord
+	if err := mysql.DB.Where("id = ? AND user_id = ?", c.Param("id"), userID).First(&record).Error; err != nil {
+		c.JSON(http.StatusNotFound, model.Response{Code: model.ERROR_NOT_FUND, Msg: "会话不存在"})
+		return
+	}
+	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "获取成功", Data: aiChatHistoryResponse(record)})
 }
 
 // SpeechRecognize 语音识别
@@ -377,6 +446,19 @@ var (
 	speechRecognizeFunc = defaultSpeechFunc
 )
 
+func aiChatHistoryResponse(record model.AIChatRecord) AIChatHistoryResponse {
+	return AIChatHistoryResponse{
+		ID:         record.ID,
+		UserID:     record.UserID,
+		BabyID:     record.BabyID,
+		Question:   record.Question,
+		Answer:     record.Answer,
+		TokensUsed: record.TokensUsed,
+		Model:      record.Model,
+		CreatedAt:  record.CreatedAt.Format(time.RFC3339),
+	}
+}
+
 const (
 	quotaTypeChat    = "chat"
 	quotaTypeSpeech  = "speech"
@@ -433,6 +515,7 @@ func initAIRouter() {
 			cfg.DashScope.Enabled,
 			dsKey,
 			cfg.DashScope.Model,
+			time.Duration(cfg.DashScope.TimeoutSeconds)*time.Second,
 		))
 
 		// 4. CLIProxyAPI（最后 fallback）
@@ -451,7 +534,7 @@ func initAIRouter() {
 	})
 }
 
-func defaultChatFunc(messages []ai.ChatMessage) (*ai.ChatResponse, error) {
+func defaultChatFunc(ctx context.Context, messages []ai.ChatMessage) (*ai.ChatResponse, error) {
 	initAIRouter()
 
 	req := ai.ChatRequest{
@@ -460,7 +543,7 @@ func defaultChatFunc(messages []ai.ChatMessage) (*ai.ChatResponse, error) {
 		Temperature: 0.7,
 	}
 
-	resp, err := aiRouter.Chat(context.Background(), req)
+	resp, err := aiRouter.Chat(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -468,12 +551,22 @@ func defaultChatFunc(messages []ai.ChatMessage) (*ai.ChatResponse, error) {
 	return resp, nil
 }
 
+func firstEnabledProvider() ai.ProviderName {
+	initAIRouter()
+	for _, p := range aiRouter.Providers() {
+		if p.Enabled() {
+			return p.Name()
+		}
+	}
+	return ai.ProviderDashScope // fallback
+}
+
 func defaultSpeechFunc(data []byte) (*ai.SpeechResult, error) {
 	return ai.RecognizeSpeech(data)
 }
 
-func buildChatMessages(req AIChatRequest, baby *model.Baby) []ai.ChatMessage {
-	messages := []ai.ChatMessage{{Role: "system", Content: ai.BuildSystemPrompt()}}
+func buildChatMessages(req AIChatRequest, baby *model.Baby, provider ai.ProviderName) []ai.ChatMessage {
+	messages := []ai.ChatMessage{{Role: "system", Content: ai.BuildSystemPrompt(provider)}}
 	if baby != nil {
 		messages = append(messages, ai.ChatMessage{Role: "system", Content: buildBabyContext(baby)})
 	}

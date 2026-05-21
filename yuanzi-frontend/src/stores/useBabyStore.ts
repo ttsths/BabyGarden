@@ -24,8 +24,7 @@ export const useBabyStore = create<BabyState>()((set, get) => ({
   fetchBabies: async () => {
     set({ isLoading: true });
     try {
-      const res = await api.baby.getList();
-      const babies = res.data as Baby[];
+      const babies = await api.baby.getList() as Baby[];
       set({ babies, isLoading: false });
       
       // 自动选择第一个宝宝
@@ -43,8 +42,7 @@ export const useBabyStore = create<BabyState>()((set, get) => ({
   },
 
   addBaby: async (baby) => {
-    const newRes = await api.baby.create(baby);
-    const newBaby = newRes.data as Baby;
+    const newBaby = await api.baby.create(baby) as Baby;
     set((state) => ({
       babies: [...state.babies, newBaby],
       currentBabyId: newBaby.id,
@@ -52,8 +50,7 @@ export const useBabyStore = create<BabyState>()((set, get) => ({
   },
 
   updateBaby: async (babyId, baby) => {
-    const updatedRes = await api.baby.update(babyId, baby);
-    const updatedBaby = updatedRes.data as Baby;
+    const updatedBaby = await api.baby.update(babyId, baby) as Baby;
     set((state) => ({
       babies: state.babies.map((b) =>
         b.id === babyId ? updatedBaby : b

@@ -147,8 +147,8 @@ func InviteFamilyMember(c *gin.Context) {
 	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "邀请已发送", Data: InviteMemberResponse{InviteCode: family.InviteCode, ExpiresIn: defaultInviteTTLSeconds}})
 }
 
-// JoinFamilyByInviteCode 使用邀请码加入家庭。
-func JoinFamilyByInviteCode(c *gin.Context) {
+// JoinFamily 通过邀请码加入家庭。
+func JoinFamily(c *gin.Context) {
 	userID := middleware.GetUserIDOrZero(c)
 	if userID == "" {
 		c.JSON(http.StatusUnauthorized, model.Response{Code: model.ERROR_NOT_AUTH, Msg: "未登录"})
@@ -170,8 +170,15 @@ func JoinFamilyByInviteCode(c *gin.Context) {
 		c.JSON(http.StatusNotFound, model.Response{Code: model.ERROR_NOT_FUND, Msg: "邀请码无效"})
 		return
 	}
-	role := normalizeInviteRole(req.Role)
-	member := model.FamilyMember{FamilyID: family.ID, UserID: userID, Role: role, ElderMode: elderModeFromRole(role), Notifications: model.JSON([]byte(`{"feed":true,"sleep":true}`)), JoinedAt: time.Now()}
+
+	member := model.FamilyMember{
+		FamilyID:      family.ID,
+		UserID:        userID,
+		Role:          model.FamilyRoleMember,
+		ElderMode:     0,
+		Notifications: model.JSON([]byte(`{"feed":true,"sleep":true}`)),
+		JoinedAt:      time.Now(),
+	}
 	if err := mysql.DB.Create(&member).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "加入家庭失败"})
 		return
@@ -180,7 +187,7 @@ func JoinFamilyByInviteCode(c *gin.Context) {
 	c.JSON(http.StatusOK, model.Response{Code: model.SUCCESS, Msg: "加入成功", Data: FamilyResponse{ID: family.ID, Name: family.Name, InviteCode: family.InviteCode}})
 }
 
-// LeaveFamily 当前成员主动离开家庭。
+// LeaveFamily 当前用户离开家庭。
 func LeaveFamily(c *gin.Context) {
 	family, member, err := loadFamilyWithMemberAccess(c)
 	if err != nil {
@@ -197,6 +204,7 @@ func LeaveFamily(c *gin.Context) {
 			return
 		}
 	}
+
 	if err := mysql.DB.Delete(member).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, model.Response{Code: model.ERROR, Msg: "离开家庭失败"})
 		return
@@ -304,6 +312,10 @@ type JoinFamilyRequest struct {
 type InviteMemberResponse struct {
 	InviteCode string `json:"invite_code" example:"ABC12345"`
 	ExpiresIn  int    `json:"expires_in" example:"86400"`
+}
+
+type JoinFamilyRequest struct {
+	InviteCode string `json:"invite_code" binding:"required,len=8" example:"ABC12345"`
 }
 
 type FamilyMemberResponse struct {

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	
+
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 	"yuanzi-backend/config"
@@ -26,6 +26,9 @@ var adminTestSetupOnce sync.Once
 
 func setupAdminTestDB(t *testing.T) {
 	t.Helper()
+	if os.Getenv("RUN_EXTERNAL_INTEGRATION_TESTS") != "1" {
+		t.Skip("跳过依赖 MySQL 的集成测试：设置 RUN_EXTERNAL_INTEGRATION_TESTS=1 后执行")
+	}
 	adminTestSetupOnce.Do(func() {
 		projectRoot := getAdminProjectRoot(t)
 		viper.SetConfigName("config")
@@ -37,6 +40,9 @@ func setupAdminTestDB(t *testing.T) {
 		gredis.Setup()
 		gin.SetMode(gin.TestMode)
 	})
+	if mysql.DB == nil || !mysql.IsConnected() {
+		t.Skip("跳过依赖 MySQL 的集成测试：数据库未连接")
+	}
 }
 
 func getAdminProjectRoot(t *testing.T) string {
@@ -105,6 +111,9 @@ func cleanupBabyRecords(t *testing.T, familyIDs ...string) {
 	if len(familyIDs) == 0 {
 		return
 	}
+	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.PhotoComment{}).Error
+	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.PhotoLike{}).Error
+	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.Photo{}).Error
 	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.Record{}).Error
 	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.Baby{}).Error
 	_ = mysql.DB.Where("family_id IN ?", familyIDs).Delete(&model.FamilyMember{}).Error

@@ -152,40 +152,42 @@ func TestGetWeeklyStats(t *testing.T) {
 	}
 }
 
-func TestGetRangeStatsIncludesRequestedMetrics(t *testing.T) {
+func TestGetStatsSummaryCustomRange(t *testing.T) {
 	setupFamilyTestDB(t)
 
-	admin := createTestUser(t, uniquePhone("range"), "区间统计用户")
-	family := createTestFamily(t, admin.ID, "区间统计家庭")
+	admin := createTestUser(t, uniquePhone("summary"), "汇总统计用户")
+	family := createTestFamily(t, admin.ID, "汇总统计家庭")
 	member := createTestFamilyMember(t, family.ID, admin.ID, model.FamilyRoleAdmin)
-	baby := createTestBaby(t, family.ID, "区间统计宝宝")
+	baby := createTestBaby(t, family.ID, "汇总统计宝宝")
 	defer cleanupFamilies(t, family.ID)
 	defer cleanupUsers(t, admin.ID)
 	defer cleanupMembers(t, member.ID)
 
-	day := time.Date(2026, 5, 20, 9, 0, 0, 0, time.Local)
-	createTestRecord(t, model.Record{BabyID: baby.ID, FamilyID: family.ID, Type: model.RecordTypeFeeding, StartedAt: day, Content: mustJSON(t, map[string]interface{}{"type": "formula", "amount": 100}), CreatedBy: admin.ID})
-	createTestRecord(t, model.Record{BabyID: baby.ID, FamilyID: family.ID, Type: model.RecordTypeFeeding, StartedAt: day.Add(2 * time.Hour), Content: mustJSON(t, map[string]interface{}{"type": "formula", "amount": 140}), CreatedBy: admin.ID})
-	createTestRecord(t, model.Record{BabyID: baby.ID, FamilyID: family.ID, Type: model.RecordTypeSleep, StartedAt: day.Add(4 * time.Hour), EndedAt: sqlNullTime(day.Add(5 * time.Hour)), Content: mustJSON(t, map[string]interface{}{"quality": "good", "location": "crib"}), CreatedBy: admin.ID})
+	base := time.Now().In(time.Local)
+	day := time.Date(base.Year(), base.Month(), base.Day(), 9, 0, 0, 0, time.Local)
+	createTestRecord(t, model.Record{BabyID: baby.ID, FamilyID: family.ID, Type: model.RecordTypeFeeding, StartedAt: day, Content: mustJSON(t, map[string]interface{}{"type": "formula", "amount": 150}), CreatedBy: admin.ID})
+	createTestRecord(t, model.Record{BabyID: baby.ID, FamilyID: family.ID, Type: model.RecordTypeSleep, StartedAt: day.Add(2 * time.Hour), EndedAt: sqlNullTime(day.Add(3 * time.Hour)), Content: mustJSON(t, map[string]interface{}{"quality": "good", "location": "crib"}), CreatedBy: admin.ID})
 
+	dateStr := day.Format("2006-01-02")
 	recorder := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(recorder)
-	ctx.Request = httptest.NewRequest(http.MethodGet, "/stats/range?baby_id="+baby.ID+"&start_date=2026-05-20&end_date=2026-05-20", nil)
+	ctx.Request = httptest.NewRequest(http.MethodGet, "/stats/summary?baby_id="+baby.ID+"&range=custom&start_date="+dateStr+"&end_date="+dateStr, nil)
 	ctx.Set("userId", admin.ID)
 
-	GetRangeStats(ctx)
+	GetStatsSummary(ctx)
 
 	if recorder.Code != http.StatusOK {
-		t.Fatalf("获取区间统计失败: status=%d body=%s", recorder.Code, recorder.Body.String())
+		t.Fatalf("获取汇总统计失败: status=%d body=%s", recorder.Code, recorder.Body.String())
 	}
 	var response struct {
-		Data WeeklyStatsResponse `json:"data"`
+		Code int                  `json:"code"`
+		Data StatsSummaryResponse `json:"data"`
 	}
 	decodeResponse(t, recorder.Body.Bytes(), &response)
-	if len(response.Data.DailyAverageMilk) != 1 || response.Data.DailyAverageMilk[0] != 120 {
-		t.Fatalf("日均喝奶量错误: %+v", response.Data.DailyAverageMilk)
+	if len(response.Data.Dates) != 1 || response.Data.DailyAvgMilkAmount[0] != 150 {
+		t.Fatalf("喝奶统计错误: %+v", response.Data)
 	}
-	if len(response.Data.DaytimeSingleSleep) != 1 || response.Data.DaytimeSingleSleep[0] < 0.9 {
-		t.Fatalf("白天单次睡眠统计错误: %+v", response.Data.DaytimeSingleSleep)
+	if response.Data.DailyAvgSleepHours[0] < 0.9 || response.Data.DaytimeSingleSleepHours[0] < 0.9 {
+		t.Fatalf("睡眠统计错误: %+v", response.Data)
 	}
 }

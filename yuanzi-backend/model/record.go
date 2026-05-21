@@ -11,11 +11,12 @@ import (
 type RecordType string
 
 const (
-	RecordTypeFeeding RecordType = "feeding"
-	RecordTypeSleep   RecordType = "sleep"
-	RecordTypeDiaper  RecordType = "diaper"
-	RecordTypeGrowth  RecordType = "growth"
-	RecordTypeTemp    RecordType = "temperature"
+	RecordTypeFeeding     RecordType = "feeding"
+	RecordTypeSleep       RecordType = "sleep"
+	RecordTypeDiaper      RecordType = "diaper"
+	RecordTypeExcretion   RecordType = "excretion"
+	RecordTypeTemperature RecordType = "temperature"
+	RecordTypeGrowth      RecordType = "growth"
 )
 
 type Record struct {
@@ -93,6 +94,17 @@ type DiaperContent struct {
 	Type        string `json:"type"`
 	Color       string `json:"color,omitempty"`
 	Consistency string `json:"consistency,omitempty"`
+}
+type ExcretionContent struct {
+	Type        string `json:"type"`
+	Color       string `json:"color,omitempty"`
+	Consistency string `json:"consistency,omitempty"`
+	Amount      string `json:"amount,omitempty"`
+}
+type TemperatureContent struct {
+	Value    float64 `json:"value"`
+	Unit     string  `json:"unit,omitempty"`
+	Position string  `json:"position,omitempty"`
 }
 type GrowthContent struct {
 	Weight            float64 `json:"weight"`

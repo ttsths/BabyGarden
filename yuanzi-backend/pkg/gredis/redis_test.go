@@ -26,7 +26,12 @@ func getProjectRoot() string {
 }
 
 // setupTestRedis 初始化测试 Redis 客户端
-func setupTestRedis() {
+func setupTestRedis(t *testing.T) {
+	t.Helper()
+	if os.Getenv("RUN_EXTERNAL_INTEGRATION_TESTS") != "1" {
+		t.Skip("跳过外部 Redis 集成测试：设置 RUN_EXTERNAL_INTEGRATION_TESTS=1 后执行")
+	}
+
 	// 设置配置文件路径
 	projectRoot := getProjectRoot()
 	viper.SetConfigName("config")
@@ -46,7 +51,7 @@ func setupTestRedis() {
 
 // TestSetup 测试 Redis 连接初始化
 func TestSetup(t *testing.T) {
-	setupTestRedis()
+	setupTestRedis(t)
 
 	if RedisClient == nil {
 		t.Fatal("Redis 客户端初始化失败")
@@ -66,7 +71,7 @@ func TestSetup(t *testing.T) {
 
 // TestSetGet 测试 Set/Get 操作
 func TestSetGet(t *testing.T) {
-	setupTestRedis()
+	setupTestRedis(t)
 
 	key := "test_key"
 	value := "test_value"
@@ -96,7 +101,7 @@ func TestSetGet(t *testing.T) {
 
 // TestSetEx 测试 SetEx 操作
 func TestSetEx(t *testing.T) {
-	setupTestRedis()
+	setupTestRedis(t)
 
 	key := "test_setex_key"
 	value := "test_setex_value"
@@ -132,7 +137,7 @@ func TestSetEx(t *testing.T) {
 
 // TestDel 测试 Del 操作
 func TestDel(t *testing.T) {
-	setupTestRedis()
+	setupTestRedis(t)
 
 	key := "test_del_key"
 	value := "test_del_value"
@@ -169,7 +174,7 @@ func TestDel(t *testing.T) {
 
 // TestExists 测试 Exists 操作
 func TestExists(t *testing.T) {
-	setupTestRedis()
+	setupTestRedis(t)
 
 	key := "test_exists_key"
 
@@ -202,7 +207,7 @@ func TestExists(t *testing.T) {
 
 // TestHash 测试 Hash 操作
 func TestHash(t *testing.T) {
-	setupTestRedis()
+	setupTestRedis(t)
 
 	key := "test_hash"
 	field := "name"
@@ -251,7 +256,7 @@ func TestHash(t *testing.T) {
 
 // TestList 测试 List 操作
 func TestList(t *testing.T) {
-	setupTestRedis()
+	setupTestRedis(t)
 
 	key := "test_list"
 	values := []interface{}{"item1", "item2", "item3"}
@@ -310,7 +315,7 @@ func TestList(t *testing.T) {
 
 // TestIncrDecr 测试自增自减操作
 func TestIncrDecr(t *testing.T) {
-	setupTestRedis()
+	setupTestRedis(t)
 
 	key := "test_counter"
 
@@ -346,7 +351,7 @@ func TestIncrDecr(t *testing.T) {
 
 // TestExpire 测试过期时间设置
 func TestExpire(t *testing.T) {
-	setupTestRedis()
+	setupTestRedis(t)
 
 	key := "test_expire_key"
 	value := "test_expire_value"
@@ -377,7 +382,7 @@ func TestExpire(t *testing.T) {
 
 // TestCodeOps 测试验证码专用操作
 func TestCodeOps(t *testing.T) {
-	setupTestRedis()
+	setupTestRedis(t)
 
 	phone := "13800138000"
 	code := "123456"
@@ -424,7 +429,7 @@ func TestCodeOps(t *testing.T) {
 
 // TestTokenBlacklist 测试 Token 黑名单操作
 func TestTokenBlacklist(t *testing.T) {
-	setupTestRedis()
+	setupTestRedis(t)
 
 	jti := "test_jti_12345"
 	ttl := 300 * time.Second // 5分钟
