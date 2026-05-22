@@ -1,0 +1,19 @@
+?   	yuanzi-backend	[no test files]
+?   	yuanzi-backend/config	[no test files]
+?   	yuanzi-backend/docs	[no test files]
+ok  	yuanzi-backend/e2e	6.121s
+ok  	yuanzi-backend/handler	24.417s
+ok  	yuanzi-backend/handler/admin	11.819s
+?   	yuanzi-backend/logger	[no test files]
+ok  	yuanzi-backend/middleware	3.701s
+?   	yuanzi-backend/model	[no test files]
+ok  	yuanzi-backend/mysql	3.710s
+?   	yuanzi-backend/pkg	[no test files]
+ok  	yuanzi-backend/pkg/ai	3.994s
+ok  	yuanzi-backend/pkg/gredis	18.075s
+?   	yuanzi-backend/pkg/oss	[no test files]
+?   	yuanzi-backend/pkg/push	[no test files]
+?   	yuanzi-backend/pkg/sms	[no test files]
+?   	yuanzi-backend/pkg/storage	[no test files]
+?   	yuanzi-backend/pkg/utils	[no test files]
+ok  	yuanzi-backend/router	4.629s
