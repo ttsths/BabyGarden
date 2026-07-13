@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>喂养记录详情 - BabyTracker</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "deep-cocoa": "#23110F",
+                        "tertiary-fixed-dim": "#9ed1c2",
+                        "surface-container-highest": "#e5e2de",
+                        "on-tertiary-fixed": "#00201a",
+                        "on-tertiary-fixed-variant": "#1d4f44",
+                        "on-secondary-container": "#772e24",
+                        "inverse-primary": "#ffb4ab",
+                        "surface-variant": "#e5e2de",
+                        "inverse-surface": "#31302e",
+                        "on-secondary-fixed": "#3e0402",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#fe9889",
+                        "primary-container": "#c84b42",
+                        "surface-bright": "#fdf9f5",
+                        "primary-fixed": "#ffdad6",
+                        "surface": "#fdf9f5",
+                        "outline": "#8b716e",
+                        "surface-dim": "#ddd9d6",
+                        "surface-container": "#f1ede9",
+                        "quiet-border": "#E7D8D2",
+                        "tertiary-fixed": "#b9edde",
+                        "on-secondary-fixed-variant": "#792f26",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#ffdad5",
+                        "secondary-fixed-dim": "#ffb4a8",
+                        "slate-graphite": "#344054",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#410002",
+                        "primary": "#a7332c",
+                        "surface-container-low": "#f7f3ef",
+                        "background": "#fdf9f5",
+                        "on-tertiary-container": "#f6fffa",
+                        "on-primary-fixed-variant": "#891d1a",
+                        "surface-tint": "#aa352e",
+                        "on-background": "#1c1c19",
+                        "tertiary-container": "#4d7e71",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#fffcff",
+                        "primary-fixed-dim": "#ffb4ab",
+                        "inverse-on-surface": "#f4f0ec",
+                        "on-surface-variant": "#58413f",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#1c1c19",
+                        "secondary": "#97463b",
+                        "focus-blue": "#2E90FA",
+                        "tertiary": "#346559",
+                        "surface-container-high": "#ebe7e4",
+                        "outline-variant": "#dfbfbb",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "admin-control-height": "36px",
+                        "product-margin": "24px",
+                        "admin-margin": "16px",
+                        "control-min-height": "44px",
+                        "admin-gutter": "8px",
+                        "product-gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "product-body": ["Noto Sans", "sans-serif"],
+                        "headline-lg-mobile": ["Noto Sans", "sans-serif"],
+                        "label-caps": ["Noto Sans", "sans-serif"],
+                        "supporting-text": ["Noto Sans", "sans-serif"],
+                        "section-title": ["Noto Sans", "sans-serif"],
+                        "headline-lg": ["Noto Sans", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "product-body": ["16px", { "lineHeight": "26px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "supporting-text": ["14px", { "lineHeight": "22px", "fontWeight": "400" }],
+                        "section-title": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Noto Sans', sans-serif; background-color: #FFFBF7; }
+        .focus-ring:focus-visible { outline: 2px solid #FFFBF7; box-shadow: 0 0 0 4px #2E90FA; }
+        .soft-shadow { box-shadow: 0 4px 12px rgba(35, 17, 15, 0.04); }
+    </style>
+</head>
+<body class="bg-background text-deep-cocoa antialiased min-h-screen flex flex-col">
+<!-- Top Navigation (Shell suppressed as per instructions for transactional/detail page, but prompt specifically asked for Header) -->
+<!-- Applying Shared Component JSON for TopNavBar, but hiding navigation_links as this is a detail page with back link -->
+<header class="w-full top-0 sticky bg-surface border-b border-quiet-border shadow-sm z-50">
+<div class="flex justify-between items-center h-control-min-height px-product-margin max-w-[1440px] mx-auto">
+<div class="flex items-center gap-4">
+<div class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold">Xiao Man, 8 months</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="bg-primary text-on-primary font-supporting-text text-supporting-text px-4 h-control-min-height rounded-xl hover:bg-surface-tint transition-colors focus-ring">Record</button>
+<button aria-label="Settings" class="text-on-surface-variant hover:text-primary-container transition-colors focus-ring flex items-center justify-center w-control-min-height h-control-min-height rounded-full">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<button aria-label="Parent Profile" class="w-10 h-10 rounded-full overflow-hidden border border-quiet-border focus-ring">
+<img alt="Parent Profile" class="w-full h-full object-cover" data-alt="A close-up portrait of a caring parent with a warm smile, softly lit against a minimalist off-white background. The lighting is high-key and serene, emphasizing a clean, trustworthy aesthetic suitable for a premium family app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuChrdCVa2KTG8_DZbbVq2TbIoN1uNUxRnfjWqo5AEiIPMtT5FSBY4ohlOKp5QQTtvK0ffdBhgdauEhiHueEqAQD3UWE306KyLbyhnz0eoxBE-9Hjj3ggpzZlTe314dc7M-jw0vb9uOuE_PBazmhblL6o-2ChcDWYIJr_t2prU5-2Izg1tZgtj2VIk3YUH8welO3O_WS2wYuMwfZfUeikhLftukibJypM6DfsSy3m8JkTmS0W6NKD4CC37Tf5NRMO9Atkw_XEGrJGxw"/>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow w-full max-w-[1440px] mx-auto px-product-margin py-8 md:py-12 flex flex-col gap-8">
+<!-- Navigation / Title -->
+<div class="flex flex-col gap-2">
+<a class="inline-flex items-center text-secondary font-supporting-text text-supporting-text hover:underline decoration-primary focus-ring w-fit gap-1 group" href="#">
+<span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform" data-icon="arrow_back">arrow_back</span>
+                最近记录
+            </a>
+<h1 class="font-headline-lg text-headline-lg text-deep-cocoa">喂养记录详情</h1>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-product-gutter items-start">
+<!-- Center Content: Main Card -->
+<div class="lg:col-span-8 lg:col-start-3">
+<article class="bg-on-secondary rounded-[16px] border border-quiet-border soft-shadow p-6 md:p-8 flex flex-col gap-6 relative overflow-hidden">
+<!-- Header Section of Card -->
+<div class="flex justify-between items-start border-b border-quiet-border pb-6">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 bg-surface-container-low rounded-full flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-3xl" data-icon="water_bottle">water_bottle</span>
+</div>
+<div>
+<h2 class="font-section-title text-section-title text-deep-cocoa">配方奶</h2>
+<p class="font-supporting-text text-supporting-text text-on-surface-variant mt-1">今天 10:30</p>
+</div>
+</div>
+<div class="text-right">
+<span class="block font-headline-lg text-headline-lg text-primary">120<span class="text-xl ml-1">ml</span></span>
+</div>
+</div>
+<!-- Details Section -->
+<div class="flex flex-col gap-4 py-2">
+<div>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-2">备注 (Note)</h3>
+<p class="font-product-body text-product-body text-deep-cocoa bg-surface-container-lowest border border-quiet-border rounded-lg p-4">
+                                宝宝胃口很好
+                            </p>
+</div>
+</div>
+<!-- Footer Section of Card -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2 pt-4 border-t border-quiet-border">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2 text-on-surface-variant font-supporting-text text-supporting-text">
+<span class="material-symbols-outlined text-sm" data-icon="lock">lock</span>
+                                此记录对家庭成员可见
+                            </div>
+<div class="flex items-center gap-2 text-secondary font-supporting-text text-supporting-text text-xs opacity-80">
+<span class="material-symbols-outlined text-sm" data-icon="cloud_off">cloud_off</span>
+                                本地已保存，等待同步
+                            </div>
+</div>
+<div class="flex items-center gap-3 w-full sm:w-auto">
+<button class="flex-1 sm:flex-none h-control-min-height px-6 rounded-[12px] border border-outline-variant text-error font-supporting-text text-supporting-text font-medium hover:bg-error-container focus-ring transition-colors">
+                                删除记录
+                            </button>
+<button class="flex-1 sm:flex-none h-control-min-height px-6 rounded-[12px] bg-primary text-on-primary font-supporting-text text-supporting-text font-medium hover:bg-surface-tint focus-ring transition-colors shadow-sm">
+                                编辑记录
+                            </button>
+</div>
+</div>
+</article>
+</div>
+</div>
+</main>
+<!-- Footer Component applied from JSON -->
+<footer class="w-full py-8 border-t border-quiet-border bg-surface-container-low mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center px-product-margin max-w-[1440px] mx-auto gap-4">
+<div class="font-label-caps text-label-caps text-on-surface-variant">© 2024 Baby Tracker. All rights reserved.</div>
+<div class="flex gap-4">
+<a class="font-supporting-text text-supporting-text text-secondary hover:underline decoration-primary cursor-pointer transition-all" href="#">Privacy Policy</a>
+<a class="font-supporting-text text-supporting-text text-secondary hover:underline decoration-primary cursor-pointer transition-all" href="#">Support</a>
+<a class="font-supporting-text text-supporting-text text-secondary hover:underline decoration-primary cursor-pointer transition-all" href="#">Terms of Service</a>
+</div>
+</div>
+</footer>
+</body></html>
