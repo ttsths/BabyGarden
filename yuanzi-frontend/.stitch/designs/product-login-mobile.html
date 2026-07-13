@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BabyGarden - 登录</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#ffffff",
+                    "primary-container": "#c84b42",
+                    "tertiary-container": "#4d7e71",
+                    "surface-container": "#f1ede9",
+                    "quiet-border": "#E7D8D2",
+                    "on-tertiary-container": "#f6fffa",
+                    "secondary-fixed": "#ffdad5",
+                    "on-surface-variant": "#58413f",
+                    "surface-tint": "#aa352e",
+                    "surface-container-highest": "#e5e2de",
+                    "primary-fixed": "#ffdad6",
+                    "deep-cocoa": "#23110F",
+                    "on-tertiary-fixed": "#00201a",
+                    "on-secondary-container": "#772e24",
+                    "on-error": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "focus-blue": "#2E90FA",
+                    "surface-container-low": "#f7f3ef",
+                    "inverse-primary": "#ffb4ab",
+                    "secondary-fixed-dim": "#ffb4a8",
+                    "surface-bright": "#fdf9f5",
+                    "secondary": "#97463b",
+                    "surface-container-high": "#ebe7e4",
+                    "secondary-container": "#fe9889",
+                    "primary-fixed-dim": "#ffb4ab",
+                    "outline-variant": "#dfbfbb",
+                    "inverse-on-surface": "#f4f0ec",
+                    "tertiary-fixed": "#b9edde",
+                    "on-surface": "#1c1c19",
+                    "inverse-surface": "#31302e",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed": "#410002",
+                    "error": "#ba1a1a",
+                    "on-primary-container": "#fffcff",
+                    "outline": "#8b716e",
+                    "surface-variant": "#e5e2de",
+                    "on-error-container": "#93000a",
+                    "on-background": "#1c1c19",
+                    "surface-dim": "#ddd9d6",
+                    "surface": "#fdf9f5",
+                    "tertiary-fixed-dim": "#9ed1c2",
+                    "on-secondary-fixed": "#3e0402",
+                    "background": "#fdf9f5",
+                    "on-secondary-fixed-variant": "#792f26",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#346559",
+                    "slate-graphite": "#344054",
+                    "primary": "#a7332c",
+                    "on-tertiary-fixed-variant": "#1d4f44",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed-variant": "#891d1a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "product-margin": "24px",
+                    "admin-margin": "16px",
+                    "admin-gutter": "8px",
+                    "product-gutter": "16px",
+                    "control-min-height": "44px",
+                    "admin-control-height": "36px"
+            },
+            "fontFamily": {
+                    "label-caps": ["Noto Sans", "sans-serif"],
+                    "headline-lg-mobile": ["Noto Sans", "sans-serif"],
+                    "product-body": ["Noto Sans", "sans-serif"],
+                    "headline-lg": ["Noto Sans", "sans-serif"],
+                    "supporting-text": ["Noto Sans", "sans-serif"],
+                    "section-title": ["Noto Sans", "sans-serif"]
+            },
+            "fontSize": {
+                    "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                    "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                    "product-body": ["16px", { "lineHeight": "26px", "fontWeight": "400" }],
+                    "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                    "supporting-text": ["14px", { "lineHeight": "22px", "fontWeight": "400" }],
+                    "section-title": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="bg-background min-h-screen font-product-body text-on-surface antialiased flex flex-col items-center">
+<!-- Mobile Container (Max 390px for visual constraint, fluid within) -->
+<div class="w-full max-w-[390px] flex flex-col min-h-screen relative">
+<!-- Header: Compact Wordmark -->
+<header class="w-full pt-8 pb-4 px-product-gutter flex justify-center items-center">
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold tracking-tight">BabyGarden</span>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col items-center px-product-gutter w-full">
+<!-- Hero Illustration -->
+<div class="w-full flex justify-center my-6">
+<img class="w-48 h-48 object-contain drop-shadow-sm" src="https://lh3.googleusercontent.com/aida/AP1WRLuBJWIcoj7xhL-Ax_lseMbqRBMWtNjYEP-75ofnb9BVPYKLHJCVWm5frvi5xITgtOSNvg1L8--Ie8w2E8bnkHc7XfbNLd5uOFBtwhITRiNrJb4JoLGKD_cayrDHhHGYF8-UEtGwhOXabrZ2gme-05Hqg_wHW0o1KZmyBWEr97UJ0_RWUyEgC3yaZmOzMCB4fCOFkYggc4GeGI6_BkTuKoBs6-YuBIVZLeRfVoWfB4kBqlYbK2qwfddqFA"/>
+</div>
+<!-- Login Card -->
+<div class="w-full bg-surface-container-lowest rounded-2xl border border-quiet-border shadow-[0_4px_12px_rgba(35,17,15,0.04)] p-6 flex flex-col">
+<div class="text-center mb-6">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-deep-cocoa mb-2">欢迎回到小园子</h1>
+<p class="font-supporting-text text-supporting-text text-on-surface-variant">登录后继续记录宝宝的成长。</p>
+</div>
+<form class="flex flex-col gap-5">
+<!-- Username Field -->
+<div class="flex flex-col gap-1.5">
+<label class="font-supporting-text text-supporting-text text-deep-cocoa" for="username">用户名</label>
+<input class="w-full h-control-min-height px-4 bg-surface-container-lowest border border-quiet-border rounded-xl font-product-body text-product-body text-on-surface focus:outline-none focus:ring-2 focus:ring-focus-blue focus:ring-offset-2 focus:ring-offset-surface-container-lowest transition-shadow" id="username" placeholder="输入用户名" type="text"/>
+</div>
+<!-- Password Field -->
+<div class="flex flex-col gap-1.5">
+<label class="font-supporting-text text-supporting-text text-deep-cocoa" for="password">密码</label>
+<div class="relative w-full">
+<input class="w-full h-control-min-height pl-4 pr-12 bg-surface-container-lowest border border-quiet-border rounded-xl font-product-body text-product-body text-on-surface focus:outline-none focus:ring-2 focus:ring-focus-blue focus:ring-offset-2 focus:ring-offset-surface-container-lowest transition-shadow" id="password" placeholder="输入密码" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-deep-cocoa transition-colors p-1 flex items-center justify-center" type="button">
+<span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span>
+</button>
+</div>
+</div>
+<!-- Primary Action -->
+<button class="w-full h-control-min-height mt-2 bg-primary-container text-on-primary-container rounded-xl font-product-body text-product-body font-bold hover:bg-surface-tint active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-focus-blue focus:ring-offset-2 focus:ring-offset-surface-container-lowest shadow-sm" type="submit">
+                        登录
+                    </button>
+</form>
+<!-- Help Text -->
+<div class="mt-6 text-center">
+<p class="font-supporting-text text-supporting-text text-on-surface-variant">
+                        没有账号或忘记密码？请联系管理员。
+                    </p>
+</div>
+</div>
+<!-- Footer Note -->
+<div class="mt-8 mb-6 text-center w-full px-4">
+<p class="font-supporting-text text-supporting-text text-outline flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined" style="font-size: 16px;">lock</span>
+                    仅家庭成员可查看园子里的记录。
+                </p>
+</div>
+</main>
+<!-- State Strip (Bottom Debug/Info blocks) -->
+<div class="w-full px-product-gutter pb-8 flex flex-wrap justify-center gap-2 mt-auto">
+<span class="px-3 py-1.5 bg-error-container text-on-error-container rounded-full font-label-caps text-label-caps border border-error/20 flex items-center gap-1">
+<span class="material-symbols-outlined" style="font-size: 14px;">error</span>
+                无效凭据
+            </span>
+<span class="px-3 py-1.5 bg-surface-variant text-on-surface-variant rounded-full font-label-caps text-label-caps border border-outline-variant flex items-center gap-1">
+<span class="material-symbols-outlined" style="font-size: 14px;">block</span>
+                账号已禁用
+            </span>
+<span class="px-3 py-1.5 bg-secondary-fixed text-on-secondary-fixed rounded-full font-label-caps text-label-caps border border-secondary/20 flex items-center gap-1">
+<span class="material-symbols-outlined" style="font-size: 14px;">timer</span>
+                会话已过期
+            </span>
+</div>
+</div>
+<!-- Simple interaction script for password toggle (optional enhancement) -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.querySelector('button[type="button"]');
+            const passInput = document.getElementById('password');
+            const icon = toggleBtn.querySelector('.material-symbols-outlined');
+
+            toggleBtn.addEventListener('click', () => {
+                if (passInput.type === 'password') {
+                    passInput.type = 'text';
+                    icon.textContent = 'visibility';
+                } else {
+                    passInput.type = 'password';
+                    icon.textContent = 'visibility_off';
+                }
+            });
+        });
+    </script>
+</body></html>
