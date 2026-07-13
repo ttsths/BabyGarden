@@ -1,23 +1,24 @@
 ---
-page: product-setup-mobile
+page: product-record-desktop
 issue: 84
-deviceType: MOBILE
-frame: 390x844
+deviceType: DESKTOP
+frame: 1440x900
 ---
 
-Create the critical 390px mobile-browser variant of the Product Web
-first-family setup page for BabyGarden. Preserve the desktop form semantics and
-the Nurturing Foundation visual hierarchy while making the form comfortable to
-complete with one hand. This is responsive Web, not a native app screen.
+Create the canonical 1440px Product Web quick-record vertical slice for
+BabyGarden. It is opened from the home dashboard primary actions and lets a
+caregiver record one feeding, sleep session or diaper change without leaving
+the current baby context. This is an MVP interaction design; do not add SMS,
+AI, photos, object storage, realtime presence or other external dependencies.
 
 **DESIGN SYSTEM (REQUIRED):**
 
-- Platform: responsive Web; 390px is the mobile-browser breakpoint of the same
-  Product Web shell.
+- Platform: responsive Web, desktop-first at 1440px with a later 390px drawer
+  variant. This is not a native mobile app.
 - Personality: warm, trustworthy, calm, practical; never childish or
   decorative for its own sake.
-- Density: comfortable. Inputs, segmented choices and primary actions are at
-  least 44px high; use 16px side margins and readable Chinese line lengths.
+- Density: medium. Product controls are at least 44px high and touch targets
+  are at least 44x44px.
 - Canvas: Warm Porcelain `#FFFBF7`.
 - Primary action: Deep Warm Coral `#C84B42` with white text.
 - Brand accent only: Soft Coral `#FF998A`; never use it behind white body text.
@@ -25,47 +26,51 @@ complete with one hand. This is responsive Web, not a native app screen.
 - Primary text: Deep Cocoa `#23110F`; secondary text: Slate Graphite `#344054`.
 - Surface: white with quiet `#E7D8D2` borders and restrained shadow.
 - Focus: 2px adjacent-surface separator plus 2px outer Focus Blue `#2E90FA`.
-- Radius: 10-12px controls, 16px cards, 20px large panels.
-- Typography: Chinese-first system sans; 24/32 mobile page title, 18/26
-  section title, 16/26 product body, 14/22 supporting text.
+- Radius: 10-12px controls, 16px cards, 20px dialogs.
+- Typography: Chinese-first system sans; 24/32 page title, 20/28 section
+  title, 16/26 product body, 14/22 supporting text.
 - Motion: 120-240ms strong ease-out; no page-wide entrance animation, scale
   from zero, bounce, or `transition: all`.
 
-**MVP FORM CONTRACT:**
+**MVP RECORD CONTRACT:**
 
-- Collect only family name, caregiver display name, baby name, birth date and
-  optional gender choice. Do not introduce SMS, OTP, phone verification, email
-  verification, photos or external-service dependencies.
-- Use visible Simplified Chinese labels, required markers, helper text and
-  explicit date format. Keep entered values intact when showing errors.
-- Make `创建家庭并继续` the clear primary action. A secondary `稍后完善`
-  route is allowed only when its destination remains recoverable.
-- Explain that records are private to family members.
+- Keep baby context explicit: `小满 · 8个月`; the record is owned by the
+  current family and timestamped locally before any sync.
+- Provide three modes with Chinese labels: `喂养`, `睡眠`, `尿布`. The active
+  mode must change only the minimal relevant fields.
+- 喂养 fields: record time, feeding type (母乳/配方奶/辅食), amount in ml when
+  applicable, and optional note.
+- 睡眠 fields: start time, end time or duration, and optional note.
+- 尿布 fields: record time, type (尿布/嘘嘘/便便) and optional note.
+- Make `保存记录` primary and `取消` secondary. Do not require external
+  services, invite flows, media uploads or realtime confirmation.
 
-**MOBILE LAYOUT:**
+**PAGE STRUCTURE:**
 
-1. Compact header with BabyGarden wordmark, `第 1 步，共 1 步` and account
-   menu. Do not render native status bars, bottom tabs or App navigation.
-2. Put the heading and privacy explanation above one scrollable white form card.
-3. Stack `家庭信息` and `宝宝信息` groups with 44px+ inputs, date picker
-   affordance and a full-width gender choice row.
-4. Keep the primary CTA visible after the final field and repeat a compact
-   privacy cue near it; avoid a sticky footer that hides content.
-5. Include a small state reference strip below the form for submitting,
-   validation error and retryable network error; it is not a duplicate page.
+1. Preserve the Product Web header and current baby/family context behind a
+   focused modal or right-side dialog; do not use an Admin sidebar.
+2. Modal header states the action, e.g. `记录小满的喂养`, with a close button
+   and a visible mode switcher for 喂养/睡眠/尿布.
+3. Use grouped, visibly labelled inputs with explicit units and examples.
+   Keep the primary action within the dialog's comfortable reach.
+4. Show a privacy cue that the record is visible to family members and a small
+   local-save/sync note that remains honest when the network is unavailable.
+5. Include compact reference treatments for validation error, saving,
+   successfully saved and retryable network error without duplicating the
+   entire page.
 
 **REQUIRED STATES:**
 
-- Empty form, field validation errors, submitting, recoverable network error
-  with local retry, signed-out/session-expired and forbidden states.
-- Error copy must be actionable, local to the field or operation, and must not
-  discard entered data.
+- Empty/default form, field validation error, saving, saved confirmation,
+  retryable network error and session expired. Preserve entered values on error.
+- A degraded optional service must not block local core record creation; do not
+  present a fake realtime or AI result.
 
 **ANTI-SLOP CONSTRAINTS:**
 
-- No purple gradients, glassmorphism, giant hero metrics, fake testimonials,
-  decorative charts, emoji icons, lorem ipsum, stock photography or invented
-  AI conclusions.
+- No SMS/OTP, phone verification, purple gradients, glassmorphism, giant hero
+  metrics, fake testimonials, decorative charts, emoji icons, lorem ipsum,
+  stock photography or invented AI conclusions.
 - Keep labels Chinese-first and do not introduce English navigation or system
   preview copy unless it is an unavoidable technical token.
 - Generated HTML is visual reference only, not production React code.
