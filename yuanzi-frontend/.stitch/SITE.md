@@ -13,10 +13,10 @@ application architecture.
   design cycle)
 - Visibility: private
 - Design system asset: `assets/f56839ef90a64ca1898687653ea64867`
-- Current status: Product Web login, resilient home, first-family setup and
-  quick-record masters are generated at desktop and 390px widths. The desktop
-  login master was accepted to continue; the remaining variants are review
-  gates. The next baton is the Product Web records list desktop master.
+- Current status: Product Web login, resilient home, first-family setup,
+  quick-record and records-list desktop masters are generated. Their 390px
+  variants and the remaining desktop masters are review gates. The next baton
+  is the records-list mobile-browser master.
 
 The project and screen identifiers are persisted in `.stitch/metadata.json`.
 Refresh that file after every accepted Stitch generation.
@@ -41,6 +41,7 @@ not count as the desktop Product or Admin masters required by issue #84.
 - [ ] `/record` — quick-record modal, 1440px desktop master
 - [ ] `/record` — quick-record drawer, 390px mobile-browser variant
 - [ ] `/records` — record list, 1440px desktop master
+- [ ] `/records` — record list, 390px mobile-browser variant
 - [ ] `/record-detail/:id` — record detail
 - [ ] `/stats` — core statistics
 - [ ] `/family` — members and invitation

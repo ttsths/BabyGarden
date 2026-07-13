@@ -4,7 +4,7 @@
   "title": "Yuanzi Baby App",
   "visibility": "PRIVATE",
   "createTime": "2026-03-08T03:11:21.816627Z",
-  "updateTime": "2026-07-13T07:44:50.000000Z",
+  "updateTime": "2026-07-13T07:49:25.000000Z",
   "projectType": "PROJECT_DESIGN",
   "origin": "STITCH",
   "deviceType": "MOBILE",
@@ -136,12 +136,26 @@
       "status": "generated_pending_human_review",
       "htmlPath": ".stitch/designs/product-record-mobile.html",
       "screenshotPath": ".stitch/designs/product-record-mobile.png"
+    },
+    "product-records-desktop": {
+      "id": "00e3a0a9625a40bea9e5c334f53c2f52",
+      "sourceScreen": "projects/6507375090366546067/screens/00e3a0a9625a40bea9e5c334f53c2f52",
+      "x": null,
+      "y": null,
+      "width": 2560,
+      "height": 2516,
+      "logicalFrame": "1440x1415",
+      "title": "BabyGarden Records History (Desktop)",
+      "deviceType": "DESKTOP",
+      "status": "generated_pending_human_review",
+      "htmlPath": ".stitch/designs/product-records-desktop.html",
+      "screenshotPath": ".stitch/designs/product-records-desktop.png"
     }
   },
   "generation": {
     "sessionId": "7084992055446249236",
     "generatedAt": "2026-07-13T07:17:07.909783Z",
-    "latestSessionId": "11271525654165702500",
-    "latestGeneratedAt": "2026-07-13T07:44:50.000000Z"
+    "latestSessionId": "9449132034275404029",
+    "latestGeneratedAt": "2026-07-13T07:49:25.000000Z"
   }
 }
