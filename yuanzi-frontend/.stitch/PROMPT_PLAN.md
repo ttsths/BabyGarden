@@ -3,6 +3,9 @@
 Target: approximately 40 review assets. Generate one screen per prompt and use
 state boards instead of duplicating full pages for every component state.
 
+Current progress: `product-login-desktop` is generated in Stitch and awaiting
+human visual review. The next baton is the 390px mobile-browser variant.
+
 ## Batch A — Product desktop masters (10)
 
 Login, setup, baby profile, home, quick record, record list, record detail,

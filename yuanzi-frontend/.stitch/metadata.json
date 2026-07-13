@@ -1,0 +1,47 @@
+{
+  "name": "projects/6507375090366546067",
+  "projectId": "6507375090366546067",
+  "title": "Yuanzi Baby App",
+  "visibility": "PRIVATE",
+  "createTime": "2026-03-08T03:11:21.816627Z",
+  "updateTime": "2026-07-13T07:07:00.085842Z",
+  "projectType": "PROJECT_DESIGN",
+  "origin": "STITCH",
+  "deviceType": "MOBILE",
+  "designTheme": {
+    "colorMode": "DARK",
+    "customColor": "#ff998a",
+    "font": "MANROPE",
+    "roundness": "ROUND_EIGHT",
+    "saturation": 3
+  },
+  "metadata": {
+    "userRole": "OWNER"
+  },
+  "designSystem": {
+    "name": "assets/f56839ef90a64ca1898687653ea64867",
+    "version": "1",
+    "displayName": "Nurturing Foundation",
+    "source": ".stitch/DESIGN.md",
+    "uploadScreenInstanceId": "7725981056247829247"
+  },
+  "screens": {
+    "product-login-desktop": {
+      "id": "b5d2cd43f9f046ad81364d0ce4df8c39",
+      "sourceScreen": "projects/6507375090366546067/screens/b5d2cd43f9f046ad81364d0ce4df8c39",
+      "x": null,
+      "y": null,
+      "width": 2560,
+      "height": 2104,
+      "title": "BabyGarden Desktop Login",
+      "deviceType": "DESKTOP",
+      "status": "generated_pending_human_review",
+      "htmlPath": ".stitch/designs/product-login-desktop.html",
+      "screenshotPath": ".stitch/designs/product-login-desktop.png"
+    }
+  },
+  "generation": {
+    "sessionId": "7084992055446249236",
+    "generatedAt": "2026-07-13T07:07:00.085842Z"
+  }
+}

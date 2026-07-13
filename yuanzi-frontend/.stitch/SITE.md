@@ -8,15 +8,16 @@ application architecture.
 
 ## 2. Stitch Project
 
-- Project ID: pending Stitch MCP connection
-- Expected project title: `BabyGarden Web + Admin MVP`
+- Project ID: `6507375090366546067`
+- Project title: `Yuanzi Baby App` (existing private project selected for this
+  design cycle)
 - Visibility: private
-- Current blocker: this Codex session has no Stitch MCP tools, so prompts are
-  prepared locally but cloud screens cannot yet be generated or synchronized.
+- Design system asset: `assets/f56839ef90a64ca1898687653ea64867`
+- Current status: Product Web desktop login master generated; human visual
+  review and the 390px mobile variant remain open gates.
 
-When MCP becomes available, create or select the project, write
-`.stitch/metadata.json`, generate the current baton, then refresh metadata after
-every screen.
+The project and screen identifiers are persisted in `.stitch/metadata.json`.
+Refresh that file after every accepted Stitch generation.
 
 ## 3. Existing Evidence
 
@@ -28,7 +29,8 @@ not count as the desktop Product or Admin masters required by issue #84.
 
 ### Product P0
 
-- [ ] `/login` — username/password login, desktop and 390px
+- [x] `/login` — username/password login, 1440px desktop master generated
+- [ ] `/login` — 390px mobile-browser variant
 - [ ] `/baby/setup` — first family and baby setup, desktop and 390px
 - [ ] `/baby-profile` — baby profile
 - [ ] `/` — resilient home dashboard, desktop and 390px
@@ -58,7 +60,8 @@ not count as the desktop Product or Admin masters required by issue #84.
 
 ## 5. Roadmap
 
-1. Product login desktop master and 390px variant.
+1. Product login desktop master — generated; review pending. Continue with the
+   390px mobile variant.
 2. Product shell, home desktop master and 390px variant.
 3. Setup and core-record vertical slice.
 4. Remaining Product P0 masters.
