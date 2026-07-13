@@ -14,10 +14,12 @@ application architecture.
 - Visibility: private
 - Design system asset: `assets/f56839ef90a64ca1898687653ea64867`
 - Current status: Product Web login, resilient home, first-family setup,
-  quick-record, records-list and record-detail desktop masters are generated.
+  quick-record, records-list and record-detail desktop/mobile masters are generated.
   The first records-list mobile draft was superseded because it introduced App
-  navigation; a refined Web-only variant is now generated. The next baton is
-  record detail mobile.
+  navigation; a refined Web-only variant is now generated. Record detail
+  desktop/mobile masters are now generated; the next baton is baby profile
+  desktop. Baby profile desktop is now generated with a Chinese refinement;
+  the next baton is statistics desktop.
 
 The project and screen identifiers are persisted in `.stitch/metadata.json`.
 Refresh that file after every accepted Stitch generation.
@@ -44,8 +46,8 @@ not count as the desktop Product or Admin masters required by issue #84.
 - [ ] `/records` — record list, 1440px desktop master
 - [ ] `/records` — record list, 390px mobile-browser variant (Web-only refined)
 - [ ] `/record-detail/:id` — 1440px desktop master
-- [ ] `/record-detail/:id` — 390px mobile-browser variant
-- [ ] `/stats` — core statistics
+- [ ] `/record-detail/:id` — 390px mobile-browser variant generated; final review pending
+- [ ] `/stats` — core statistics (next baton: desktop)
 - [ ] `/family` — members and invitation
 - [ ] `/settings` — account and product settings
 
@@ -74,8 +76,9 @@ not count as the desktop Product or Admin masters required by issue #84.
 3. First-family setup desktop/390px masters — generated; review pending.
 4. Quick-record desktop/mobile vertical slice for feeding, sleep and diaper —
    generated; review pending.
-5. Product records list desktop/mobile, then detail, statistics, family and
-   settings masters.
+5. Product records list and detail desktop/mobile masters are generated, and
+   baby profile desktop is generated pending review; next produce statistics,
+   family and settings masters.
 6. Admin shell, dashboard and account provisioning.
 7. Remaining Admin P0 masters and 1024px compact anchors.
 8. Five shared state boards.

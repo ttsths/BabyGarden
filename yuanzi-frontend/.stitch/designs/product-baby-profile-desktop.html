@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html lang="zh"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>宝宝资料 - BabyGarden</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#346559",
+                        "surface-container": "#f1ede9",
+                        "inverse-primary": "#ffb4ab",
+                        "surface-tint": "#aa352e",
+                        "on-surface": "#1c1c19",
+                        "on-tertiary-container": "#f6fffa",
+                        "quiet-border": "#E7D8D2",
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-container": "#fffcff",
+                        "on-secondary-fixed-variant": "#792f26",
+                        "background": "#fdf9f5",
+                        "surface-container-low": "#f7f3ef",
+                        "surface-container-high": "#ebe7e4",
+                        "slate-graphite": "#344054",
+                        "primary-container": "#c84b42",
+                        "tertiary-fixed": "#b9edde",
+                        "secondary": "#97463b",
+                        "on-secondary-container": "#772e24",
+                        "surface": "#fdf9f5",
+                        "primary-fixed": "#ffdad6",
+                        "on-tertiary-fixed": "#00201a",
+                        "surface-bright": "#fdf9f5",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed-dim": "#ffb4a8",
+                        "inverse-on-surface": "#f4f0ec",
+                        "on-secondary-fixed": "#3e0402",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#4d7e71",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed": "#410002",
+                        "surface-variant": "#e5e2de",
+                        "primary": "#a7332c",
+                        "secondary-fixed": "#ffdad5",
+                        "on-error": "#ffffff",
+                        "deep-cocoa": "#23110F",
+                        "on-tertiary-fixed-variant": "#1d4f44",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#58413f",
+                        "on-background": "#1c1c19",
+                        "secondary-container": "#fe9889",
+                        "primary-fixed-dim": "#ffb4ab",
+                        "tertiary-fixed-dim": "#9ed1c2",
+                        "surface-dim": "#ddd9d6",
+                        "surface-container-highest": "#e5e2de",
+                        "on-primary-fixed-variant": "#891d1a",
+                        "focus-blue": "#2E90FA",
+                        "outline-variant": "#dfbfbb",
+                        "inverse-surface": "#31302e",
+                        "outline": "#8b716e",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "product-gutter": "16px",
+                        "admin-margin": "16px",
+                        "product-margin": "24px",
+                        "admin-control-height": "36px",
+                        "control-min-height": "44px",
+                        "admin-gutter": "8px"
+                    },
+                    "fontFamily": {
+                        "section-title": ["Noto Sans", "sans-serif"],
+                        "headline-lg-mobile": ["Noto Sans", "sans-serif"],
+                        "supporting-text": ["Noto Sans", "sans-serif"],
+                        "headline-lg": ["Noto Sans", "sans-serif"],
+                        "product-body": ["Noto Sans", "sans-serif"],
+                        "label-caps": ["Noto Sans", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "section-title": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "supporting-text": ["14px", { "lineHeight": "22px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "product-body": ["16px", { "lineHeight": "26px", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Noto Sans', sans-serif; background-color: #FFFBF7; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        
+        .skeleton {
+            background: linear-gradient(90deg, #f1ede9 25%, #e5e2de 50%, #f1ede9 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-surface text-deep-cocoa flex flex-col min-h-screen font-product-body">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-surface-dim w-full top-0 sticky border-b border-quiet-border dark:border-on-surface-variant shadow-sm z-50">
+<div class="flex justify-between items-center h-16 px-product-margin max-w-[1440px] mx-auto">
+<div class="flex items-center gap-8">
+<div class="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed-dim">
+                    BabyGarden
+                </div>
+<nav class="hidden md:flex gap-6">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors active:scale-95 duration-150 py-1" href="#">首页</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors active:scale-95 duration-150 py-1" href="#">最近记录</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors active:scale-95 duration-150 py-1" href="#">成长</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors active:scale-95 duration-150 py-1" href="#">统计</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-primary dark:text-primary-fixed-dim font-product-body text-product-body">小满，8个月</span>
+<button aria-label="Account Settings" class="p-2 text-primary dark:text-primary-fixed-dim hover:bg-surface-container rounded-full transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow max-w-[1440px] mx-auto w-full px-product-margin py-8 md:py-12 flex flex-col gap-8">
+<!-- Breadcrumb & Title -->
+<div class="flex flex-col gap-2">
+<nav class="text-supporting-text text-deep-cocoa opacity-70">
+<a class="hover:underline" href="#">首页</a> / <span>宝宝资料</span>
+</nav>
+<h1 class="font-headline-lg text-headline-lg text-deep-cocoa">宝宝资料</h1>
+</div>
+<!-- Layout Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-product-gutter items-start">
+<!-- Left Column: Summary Card -->
+<div class="lg:col-span-4 bg-white rounded-xl border border-quiet-border p-6 shadow-[0_4px_12px_rgba(35,17,15,0.04)] flex flex-col items-center text-center gap-6">
+<div class="w-32 h-32 rounded-full overflow-hidden border-2 border-quiet-border bg-surface-container flex items-center justify-center">
+<img alt="宝宝头像" class="w-full h-full object-cover" data-alt="A gentle, soft-focus portrait of a smiling baby, roughly 8 months old, wearing a simple cream-colored onesie, photographed in a well-lit, airy room with natural light spilling in. The aesthetic is warm, nurturing, and high-end editorial, matching a premium parenting app's visual style. Warm porcelain and soft neutral tones dominate the background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuALYSGp8qjybjTRbLTHPQ0jilpenfEK0Q6jBxctxMTFuyHs154KkS5FhWyY-cJRV8s3Gyg9L61qdxnIyus5gZGV5Y68YinEaxFJei2SfguUEF8jbBygSCZrW2HZWslJEmhXTnRI0-n61rXYsFNuQUUtL9YbbJ-Bh8Sb4KeqqRnLZFLwtTS4oO1MAryO8te3TLt_llwF1sZYGYPaLQbcHjOdTWPgQEf3Qar4LwwicivKOtdgzBp7wx7KoQ9Tnx2stNGwUcbgBgM8t44"/>
+</div>
+<div class="flex flex-col gap-1">
+<h2 class="font-section-title text-section-title text-deep-cocoa">小满</h2>
+<p class="font-supporting-text text-supporting-text text-slate-graphite">8个月</p>
+<p class="font-supporting-text text-supporting-text text-slate-graphite">2025年11月14日</p>
+</div>
+</div>
+<!-- Right Column: Edit Form -->
+<div class="lg:col-span-8 bg-white rounded-xl border border-quiet-border p-6 shadow-[0_4px_12px_rgba(35,17,15,0.04)] flex flex-col gap-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-2">
+<label class="text-supporting-text text-deep-cocoa font-semibold">宝宝昵称</label>
+<input class="w-full h-control-min-height px-4 bg-white border border-quiet-border rounded-lg text-product-body text-deep-cocoa focus:outline-none focus:ring-2 focus:ring-focus-blue focus:border-transparent transition-shadow" type="text" value="小满"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-supporting-text text-deep-cocoa font-semibold">出生日期</label>
+<input class="w-full h-control-min-height px-4 bg-white border border-quiet-border rounded-lg text-product-body text-deep-cocoa focus:outline-none focus:ring-2 focus:ring-focus-blue focus:border-transparent transition-shadow" type="date" value="2025-11-14"/>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-supporting-text text-deep-cocoa font-semibold">宝宝性别</label>
+<div class="flex gap-4">
+<label class="flex items-center gap-2 cursor-pointer h-control-min-height">
+<input class="w-5 h-5 text-primary border-quiet-border focus:ring-focus-blue" name="gender" type="radio" value="male"/>
+<span class="text-product-body text-deep-cocoa">男宝宝</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer h-control-min-height">
+<input class="w-5 h-5 text-primary border-quiet-border focus:ring-focus-blue" name="gender" type="radio" value="female"/>
+<span class="text-product-body text-deep-cocoa">女宝宝</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer h-control-min-height">
+<input checked="" class="w-5 h-5 text-primary border-quiet-border focus:ring-focus-blue" name="gender" type="radio" value="none"/>
+<span class="text-product-body text-deep-cocoa">暂不选择</span>
+</label>
+</div>
+</div>
+<p class="font-supporting-text text-supporting-text text-slate-graphite mt-2 flex items-start gap-2">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+                    此资料仅对受邀家庭成员可见，确保数据隐私安全。
+                </p>
+<div class="flex items-center gap-4 mt-4 pt-6 border-t border-quiet-border">
+<button class="h-control-min-height px-6 bg-primary text-white rounded-xl font-medium hover:bg-primary-container focus:ring-2 focus:ring-offset-2 focus:ring-focus-blue transition-all">保存资料</button>
+<button class="h-control-min-height px-6 bg-white text-deep-cocoa border border-quiet-border rounded-xl font-medium hover:bg-surface-container focus:ring-2 focus:ring-offset-2 focus:ring-focus-blue transition-all">取消编辑</button>
+</div>
+</div>
+</div>
+<!-- States Reference Section -->
+<div class="mt-16 pt-8 border-t border-quiet-border border-dashed">
+<h3 class="font-section-title text-section-title text-deep-cocoa mb-6">状态参考</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Loading State -->
+<div class="bg-white rounded-xl border border-quiet-border p-6 shadow-[0_4px_12px_rgba(35,17,15,0.04)]">
+<h4 class="text-sm font-semibold mb-4 text-slate-graphite uppercase">加载中</h4>
+<div class="flex flex-col gap-4">
+<div class="skeleton h-4 w-24 rounded"></div>
+<div class="skeleton h-control-min-height w-full rounded-lg"></div>
+<div class="skeleton h-4 w-32 rounded mt-2"></div>
+<div class="skeleton h-control-min-height w-full rounded-lg"></div>
+</div>
+</div>
+<!-- Empty State -->
+<div class="bg-white rounded-xl border border-quiet-border p-6 shadow-[0_4px_12px_rgba(35,17,15,0.04)] flex flex-col items-center justify-center text-center h-48">
+<h4 class="text-sm font-semibold mb-4 text-slate-graphite uppercase absolute top-4 left-4">暂无资料</h4>
+<span class="material-symbols-outlined text-4xl text-quiet-border mb-2">child_care</span>
+<p class="text-product-body text-slate-graphite">暂无资料</p>
+</div>
+<!-- Validation Error -->
+<div class="bg-white rounded-xl border border-quiet-border p-6 shadow-[0_4px_12px_rgba(35,17,15,0.04)]">
+<h4 class="text-sm font-semibold mb-4 text-slate-graphite uppercase">校验错误</h4>
+<div class="flex flex-col gap-2">
+<label class="text-supporting-text text-error font-semibold">宝宝昵称</label>
+<input class="w-full h-control-min-height px-4 bg-error-container/20 border border-error rounded-lg text-product-body text-deep-cocoa focus:outline-none focus:ring-2 focus:ring-error focus:border-transparent transition-shadow" type="text" value=""/>
+<span class="text-supporting-text text-error flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">error</span>请输入宝宝姓名</span>
+</div>
+</div>
+<!-- Submitting -->
+<div class="bg-white rounded-xl border border-quiet-border p-6 shadow-[0_4px_12px_rgba(35,17,15,0.04)] flex items-center justify-center h-48 relative">
+<h4 class="text-sm font-semibold mb-4 text-slate-graphite uppercase absolute top-4 left-4">保存中...</h4>
+<button class="h-control-min-height px-8 bg-primary text-white rounded-xl font-medium opacity-80 cursor-not-allowed flex items-center gap-2">
+<span class="material-symbols-outlined animate-spin">progress_activity</span>
+                        保存中...
+                    </button>
+</div>
+<!-- Success Toast -->
+<div class="bg-white rounded-xl border border-quiet-border p-6 shadow-[0_4px_12px_rgba(35,17,15,0.04)] flex items-center justify-center h-48 relative">
+<h4 class="text-sm font-semibold mb-4 text-slate-graphite uppercase absolute top-4 left-4">保存成功</h4>
+<div class="bg-tertiary-container text-on-tertiary-container px-4 py-3 rounded-lg shadow-md flex items-center gap-2">
+<span class="material-symbols-outlined fill">check_circle</span>
+<span>保存成功</span>
+</div>
+</div>
+<!-- Forbidden / Session Expired -->
+<div class="bg-white rounded-xl border border-quiet-border p-6 shadow-[0_4px_12px_rgba(35,17,15,0.04)] flex items-center justify-center h-48 relative">
+<h4 class="text-sm font-semibold mb-4 text-slate-graphite uppercase absolute top-4 left-4">无权访问 / 会话已过期</h4>
+<div class="text-center">
+<span class="material-symbols-outlined text-3xl text-primary mb-2">lock_clock</span>
+<p class="text-product-body text-deep-cocoa mb-3">会话已过期，请重新登录</p>
+<a class="text-primary hover:underline font-medium" href="#">返回登录页</a>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-inverse-surface w-full mt-auto border-t border-quiet-border dark:border-on-surface-variant">
+<div class="flex flex-col md:flex-row justify-between items-center py-8 px-product-margin max-w-[1440px] mx-auto space-y-4 md:space-y-0">
+<div class="font-section-title text-section-title text-deep-cocoa dark:text-inverse-on-surface">
+                BabyGarden
+            </div>
+<div class="flex gap-6 font-supporting-text text-supporting-text text-secondary dark:text-secondary-fixed-dim">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed underline opacity-80 hover:opacity-100" href="#">隐私说明</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed underline opacity-80 hover:opacity-100" href="#">帮助中心</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed underline opacity-80 hover:opacity-100" href="#">服务条款</a>
+</div>
+<div class="font-supporting-text text-supporting-text text-secondary dark:text-secondary-fixed-dim opacity-80">
+                © 2024 BabyGarden. 保留所有权利.
+            </div>
+</div>
+</footer>
+</body></html>

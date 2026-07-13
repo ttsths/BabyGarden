@@ -18,7 +18,9 @@ history page and is pending visual review. The next baton is
 `product-records-mobile`; its first draft was superseded for adding App
 navigation, and a Web-only refinement is now generated pending review. The next
 baton `product-record-detail-desktop` is now generated and pending visual
-review. The next baton is `product-record-detail-mobile`.
+review. `product-record-detail-mobile` is now generated and pending visual
+review. `product-baby-profile-desktop` is now generated with a Chinese
+refinement and pending visual review. The next baton is `product-stats-desktop`.
 
 ## Batch A — Product desktop masters (10)
 
@@ -49,7 +51,8 @@ After `product-login-desktop`, prepare `product-login-mobile`, then
 `product-home-desktop`, `product-home-mobile`, `product-setup-desktop`,
 `product-setup-mobile`, `product-record-desktop`,
 `product-record-mobile`, `product-records-desktop`,
-`product-records-mobile`, `product-record-detail-desktop`, followed by
-`product-record-detail-mobile`. Update `SITE.md`, metadata and this order after
-every generated Stitch screen; only mark a sitemap item complete after human
-visual review.
+`product-records-mobile`, `product-record-detail-desktop`,
+`product-record-detail-mobile`, `product-baby-profile-desktop`, followed by
+`product-stats-desktop`.
+Update `SITE.md`, metadata and this order after every generated Stitch screen;
+only mark a sitemap item complete after human visual review.
