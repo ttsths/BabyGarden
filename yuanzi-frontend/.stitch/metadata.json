@@ -4,7 +4,7 @@
   "title": "Yuanzi Baby App",
   "visibility": "PRIVATE",
   "createTime": "2026-03-08T03:11:21.816627Z",
-  "updateTime": "2026-07-13T07:49:25.000000Z",
+  "updateTime": "2026-07-13T07:55:46.000000Z",
   "projectType": "PROJECT_DESIGN",
   "origin": "STITCH",
   "deviceType": "MOBILE",
@@ -150,12 +150,42 @@
       "status": "generated_pending_human_review",
       "htmlPath": ".stitch/designs/product-records-desktop.html",
       "screenshotPath": ".stitch/designs/product-records-desktop.png"
+    },
+    "product-records-mobile-draft": {
+      "id": "b444952c39464a5c9c271b70d263a002",
+      "sourceScreen": "projects/6507375090366546067/screens/b444952c39464a5c9c271b70d263a002",
+      "x": null,
+      "y": null,
+      "width": 780,
+      "height": 2808,
+      "logicalFrame": "390x1404",
+      "title": "BabyGarden Records History (Mobile)",
+      "deviceType": "MOBILE",
+      "status": "superseded_due_to_app_chrome",
+      "htmlPath": ".stitch/designs/product-records-mobile.html",
+      "screenshotPath": ".stitch/designs/product-records-mobile.png",
+      "supersededBy": "product-records-mobile"
+    },
+    "product-records-mobile": {
+      "id": "90fbd1abc978406cade55ac86e2a5376",
+      "sourceScreen": "projects/6507375090366546067/screens/90fbd1abc978406cade55ac86e2a5376",
+      "x": null,
+      "y": null,
+      "width": 780,
+      "height": 2108,
+      "logicalFrame": "390x1054",
+      "title": "BabyGarden Records History (Mobile Web)",
+      "deviceType": "MOBILE",
+      "status": "generated_pending_human_review",
+      "refinedFrom": "product-records-mobile-draft",
+      "htmlPath": ".stitch/designs/product-records-mobile-web.html",
+      "screenshotPath": ".stitch/designs/product-records-mobile-web.png"
     }
   },
   "generation": {
     "sessionId": "7084992055446249236",
     "generatedAt": "2026-07-13T07:17:07.909783Z",
-    "latestSessionId": "9449132034275404029",
-    "latestGeneratedAt": "2026-07-13T07:49:25.000000Z"
+    "latestSessionId": "5322784321877486936",
+    "latestGeneratedAt": "2026-07-13T07:55:46.000000Z"
   }
 }

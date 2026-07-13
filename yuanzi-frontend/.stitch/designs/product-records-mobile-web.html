@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=390, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>BabyGarden - Records History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-tint": "#aa352e",
+                        "outline-variant": "#dfbfbb",
+                        "inverse-primary": "#ffb4ab",
+                        "secondary-fixed": "#ffdad5",
+                        "deep-cocoa": "#23110F",
+                        "surface-bright": "#fdf9f5",
+                        "on-tertiary-fixed-variant": "#1d4f44",
+                        "focus-blue": "#2E90FA",
+                        "primary": "#a7332c",
+                        "on-secondary-fixed": "#3e0402",
+                        "surface": "#fdf9f5",
+                        "primary-fixed": "#ffdad6",
+                        "on-background": "#1c1c19",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#f1ede9",
+                        "inverse-on-surface": "#f4f0ec",
+                        "on-surface-variant": "#58413f",
+                        "on-primary-container": "#fffcff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#c84b42",
+                        "on-secondary-fixed-variant": "#792f26",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#9ed1c2",
+                        "background": "#fdf9f5",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#410002",
+                        "tertiary": "#346559",
+                        "tertiary-container": "#4d7e71",
+                        "on-surface": "#1c1c19",
+                        "surface-container-highest": "#e5e2de",
+                        "surface-variant": "#e5e2de",
+                        "surface-container-low": "#f7f3ef",
+                        "slate-graphite": "#344054",
+                        "secondary-container": "#fe9889",
+                        "surface-dim": "#ddd9d6",
+                        "inverse-surface": "#31302e",
+                        "surface-container-lowest": "#ffffff",
+                        "quiet-border": "#E7D8D2",
+                        "tertiary-fixed": "#b9edde",
+                        "on-secondary-container": "#772e24",
+                        "outline": "#8b716e",
+                        "surface-container-high": "#ebe7e4",
+                        "on-primary-fixed-variant": "#891d1a",
+                        "on-tertiary-fixed": "#00201a",
+                        "on-error-container": "#93000a",
+                        "secondary": "#97463b",
+                        "primary-fixed-dim": "#ffb4ab",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#f6fffa",
+                        "secondary-fixed-dim": "#ffb4a8"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "control-min-height": "44px",
+                        "admin-margin": "16px",
+                        "admin-gutter": "8px",
+                        "admin-control-height": "36px",
+                        "product-gutter": "16px",
+                        "product-margin": "24px"
+                    },
+                    fontFamily: {
+                        "headline-lg-mobile": ["Noto Sans", "sans-serif"],
+                        "supporting-text": ["Noto Sans", "sans-serif"],
+                        "product-body": ["Noto Sans", "sans-serif"],
+                        "section-title": ["Noto Sans", "sans-serif"],
+                        "headline-lg": ["Noto Sans", "sans-serif"],
+                        "label-caps": ["Noto Sans", "sans-serif"]
+                    },
+                    fontSize: {
+                        "headline-lg-mobile": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+                        "supporting-text": ["14px", { lineHeight: "22px", fontWeight: "400" }],
+                        "product-body": ["16px", { lineHeight: "26px", fontWeight: "400" }],
+                        "section-title": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+                        "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+                        "label-caps": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #FFFBF7; /* Warm Porcelain */
+            font-family: 'Noto Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            max-width: 390px;
+            margin: 0 auto;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .soft-shadow {
+            box-shadow: 0 4px 12px rgba(35, 17, 15, 0.04);
+        }
+        
+        .focus-ring:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px #FFFBF7, 0 0 0 4px #2E90FA;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-deep-cocoa flex flex-col w-full h-full">
+<!-- Shared Components: TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim flex justify-between items-center w-full px-admin-margin h-control-min-height max-w-[1440px] mx-auto border-b border-quiet-border dark:border-outline-variant shadow-sm dark:shadow-none docked full-width top-0 sticky z-50">
+<div class="flex items-center gap-2">
+<span class="text-section-title font-section-title font-bold text-primary dark:text-primary-fixed-dim">BabyGarden</span>
+<div class="flex items-center text-label-caps font-label-caps text-on-surface-variant bg-surface-container-low px-2 py-1 rounded-full cursor-pointer hover:bg-surface-container transition-colors focus-ring" tabindex="0">
+<span>小满 · 8个月</span>
+<span class="material-symbols-outlined text-[16px] ml-1">arrow_drop_down</span>
+</div>
+</div>
+<button aria-label="Account Profile" class="text-primary dark:text-primary-fixed-dim hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors rounded-full p-1 focus-ring">
+<span class="material-symbols-outlined text-[24px]">account_circle</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full px-[16px] py-6 flex flex-col gap-6">
+<!-- Header Section -->
+<section class="flex flex-col gap-4">
+<div class="flex justify-between items-end">
+<div>
+<h1 class="text-headline-lg-mobile font-headline-lg-mobile text-deep-cocoa">最近记录</h1>
+<div class="flex items-center gap-1 text-supporting-text font-supporting-text text-on-surface-variant mt-1">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+<span>仅家庭成员可见</span>
+</div>
+</div>
+</div>
+<button aria-label="Add New Record" class="w-full bg-primary-container text-on-primary min-h-[44px] rounded-lg text-product-body font-product-body font-semibold flex items-center justify-center gap-2 hover:bg-primary transition-colors focus-ring">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span>记录一笔</span>
+</button>
+</section>
+<!-- Filters Section -->
+<section class="flex flex-col gap-3">
+<div class="flex items-center gap-2 text-product-body font-product-body text-deep-cocoa bg-white border border-quiet-border rounded-lg px-3 py-2 w-max cursor-pointer hover:bg-surface-container-low focus-ring" tabindex="0">
+<span class="material-symbols-outlined">calendar_today</span>
+<span>2023年10月24日</span>
+</div>
+<div class="flex items-center gap-2 overflow-x-auto hide-scrollbar py-1">
+<button class="px-4 py-1.5 rounded-full text-supporting-text font-supporting-text whitespace-nowrap bg-primary-container text-on-primary focus-ring">全部</button>
+<button class="px-4 py-1.5 rounded-full text-supporting-text font-supporting-text whitespace-nowrap bg-[#E5ECE9] text-slate-graphite hover:bg-[#d4dfda] focus-ring">喂养</button>
+<button class="px-4 py-1.5 rounded-full text-supporting-text font-supporting-text whitespace-nowrap bg-[#E5ECE9] text-slate-graphite hover:bg-[#d4dfda] focus-ring">睡眠</button>
+<button class="px-4 py-1.5 rounded-full text-supporting-text font-supporting-text whitespace-nowrap bg-[#E5ECE9] text-slate-graphite hover:bg-[#d4dfda] focus-ring">尿布</button>
+</div>
+</section>
+<!-- Records List -->
+<section class="flex flex-col gap-4">
+<h2 class="text-section-title font-section-title text-deep-cocoa border-b border-quiet-border pb-2">今天, 10月24日</h2>
+<div class="flex flex-col gap-3">
+<!-- Record Card 1: Feeding -->
+<article class="bg-white rounded-[16px] border border-quiet-border p-[20px] soft-shadow flex gap-4 items-start">
+<div class="bg-primary-container/10 p-2 rounded-full text-primary-container flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">local_dining</span>
+</div>
+<div class="flex-1 flex flex-col gap-1">
+<div class="flex justify-between items-center w-full">
+<span class="text-label-caps font-label-caps text-on-surface-variant">10:30</span>
+<span class="text-supporting-text font-supporting-text font-semibold text-deep-cocoa">120ml</span>
+</div>
+<h3 class="text-product-body font-product-body font-semibold text-deep-cocoa">喂养 · 配方奶</h3>
+<p class="text-supporting-text font-supporting-text text-on-surface-variant bg-surface-container-low rounded p-2 mt-1">宝宝胃口很好</p>
+</div>
+</article>
+<!-- Record Card 2: Sleep -->
+<article class="bg-white rounded-[16px] border border-quiet-border p-[20px] soft-shadow flex gap-4 items-start">
+<div class="bg-[#346559]/10 p-2 rounded-full text-tertiary flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">bed</span>
+</div>
+<div class="flex-1 flex flex-col gap-1">
+<div class="flex justify-between items-center w-full">
+<span class="text-label-caps font-label-caps text-on-surface-variant">08:45 - 10:00</span>
+<span class="text-supporting-text font-supporting-text font-semibold text-deep-cocoa">1小时15分</span>
+</div>
+<h3 class="text-product-body font-product-body font-semibold text-deep-cocoa">小睡</h3>
+<p class="text-supporting-text font-supporting-text text-on-surface-variant bg-surface-container-low rounded p-2 mt-1">自主入睡</p>
+</div>
+</article>
+<!-- Record Card 3: Diaper -->
+<article class="bg-white rounded-[16px] border border-quiet-border p-[20px] soft-shadow flex gap-4 items-start">
+<div class="bg-focus-blue/10 p-2 rounded-full text-focus-blue flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">water_drop</span>
+</div>
+<div class="flex-1 flex flex-col gap-1">
+<div class="flex justify-between items-center w-full">
+<span class="text-label-caps font-label-caps text-on-surface-variant">08:30</span>
+<span class="text-supporting-text font-supporting-text font-semibold text-deep-cocoa">少量</span>
+</div>
+<h3 class="text-product-body font-product-body font-semibold text-deep-cocoa">尿布 · 嘘嘘</h3>
+<p class="text-supporting-text font-supporting-text text-on-surface-variant bg-surface-container-low rounded p-2 mt-1">正常状态</p>
+</div>
+</article>
+</div>
+</section>
+<!-- UI States Strip -->
+<section class="mt-8 pt-4 border-t border-quiet-border overflow-x-auto hide-scrollbar pb-8">
+<div class="flex items-center gap-4 w-max">
+<!-- Loading -->
+<div class="flex flex-col items-center gap-2 p-4 bg-white rounded-lg border border-quiet-border w-32 h-24 justify-center">
+<span class="material-symbols-outlined animate-spin text-on-surface-variant">progress_activity</span>
+<span class="text-label-caps font-label-caps text-on-surface-variant">Loading...</span>
+</div>
+<!-- Empty -->
+<div class="flex flex-col items-center gap-2 p-4 bg-white rounded-lg border border-quiet-border w-32 h-24 justify-center text-center">
+<span class="material-symbols-outlined text-outline">inbox</span>
+<span class="text-label-caps font-label-caps text-on-surface-variant">暂无记录</span>
+</div>
+<!-- Error -->
+<div class="flex flex-col items-center gap-2 p-4 bg-white rounded-lg border border-quiet-border w-32 h-24 justify-center text-center">
+<span class="material-symbols-outlined text-error">error</span>
+<span class="text-label-caps font-label-caps text-error cursor-pointer hover:underline">加载失败 重试</span>
+</div>
+<!-- Offline -->
+<div class="flex flex-col items-center gap-2 p-4 bg-white rounded-lg border border-quiet-border w-32 h-24 justify-center text-center">
+<span class="material-symbols-outlined text-on-surface-variant">cloud_off</span>
+<span class="text-label-caps font-label-caps text-on-surface-variant">离线数据</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer omitted as per instructions (no bottom nav for focused pages) -->
+</body></html>
