@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BabyGarden - 设置家庭</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "slate-graphite": "#344054",
+                        "on-secondary-fixed": "#3e0402",
+                        "on-tertiary-fixed": "#00201a",
+                        "surface": "#fdf9f5",
+                        "surface-bright": "#fdf9f5",
+                        "outline": "#8b716e",
+                        "surface-container": "#f1ede9",
+                        "quiet-border": "#E7D8D2",
+                        "surface-container-high": "#ebe7e4",
+                        "tertiary-fixed-dim": "#9ed1c2",
+                        "primary-fixed": "#ffdad6",
+                        "on-tertiary-container": "#f6fffa",
+                        "inverse-on-surface": "#f4f0ec",
+                        "surface-tint": "#aa352e",
+                        "outline-variant": "#dfbfbb",
+                        "on-surface-variant": "#58413f",
+                        "on-primary-fixed": "#410002",
+                        "deep-cocoa": "#23110F",
+                        "tertiary": "#346559",
+                        "on-surface": "#1c1c19",
+                        "focus-blue": "#2E90FA",
+                        "surface-container-lowest": "#ffffff",
+                        "background": "#fdf9f5",
+                        "primary": "#a7332c",
+                        "on-secondary-fixed-variant": "#792f26",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#ddd9d6",
+                        "inverse-surface": "#31302e",
+                        "tertiary-fixed": "#b9edde",
+                        "secondary": "#97463b",
+                        "inverse-primary": "#ffb4ab",
+                        "secondary-fixed": "#ffdad5",
+                        "on-primary-container": "#fffcff",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#f7f3ef",
+                        "on-secondary-container": "#772e24",
+                        "surface-container-highest": "#e5e2de",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed-dim": "#ffb4ab",
+                        "secondary-fixed-dim": "#ffb4a8",
+                        "on-background": "#1c1c19",
+                        "primary-container": "#c84b42",
+                        "secondary-container": "#fe9889",
+                        "on-primary-fixed-variant": "#891d1a",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#e5e2de",
+                        "error-container": "#ffdad6",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#1d4f44",
+                        "tertiary-container": "#4d7e71",
+                        "error": "#ba1a1a"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "control-min-height": "44px",
+                        "admin-control-height": "36px",
+                        "product-margin": "24px",
+                        "product-gutter": "16px",
+                        "admin-margin": "16px",
+                        "admin-gutter": "8px"
+                    },
+                    fontFamily: {
+                        "supporting-text": ["Noto Sans", "sans-serif"],
+                        "product-body": ["Noto Sans", "sans-serif"],
+                        "headline-lg": ["Noto Sans", "sans-serif"],
+                        "label-caps": ["Noto Sans", "sans-serif"],
+                        "headline-lg-mobile": ["Noto Sans", "sans-serif"],
+                        "section-title": ["Noto Sans", "sans-serif"]
+                    },
+                    fontSize: {
+                        "supporting-text": ["14px", { lineHeight: "22px", fontWeight: "400" }],
+                        "product-body": ["16px", { lineHeight: "26px", fontWeight: "400" }],
+                        "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+                        "label-caps": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "700" }],
+                        "headline-lg-mobile": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+                        "section-title": ["20px", { lineHeight: "28px", fontWeight: "600" }]
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 12px rgba(35, 17, 15, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-deep-cocoa font-product-body min-h-screen flex flex-col antialiased">
+<!-- TopAppBar: Transactional, no navigation -->
+<header class="w-full top-0 sticky bg-surface border-b border-quiet-border z-10">
+<div class="flex justify-between items-center h-control-min-height px-product-margin max-w-[1440px] mx-auto">
+<div class="font-headline-lg text-headline-lg font-bold text-primary">BabyGarden</div>
+<div class="font-supporting-text text-supporting-text text-on-surface-variant flex items-center space-x-2">
+<span class="material-symbols-outlined text-[18px]">progress_activity</span>
+<span>第 1 步，共 1 步</span>
+</div>
+<div class="flex items-center cursor-pointer active:opacity-80 hover:text-primary-container transition-colors text-on-surface-variant">
+<span class="font-supporting-text text-supporting-text mr-2 hidden sm:inline">Sign Out</span>
+<div class="w-8 h-8 rounded-full bg-surface-container overflow-hidden border border-quiet-border flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant">person</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center justify-start pt-12 pb-24 px-4 sm:px-6 w-full max-w-[1440px] mx-auto">
+<!-- Header Section -->
+<div class="text-center mb-10 w-full max-w-[640px]">
+<h1 class="font-headline-lg text-headline-lg text-deep-cocoa mb-3">先认识一下你的家庭</h1>
+<p class="font-product-body text-product-body text-on-surface-variant">只需几步即可开启记录宝宝成长的旅程</p>
+</div>
+<!-- Setup Form Card -->
+<div class="w-full max-w-[640px] bg-surface-container-lowest rounded-2xl border border-quiet-border shadow-soft p-6 sm:p-8 space-y-8">
+<!-- Group 1: 家庭信息 -->
+<section class="space-y-5">
+<h2 class="font-section-title text-section-title text-deep-cocoa pb-2 border-b border-quiet-border flex items-center">
+<span class="material-symbols-outlined mr-2 text-primary">home</span> 家庭信息
+                </h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+<div class="flex flex-col space-y-1.5">
+<label class="font-supporting-text text-supporting-text text-deep-cocoa font-medium" for="familyName">家庭名称</label>
+<input class="w-full h-control-min-height px-4 rounded-lg border border-quiet-border bg-surface-container-lowest text-deep-cocoa placeholder:text-outline-variant focus:outline-none focus:ring-2 focus:ring-focus-blue focus:ring-offset-2 focus:ring-offset-surface-container-lowest transition-shadow" id="familyName" placeholder="例如：圆子的家" type="text"/>
+</div>
+<div class="flex flex-col space-y-1.5">
+<label class="font-supporting-text text-supporting-text text-deep-cocoa font-medium" for="userRole">你的称呼</label>
+<input class="w-full h-control-min-height px-4 rounded-lg border border-quiet-border bg-surface-container-lowest text-deep-cocoa placeholder:text-outline-variant focus:outline-none focus:ring-2 focus:ring-focus-blue focus:ring-offset-2 focus:ring-offset-surface-container-lowest transition-shadow" id="userRole" placeholder="例如：妈妈、爸爸、奶奶" type="text"/>
+</div>
+</div>
+</section>
+<!-- Group 2: 宝宝信息 -->
+<section class="space-y-5">
+<h2 class="font-section-title text-section-title text-deep-cocoa pb-2 border-b border-quiet-border flex items-center">
+<span class="material-symbols-outlined mr-2 text-secondary">child_care</span> 宝宝信息
+                </h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+<div class="flex flex-col space-y-1.5">
+<label class="font-supporting-text text-supporting-text text-deep-cocoa font-medium" for="babyName">宝宝姓名或小名</label>
+<input class="w-full h-control-min-height px-4 rounded-lg border border-quiet-border bg-surface-container-lowest text-deep-cocoa placeholder:text-outline-variant focus:outline-none focus:ring-2 focus:ring-focus-blue focus:ring-offset-2 focus:ring-offset-surface-container-lowest transition-shadow" id="babyName" placeholder="宝宝姓名" type="text"/>
+</div>
+<div class="flex flex-col space-y-1.5">
+<label class="font-supporting-text text-supporting-text text-deep-cocoa font-medium" for="birthDate">出生日期</label>
+<div class="relative">
+<input class="w-full h-control-min-height px-4 rounded-lg border border-quiet-border bg-surface-container-lowest text-deep-cocoa focus:outline-none focus:ring-2 focus:ring-focus-blue focus:ring-offset-2 focus:ring-offset-surface-container-lowest transition-shadow appearance-none" id="birthDate" type="date"/>
+</div>
+</div>
+</div>
+<div class="flex flex-col space-y-2 pt-2">
+<label class="font-supporting-text text-supporting-text text-deep-cocoa font-medium">宝宝性别</label>
+<div class="flex flex-wrap gap-3">
+<label class="relative flex items-center justify-center h-control-min-height px-5 rounded-full border border-quiet-border bg-surface-container-lowest cursor-pointer hover:bg-surface-container transition-colors has-[:checked]:bg-primary-fixed has-[:checked]:border-primary-fixed has-[:checked]:text-on-primary-fixed">
+<input class="sr-only" name="gender" type="radio" value="boy"/>
+<span class="material-symbols-outlined text-[18px] mr-1">face</span>
+<span class="font-supporting-text text-supporting-text font-medium">男宝宝</span>
+</label>
+<label class="relative flex items-center justify-center h-control-min-height px-5 rounded-full border border-quiet-border bg-surface-container-lowest cursor-pointer hover:bg-surface-container transition-colors has-[:checked]:bg-primary-fixed has-[:checked]:border-primary-fixed has-[:checked]:text-on-primary-fixed">
+<input class="sr-only" name="gender" type="radio" value="girl"/>
+<span class="material-symbols-outlined text-[18px] mr-1">face_3</span>
+<span class="font-supporting-text text-supporting-text font-medium">女宝宝</span>
+</label>
+<label class="relative flex items-center justify-center h-control-min-height px-5 rounded-full border border-quiet-border bg-surface-container-lowest cursor-pointer hover:bg-surface-container transition-colors has-[:checked]:bg-surface-variant has-[:checked]:border-outline has-[:checked]:text-on-surface">
+<input checked="" class="sr-only" name="gender" type="radio" value="none"/>
+<span class="font-supporting-text text-supporting-text">暂不选择</span>
+</label>
+</div>
+</div>
+</section>
+<!-- Actions -->
+<div class="pt-6 flex flex-col items-center space-y-4 border-t border-quiet-border">
+<button class="w-full h-[52px] rounded-xl bg-primary-container text-on-primary font-product-body text-product-body font-medium hover:bg-primary transition-colors focus:outline-none focus:ring-2 focus:ring-focus-blue focus:ring-offset-2 focus:ring-offset-surface-container-lowest flex items-center justify-center shadow-sm" type="button">
+                    创建家庭并继续
+                </button>
+<button class="font-supporting-text text-supporting-text text-on-surface-variant hover:text-deep-cocoa underline underline-offset-4 transition-colors p-2" type="button">
+                    稍后完善
+                </button>
+</div>
+<div class="text-center pt-2">
+<p class="font-supporting-text text-[13px] text-outline flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] mr-1">lock</span>
+                    你的数据仅对家庭成员私密可见，我们严格保护隐私。
+                </p>
+</div>
+</div>
+</main>
+<!-- State Strip (Fixed Bottom for demonstration of states requested) -->
+<div class="fixed bottom-0 w-full bg-surface-container-lowest border-t border-quiet-border p-3 flex justify-center items-center gap-4 text-sm z-50 overflow-x-auto shadow-[0_-4px_12px_rgba(35,17,15,0.02)]">
+<div class="font-label-caps text-label-caps text-outline mr-2 whitespace-nowrap">UI STATES:</div>
+<!-- Loading State -->
+<div class="flex items-center px-3 py-1.5 rounded-lg bg-surface-container text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] mr-1.5 animate-spin">progress_activity</span>
+<span class="font-supporting-text text-supporting-text">正在提交...</span>
+</div>
+<!-- Validation Error State -->
+<div class="flex items-center px-3 py-1.5 rounded-lg bg-error-container text-on-error-container border border-[#ffb4ab]">
+<span class="material-symbols-outlined text-[16px] mr-1.5">error</span>
+<span class="font-supporting-text text-supporting-text">姓名不能为空</span>
+</div>
+<!-- Network Error State -->
+<div class="flex items-center px-3 py-1.5 rounded-lg bg-surface-variant text-on-surface-variant border border-outline-variant">
+<span class="material-symbols-outlined text-[16px] mr-1.5">wifi_off</span>
+<span class="font-supporting-text text-supporting-text mr-2">网络连接失败</span>
+<button class="font-supporting-text text-supporting-text text-primary font-medium hover:underline">重试</button>
+</div>
+</div>
+</body></html>

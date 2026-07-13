@@ -7,7 +7,9 @@ Current progress: `product-login-desktop` was accepted to continue and
 `product-login-mobile` is generated in Stitch, pending final visual review.
 `product-home-desktop` and `product-home-mobile` are now generated with the
 MVP core/degraded-state contract; both are pending visual review. The next
-baton is `product-setup-desktop`.
+baton `product-setup-desktop` is now generated with the username/password-only
+MVP onboarding contract and is pending visual review. The next baton is
+`product-setup-mobile`.
 
 ## Batch A — Product desktop masters (10)
 
@@ -35,6 +37,7 @@ anchors. Generate only after all P0 review gates pass.
 ## Baton Order
 
 After `product-login-desktop`, prepare `product-login-mobile`, then
-`product-home-desktop`, `product-home-mobile`, and `product-setup-desktop`.
-Update `SITE.md`, metadata and this order after every generated Stitch screen;
-only mark a sitemap item complete after human visual review.
+`product-home-desktop`, `product-home-mobile`, `product-setup-desktop`, and
+`product-setup-mobile`. Update `SITE.md`, metadata and this order after every
+generated Stitch screen; only mark a sitemap item complete after human visual
+review.

@@ -4,7 +4,7 @@
   "title": "Yuanzi Baby App",
   "visibility": "PRIVATE",
   "createTime": "2026-03-08T03:11:21.816627Z",
-  "updateTime": "2026-07-13T07:29:00.000000Z",
+  "updateTime": "2026-07-13T07:34:12.000000Z",
   "projectType": "PROJECT_DESIGN",
   "origin": "STITCH",
   "deviceType": "MOBILE",
@@ -80,12 +80,26 @@
       "status": "generated_pending_human_review",
       "htmlPath": ".stitch/designs/product-home-mobile.html",
       "screenshotPath": ".stitch/designs/product-home-mobile.png"
+    },
+    "product-setup-desktop": {
+      "id": "f9f96acc86e3415da774a7dd3ae1fc77",
+      "sourceScreen": "projects/6507375090366546067/screens/f9f96acc86e3415da774a7dd3ae1fc77",
+      "x": null,
+      "y": null,
+      "width": 2560,
+      "height": 2048,
+      "logicalFrame": "1440x1152",
+      "title": "BabyGarden Family Onboarding Setup",
+      "deviceType": "DESKTOP",
+      "status": "generated_pending_human_review",
+      "htmlPath": ".stitch/designs/product-setup-desktop.html",
+      "screenshotPath": ".stitch/designs/product-setup-desktop.png"
     }
   },
   "generation": {
     "sessionId": "7084992055446249236",
     "generatedAt": "2026-07-13T07:17:07.909783Z",
-    "latestSessionId": "17065510596141203466",
-    "latestGeneratedAt": "2026-07-13T07:29:00.000000Z"
+    "latestSessionId": "8319645313479306008",
+    "latestGeneratedAt": "2026-07-13T07:34:12.000000Z"
   }
 }
