@@ -4,7 +4,7 @@
   "title": "Yuanzi Baby App",
   "visibility": "PRIVATE",
   "createTime": "2026-03-08T03:11:21.816627Z",
-  "updateTime": "2026-07-13T07:17:07.909783Z",
+  "updateTime": "2026-07-13T07:22:27.896471Z",
   "projectType": "PROJECT_DESIGN",
   "origin": "STITCH",
   "deviceType": "MOBILE",
@@ -52,11 +52,26 @@
       "status": "generated_pending_human_review",
       "htmlPath": ".stitch/designs/product-login-mobile.html",
       "screenshotPath": ".stitch/designs/product-login-mobile.png"
+    },
+    "product-home-desktop": {
+      "id": "75e7f67de10e466095051cbd0eefd8c2",
+      "sourceScreen": "projects/6507375090366546067/screens/75e7f67de10e466095051cbd0eefd8c2",
+      "x": null,
+      "y": null,
+      "width": 2560,
+      "height": 2648,
+      "logicalFrame": "1440x1200",
+      "title": "BabyGarden Home Dashboard",
+      "deviceType": "DESKTOP",
+      "status": "generated_pending_human_review",
+      "htmlPath": ".stitch/designs/product-home-desktop.html",
+      "screenshotPath": ".stitch/designs/product-home-desktop.png"
     }
   },
   "generation": {
     "sessionId": "7084992055446249236",
     "generatedAt": "2026-07-13T07:17:07.909783Z",
-    "latestSessionId": "13537699895580354037"
+    "latestSessionId": "16883189387907185955",
+    "latestGeneratedAt": "2026-07-13T07:22:27.896471Z"
   }
 }

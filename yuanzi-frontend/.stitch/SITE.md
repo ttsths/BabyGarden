@@ -13,9 +13,10 @@ application architecture.
   design cycle)
 - Visibility: private
 - Design system asset: `assets/f56839ef90a64ca1898687653ea64867`
-- Current status: Product Web login desktop and 390px masters generated; the
-  desktop master was accepted to continue, while the mobile master is pending
-  final visual review. The next baton is the resilient home dashboard.
+- Current status: Product Web login desktop and 390px masters are generated;
+  the desktop login master was accepted to continue. The resilient home
+  desktop master is now generated and pending visual review; the mobile login
+  and home variants remain review gates.
 
 The project and screen identifiers are persisted in `.stitch/metadata.json`.
 Refresh that file after every accepted Stitch generation.
@@ -34,7 +35,8 @@ not count as the desktop Product or Admin masters required by issue #84.
 - [ ] `/login` — 390px mobile-browser variant generated; final review pending
 - [ ] `/baby/setup` — first family and baby setup, desktop and 390px
 - [ ] `/baby-profile` — baby profile
-- [ ] `/` — resilient home dashboard, desktop and 390px
+- [ ] `/` — 1440px resilient home dashboard generated; final review pending
+- [ ] `/` — 390px mobile-browser home variant
 - [ ] `/record` — quick-record modal and mobile drawer
 - [ ] `/records` — record list, desktop and 390px
 - [ ] `/record-detail/:id` — record detail
@@ -62,7 +64,8 @@ not count as the desktop Product or Admin masters required by issue #84.
 ## 5. Roadmap
 
 1. Product login desktop and mobile masters — generated; mobile review pending.
-2. Product shell and resilient home desktop master, then 390px variant.
+2. Product shell and resilient home desktop master — generated; review pending.
+   Continue with the 390px variant after the desktop hierarchy is accepted.
 3. Setup and core-record vertical slice.
 4. Remaining Product P0 masters.
 5. Admin shell, dashboard and account provisioning.

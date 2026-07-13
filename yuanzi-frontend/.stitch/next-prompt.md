@@ -1,24 +1,23 @@
 ---
-page: product-home-desktop
+page: product-home-mobile
 issue: 84
-deviceType: DESKTOP
-frame: 1440x1200
+deviceType: MOBILE
+frame: 390x844
 ---
 
-Create the canonical 1440px Product Web home dashboard for BabyGarden, a
-private family baby-care record product. This is the MVP home after a user has
-logged in and completed family/baby setup. It must be useful with only core
-record data; optional AI, photos, object storage and realtime services must not
-block the page.
+Create the critical 390px mobile-browser variant of the accepted Product Web
+home dashboard for BabyGarden. Keep the desktop home hierarchy and semantics,
+but adapt density and layout for a 390x844 logical viewport. This is a
+responsive Web page, not a native mobile app screen.
 
 **DESIGN SYSTEM (REQUIRED):**
 
-- Platform: responsive Web, desktop-first at 1440px with a critical 390px
-  mobile-browser variant.
+- Platform: responsive Web; 390px is a mobile-browser breakpoint of the same
+  Product Web shell.
 - Personality: warm, trustworthy, calm, practical; never childish or
   decorative for its own sake.
-- Density: medium. Product controls are at least 44px high and touch targets
-  are at least 44x44px.
+- Density: comfortable. All controls and primary record actions are at least
+  44px high; keep 16px side margins and readable Chinese line lengths.
 - Canvas: Warm Porcelain `#FFFBF7`.
 - Primary action: Deep Warm Coral `#C84B42` with white text.
 - Brand accent only: Soft Coral `#FF998A`; never use it behind white body text.
@@ -27,68 +26,55 @@ block the page.
 - Surface: white with quiet `#E7D8D2` borders and restrained shadow.
 - Focus: 2px adjacent-surface separator plus 2px outer Focus Blue `#2E90FA`.
 - Radius: 10-12px controls, 16px cards, 20px large panels.
-- Typography: Chinese-first system sans; 32/40 desktop page title, 20/28
+- Typography: Chinese-first system sans; 24/32 mobile page title, 18/26
   section title, 16/26 product body, 14/22 supporting text.
 - Motion: 120-240ms strong ease-out; no page-wide entrance animation, scale
   from zero, bounce, or `transition: all`.
 
-**ADMIN CONTRAST RULES:**
-
-- This is Product Web, not Admin. Do not use an admin sidebar, dense tables,
-  compact 36px controls, or operational dashboard language.
-
 **MVP DATA CONTRACT:**
 
-- Use realistic Chinese sample data for one family and one baby, such as
-  `小满`, 8 months old, with explicit timestamps and units.
-- Core content is baby context, today's summary, recent records and quick
-  record actions for feeding, sleep and diaper records.
-- Do not invent AI insights, photo timelines, realtime presence or fake charts.
-- Optional services may appear only as a clearly labelled unavailable card or
-  be omitted; their failure must not turn the core page into an error screen.
+- Use realistic Chinese sample data for one family and one baby: `小满`, 8
+  个月, with explicit timestamps and units.
+- Keep the baby context, today's summary, recent records and quick actions for
+  `喂养`, `睡眠`, and `尿布` as the first-class content.
+- Do not invent AI insights, photo timelines, realtime presence or fake
+  charts. Optional services may be omitted or shown as a small clearly
+  labelled unavailable notice.
+- If optional services fail, the core record actions and any successful summary
+  remain usable; never replace the whole page with an error state.
 
-**Page Structure:**
+**MOBILE LAYOUT:**
 
-1. A calm product header with the BabyGarden wordmark, current family/baby
-   context, a compact baby switcher and account menu. No marketing navigation.
-2. A page heading such as `早上好，今天也一起记录小满的成长` with last-sync
-   context and a clear privacy cue that records are visible to family members.
-3. A prominent quick-record panel with three labelled primary actions: `喂养`,
-   `睡眠`, and `尿布`. Each action must have a visible icon and a 44px target.
-4. A `今日概览` section with three or four statistic cards: feeding count and
-   volume, sleep duration, diaper count, and a compact growth signal only when
-   real data exists. Show units and time range; do not use decorative metrics.
-5. A `最近记录` section with a scannable list showing record type, timestamp,
-   amount or duration, and a link to view all records. Include a clear empty
-   state variant in the state panel.
-6. A small secondary panel for `家庭成员` or recent collaboration status that
-   remains useful without realtime; label stale or unavailable data explicitly.
-7. Include a compact annotation strip showing the loading skeleton, empty,
-   degraded optional-service and retry states without duplicating the complete
-   page four times.
+1. Use a compact header with the BabyGarden wordmark, `小满 · 8个月` context,
+   a baby switcher and account menu. Do not render a native status bar, bottom
+   tab bar or App navigation.
+2. Keep the greeting and privacy/last-sync cue concise above the fold.
+3. Stack the quick-record panel near the top. Show three prominent 44px
+   actions labelled exactly `喂养`, `睡眠`, and `尿布`, with visible icons and
+   enough spacing for one-handed tapping.
+4. Stack `今日概览` cards in a readable two-column-or-single-column rhythm;
+   preserve units and the time range for feeding, sleep and diaper values.
+5. Show `最近记录` as a scannable vertical list with type, timestamp and
+   amount/duration, plus a clear `查看全部记录` route.
+6. Keep a compact `家庭成员` card useful without realtime; explicitly mark
+   stale or unavailable collaboration data.
+7. Include a small state annotation section below the core content showing
+   loading, empty, degraded optional-service and retry treatments. It is a
+   reference strip, not four duplicated full pages.
 
-**Required States:**
+**REQUIRED STATES:**
 
 - Data: loading, empty (new baby with no records), ready, partial/degraded and
   core error with local retry.
 - Permission/session: signed out, forbidden and session expired must explain a
   safe next action without leaking private data.
-- The degraded state must keep baby context, quick record and any successful
-  core statistics usable when optional services are unavailable.
 
-**Responsive Handoff Notes:**
-
-- Preserve a clear route to a later 390px variant: stack the quick-record panel
-  and statistic cards, keep the primary action visible above the fold, and use
-  16px side margins.
-- Do not render native mobile status bars, bottom tabs, or App navigation.
-- Keep the information hierarchy and semantic colors identical across widths;
-  only density and layout should change.
-
-**Anti-slop Constraints:**
+**ANTI-SLOP CONSTRAINTS:**
 
 - No purple gradients, glassmorphism, giant hero metrics, fake testimonials,
   decorative charts, emoji icons, lorem ipsum, stock photography or invented
   AI conclusions.
-- Do not make optional services visually more prominent than core records.
+- Keep labels Chinese-first and do not introduce English navigation or system
+  preview copy unless it is an unavoidable technical token.
+- Do not make optional services more prominent than core records.
 - Generated HTML is visual reference only, not production React code.
