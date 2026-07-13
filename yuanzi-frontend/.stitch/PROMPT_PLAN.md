@@ -12,7 +12,8 @@ MVP onboarding contract and is pending visual review. The next baton is
 `product-setup-mobile`, which is now generated and pending visual review. The
 next baton `product-record-desktop` is now generated as the quick-record modal
 vertical slice and is pending visual review. The next baton is
-`product-record-mobile`.
+`product-record-mobile`, which is now generated and pending visual review. The
+next baton is `product-records-desktop`.
 
 ## Batch A — Product desktop masters (10)
 
@@ -41,7 +42,7 @@ anchors. Generate only after all P0 review gates pass.
 
 After `product-login-desktop`, prepare `product-login-mobile`, then
 `product-home-desktop`, `product-home-mobile`, `product-setup-desktop`,
-`product-setup-mobile`, `product-record-desktop`, and
-`product-record-mobile`. Update `SITE.md`, metadata and this order after every
-generated Stitch screen; only mark a sitemap item complete after human visual
-review.
+`product-setup-mobile`, `product-record-desktop`,
+`product-record-mobile`, followed by `product-records-desktop`. Update
+`SITE.md`, metadata and this order after every generated Stitch screen; only
+mark a sitemap item complete after human visual review.

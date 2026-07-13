@@ -13,11 +13,10 @@ application architecture.
   design cycle)
 - Visibility: private
 - Design system asset: `assets/f56839ef90a64ca1898687653ea64867`
-- Current status: Product Web login, resilient home and first-family setup
-  masters are generated at desktop and 390px widths. The desktop login master
-  was accepted to continue; the remaining variants are review gates. The
-  quick-record desktop vertical slice is now generated; its mobile drawer is
-  the next baton.
+- Current status: Product Web login, resilient home, first-family setup and
+  quick-record masters are generated at desktop and 390px widths. The desktop
+  login master was accepted to continue; the remaining variants are review
+  gates. The next baton is the Product Web records list desktop master.
 
 The project and screen identifiers are persisted in `.stitch/metadata.json`.
 Refresh that file after every accepted Stitch generation.
@@ -41,7 +40,7 @@ not count as the desktop Product or Admin masters required by issue #84.
 - [ ] `/baby/setup` — first family and baby setup, 390px mobile-browser variant
 - [ ] `/record` — quick-record modal, 1440px desktop master
 - [ ] `/record` — quick-record drawer, 390px mobile-browser variant
-- [ ] `/records` — record list, desktop and 390px
+- [ ] `/records` — record list, 1440px desktop master
 - [ ] `/record-detail/:id` — record detail
 - [ ] `/stats` — core statistics
 - [ ] `/family` — members and invitation
@@ -71,8 +70,9 @@ not count as the desktop Product or Admin masters required by issue #84.
    pending.
 3. First-family setup desktop/390px masters — generated; review pending.
 4. Quick-record desktop/mobile vertical slice for feeding, sleep and diaper —
-   desktop generated; review pending.
-5. Remaining Product P0 masters.
+   generated; review pending.
+5. Product records list desktop/mobile, then detail, statistics, family and
+   settings masters.
 6. Admin shell, dashboard and account provisioning.
 7. Remaining Admin P0 masters and 1024px compact anchors.
 8. Five shared state boards.
