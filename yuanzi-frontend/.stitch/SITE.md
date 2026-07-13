@@ -29,7 +29,7 @@ not count as the desktop Product or Admin masters required by issue #84.
 
 ### Product P0
 
-- [x] `/login` — username/password login, 1440px desktop master generated
+- [ ] `/login` — 1440px desktop master generated; human review pending
 - [ ] `/login` — 390px mobile-browser variant
 - [ ] `/baby/setup` — first family and baby setup, desktop and 390px
 - [ ] `/baby-profile` — baby profile
