@@ -4,7 +4,7 @@
   "title": "Yuanzi Baby App",
   "visibility": "PRIVATE",
   "createTime": "2026-03-08T03:11:21.816627Z",
-  "updateTime": "2026-07-13T07:37:05.000000Z",
+  "updateTime": "2026-07-13T07:40:39.000000Z",
   "projectType": "PROJECT_DESIGN",
   "origin": "STITCH",
   "deviceType": "MOBILE",
@@ -108,12 +108,26 @@
       "status": "generated_pending_human_review",
       "htmlPath": ".stitch/designs/product-setup-mobile.html",
       "screenshotPath": ".stitch/designs/product-setup-mobile.png"
+    },
+    "product-record-desktop": {
+      "id": "8d41bcdea90c41038138c61c61e8f434",
+      "sourceScreen": "projects/6507375090366546067/screens/8d41bcdea90c41038138c61c61e8f434",
+      "x": null,
+      "y": null,
+      "width": 2560,
+      "height": 2048,
+      "logicalFrame": "1440x1152",
+      "title": "BabyGarden Quick Record Modal (Desktop)",
+      "deviceType": "DESKTOP",
+      "status": "generated_pending_human_review",
+      "htmlPath": ".stitch/designs/product-record-desktop.html",
+      "screenshotPath": ".stitch/designs/product-record-desktop.png"
     }
   },
   "generation": {
     "sessionId": "7084992055446249236",
     "generatedAt": "2026-07-13T07:17:07.909783Z",
-    "latestSessionId": "2326252891528709818",
-    "latestGeneratedAt": "2026-07-13T07:37:05.000000Z"
+    "latestSessionId": "15068516941641730702",
+    "latestGeneratedAt": "2026-07-13T07:40:39.000000Z"
   }
 }
