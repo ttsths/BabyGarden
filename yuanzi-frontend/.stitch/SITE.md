@@ -13,10 +13,10 @@ application architecture.
   design cycle)
 - Visibility: private
 - Design system asset: `assets/f56839ef90a64ca1898687653ea64867`
-- Current status: Product Web login desktop and 390px masters are generated;
-  the desktop login master was accepted to continue. The resilient home
-  desktop master is now generated and pending visual review; the mobile login
-  and home variants remain review gates.
+- Current status: Product Web login and resilient home masters are generated at
+  desktop and 390px widths. The desktop login master was accepted to continue;
+  the remaining login/home variants are review gates. The next baton is the
+  first-family setup desktop master.
 
 The project and screen identifiers are persisted in `.stitch/metadata.json`.
 Refresh that file after every accepted Stitch generation.
@@ -36,7 +36,8 @@ not count as the desktop Product or Admin masters required by issue #84.
 - [ ] `/baby/setup` — first family and baby setup, desktop and 390px
 - [ ] `/baby-profile` — baby profile
 - [ ] `/` — 1440px resilient home dashboard generated; final review pending
-- [ ] `/` — 390px mobile-browser home variant
+- [ ] `/` — 390px mobile-browser home variant generated; final review pending
+- [ ] `/baby/setup` — first family and baby setup, 1440px desktop master
 - [ ] `/record` — quick-record modal and mobile drawer
 - [ ] `/records` — record list, desktop and 390px
 - [ ] `/record-detail/:id` — record detail
@@ -64,9 +65,9 @@ not count as the desktop Product or Admin masters required by issue #84.
 ## 5. Roadmap
 
 1. Product login desktop and mobile masters — generated; mobile review pending.
-2. Product shell and resilient home desktop master — generated; review pending.
-   Continue with the 390px variant after the desktop hierarchy is accepted.
-3. Setup and core-record vertical slice.
+2. Product shell and resilient home desktop/390px masters — generated; review
+   pending.
+3. First-family setup desktop master, then the core-record vertical slice.
 4. Remaining Product P0 masters.
 5. Admin shell, dashboard and account provisioning.
 6. Remaining Admin P0 masters and 1024px compact anchors.

@@ -1,23 +1,24 @@
 ---
-page: product-home-mobile
+page: product-setup-desktop
 issue: 84
-deviceType: MOBILE
-frame: 390x844
+deviceType: DESKTOP
+frame: 1440x1000
 ---
 
-Create the critical 390px mobile-browser variant of the accepted Product Web
-home dashboard for BabyGarden. Keep the desktop home hierarchy and semantics,
-but adapt density and layout for a 390x844 logical viewport. This is a
-responsive Web page, not a native mobile app screen.
+Create the canonical 1440px Product Web first-family setup page for BabyGarden.
+It appears after username/password login when a new account has no family or
+baby context yet. This is an MVP onboarding form for one family and one baby;
+do not add SMS, invitations that require external services, AI, photos or
+other optional dependencies.
 
 **DESIGN SYSTEM (REQUIRED):**
 
-- Platform: responsive Web; 390px is a mobile-browser breakpoint of the same
-  Product Web shell.
+- Platform: responsive Web, desktop-first at 1440px with a critical 390px
+  mobile-browser variant later.
 - Personality: warm, trustworthy, calm, practical; never childish or
   decorative for its own sake.
-- Density: comfortable. All controls and primary record actions are at least
-  44px high; keep 16px side margins and readable Chinese line lengths.
+- Density: medium. Product controls are at least 44px high and touch targets
+  are at least 44x44px.
 - Canvas: Warm Porcelain `#FFFBF7`.
 - Primary action: Deep Warm Coral `#C84B42` with white text.
 - Brand accent only: Soft Coral `#FF998A`; never use it behind white body text.
@@ -26,55 +27,54 @@ responsive Web page, not a native mobile app screen.
 - Surface: white with quiet `#E7D8D2` borders and restrained shadow.
 - Focus: 2px adjacent-surface separator plus 2px outer Focus Blue `#2E90FA`.
 - Radius: 10-12px controls, 16px cards, 20px large panels.
-- Typography: Chinese-first system sans; 24/32 mobile page title, 18/26
+- Typography: Chinese-first system sans; 32/40 desktop page title, 20/28
   section title, 16/26 product body, 14/22 supporting text.
 - Motion: 120-240ms strong ease-out; no page-wide entrance animation, scale
   from zero, bounce, or `transition: all`.
 
-**MVP DATA CONTRACT:**
+**MVP FORM CONTRACT:**
 
-- Use realistic Chinese sample data for one family and one baby: `小满`, 8
-  个月, with explicit timestamps and units.
-- Keep the baby context, today's summary, recent records and quick actions for
-  `喂养`, `睡眠`, and `尿布` as the first-class content.
-- Do not invent AI insights, photo timelines, realtime presence or fake
-  charts. Optional services may be omitted or shown as a small clearly
-  labelled unavailable notice.
-- If optional services fail, the core record actions and any successful summary
-  remain usable; never replace the whole page with an error state.
+- Collect only the minimum data needed to unlock the product: family name,
+  caregiver display name, baby name, birth date, and optional gender choice.
+- Use realistic labels and helper text in Simplified Chinese. Use explicit
+  date format and inline validation; never rely on placeholder-only labels.
+- Make the primary route obvious: `创建家庭并继续`. Provide a safe secondary
+  route such as `稍后完善` only if it leaves the user in a known recoverable
+  state.
+- Explain that the data is private to the family. Do not require SMS, email
+  verification, object storage, realtime presence or external integrations.
 
-**MOBILE LAYOUT:**
+**PAGE STRUCTURE:**
 
-1. Use a compact header with the BabyGarden wordmark, `小满 · 8个月` context,
-   a baby switcher and account menu. Do not render a native status bar, bottom
-   tab bar or App navigation.
-2. Keep the greeting and privacy/last-sync cue concise above the fold.
-3. Stack the quick-record panel near the top. Show three prominent 44px
-   actions labelled exactly `喂养`, `睡眠`, and `尿布`, with visible icons and
-   enough spacing for one-handed tapping.
-4. Stack `今日概览` cards in a readable two-column-or-single-column rhythm;
-   preserve units and the time range for feeding, sleep and diaper values.
-5. Show `最近记录` as a scannable vertical list with type, timestamp and
-   amount/duration, plus a clear `查看全部记录` route.
-6. Keep a compact `家庭成员` card useful without realtime; explicitly mark
-   stale or unavailable collaboration data.
-7. Include a small state annotation section below the core content showing
-   loading, empty, degraded optional-service and retry treatments. It is a
-   reference strip, not four duplicated full pages.
+1. Calm product header with BabyGarden wordmark, a simple progress cue such as
+   `第 1 步，共 1 步`, and account menu. No marketing navigation or admin
+   sidebar.
+2. Center a generous setup panel with a concise heading such as `先认识一下
+   你的家庭` and supporting copy that sets expectations.
+3. Group fields into `家庭信息` and `宝宝信息`; include visible labels,
+   accessible required markers, and examples that do not masquerade as values.
+4. Show a small privacy note and a compact preview of the next home experience
+   without inventing charts or AI conclusions.
+5. Include the ready, loading/submitting, validation-error and recoverable
+   network-error treatments in a compact state reference strip.
 
 **REQUIRED STATES:**
 
-- Data: loading, empty (new baby with no records), ready, partial/degraded and
-  core error with local retry.
-- Permission/session: signed out, forbidden and session expired must explain a
-  safe next action without leaking private data.
+- Empty form, field validation errors, submitting, recoverable network error
+  with local retry, signed-out/session-expired and forbidden states.
+- Errors must be actionable, local to the field or operation, and must not
+  discard already-entered values.
+
+**ADMIN CONTRAST RULES:**
+
+- This is Product Web, not Admin. Do not use dense tables, compact 36px
+  controls, operational dashboard language or a fixed admin sidebar.
 
 **ANTI-SLOP CONSTRAINTS:**
 
-- No purple gradients, glassmorphism, giant hero metrics, fake testimonials,
-  decorative charts, emoji icons, lorem ipsum, stock photography or invented
-  AI conclusions.
-- Keep labels Chinese-first and do not introduce English navigation or system
+- No SMS/OTP flow, phone-number verification, purple gradients, glassmorphism,
+  giant hero metrics, fake testimonials, decorative charts, emoji icons,
+  lorem ipsum, stock photography or invented AI conclusions.
+- Keep all labels Chinese-first; do not introduce English navigation or system
   preview copy unless it is an unavoidable technical token.
-- Do not make optional services more prominent than core records.
 - Generated HTML is visual reference only, not production React code.
