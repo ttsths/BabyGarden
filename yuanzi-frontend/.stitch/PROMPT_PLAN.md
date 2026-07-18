@@ -20,7 +20,10 @@ navigation, and a Web-only refinement is now generated pending review. The next
 baton `product-record-detail-desktop` is now generated and pending visual
 review. `product-record-detail-mobile` is now generated and pending visual
 review. `product-baby-profile-desktop` is now generated with a Chinese
-refinement and pending visual review. The next baton is `product-stats-desktop`.
+refinement and pending visual review. `product-stats-desktop` was generated,
+then refined to restore visible chart bars, remove the English state heading
+and split permission/session states. The refined screen is pending visual
+review. The next baton is `product-family-desktop`.
 
 ## Batch A — Product desktop masters (10)
 
@@ -53,6 +56,6 @@ After `product-login-desktop`, prepare `product-login-mobile`, then
 `product-record-mobile`, `product-records-desktop`,
 `product-records-mobile`, `product-record-detail-desktop`,
 `product-record-detail-mobile`, `product-baby-profile-desktop`, followed by
-`product-stats-desktop`.
+`product-stats-desktop` and `product-family-desktop`.
 Update `SITE.md`, metadata and this order after every generated Stitch screen;
 only mark a sitemap item complete after human visual review.

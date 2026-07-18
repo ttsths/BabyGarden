@@ -1,14 +1,14 @@
 ---
-page: product-stats-desktop
+page: product-family-desktop
 issue: 84
 deviceType: DESKTOP
 frame: 1440x1152
 ---
 
-Create the critical 1440px desktop Product Web statistics page for BabyGarden.
-This follows the login → home → setup → quick record → records list → record
-detail → baby profile flow. It is a responsive Web page, not a native App and
-not an Admin dashboard.
+Create the critical 1440px desktop Product Web family-members page for
+BabyGarden. This follows the completed Product Web core-recording and
+statistics flow. It is a responsive Web page, not a native App and not an
+Admin console.
 
 **DESIGN SYSTEM (REQUIRED):**
 
@@ -33,41 +33,49 @@ not an Admin dashboard.
 
 **MVP DATA CONTRACT:**
 
-- Active baby is `小满 · 8个月`. Use a fixed `最近7天` range by default and
-  display realistic, clearly labeled data: 喂养 28次, 睡眠 63小时, 尿布 42次.
-- Provide a range control for `最近7天` and `最近30天`, but do not add
-  realtime, AI interpretation, medical advice or external analytics.
-- Use one accessible trend visualization (simple bars/lines with visible
-  labels and a text summary) for feeding, sleep and diaper activity. Do not
-  create decorative charts or unsupported precision.
-- Include a clear link to `记录一笔` and `最近记录`; explain that statistics
-  are derived from saved records and may be incomplete when offline.
+- Active context is `小满的家 · 3位成员`, with baby `小满 · 8个月`.
+- Show three realistic members: `林悦` as `家庭管理员 · 妈妈`, `陈昊` as
+  `可编辑 · 爸爸`, and `王阿姨` as `仅查看 · 照护者`.
+- MVP invitations must not depend on SMS, email, contacts or social login.
+  Provide an internal `生成邀请口令` action and a ready-state invitation card
+  with copyable code `XM-8M-2741`, expiry `24小时后失效`, role selection and
+  `复制口令`. Explain that the inviter shares it manually.
+- Allow the administrator to edit roles and remove a member. Removing a member
+  requires a visible irreversible-action confirmation. A user cannot remove
+  themselves while they are the only administrator.
 
 **DESKTOP LAYOUT:**
 
 1. Use the established BabyGarden Product Web shell: compact brand header,
-   active baby context, account control and breadcrumb `首页 / 统计`.
-2. Start with a concise title `成长统计` and range selector. Show three summary
-   cards for 喂养、睡眠、尿布 with period labels and a small comparison hint.
-3. Place the main trend card below with tabs or a segmented control for the
-   three record types. Keep legends and data labels readable; provide a text
-   summary such as `近7天平均每天喂养4次` for screen-reader parity.
-4. Add a compact degraded/offline note and the visible state-reference section
-   below the ready view: loading skeleton, empty, no records, partial data,
-   error with retry, and signed-out/session-expired. These are references only.
+   active baby context, account control and breadcrumb `首页 / 家庭成员`.
+2. Start with title `家庭成员` and a concise privacy explanation. Use a
+   two-column workspace: member list as the main column and invitation/role
+   guidance as the supporting column.
+3. Member rows must show name, relationship, role, last activity, explicit
+   `调整权限` and overflow/removal actions. Clearly distinguish `家庭管理员`,
+   `可编辑` and `仅查看` without using color alone.
+4. Show the generated invitation code card as a separate ready state. Keep
+   invitation generation/copying internal and manual; do not add delivery
+   channels or external services.
+5. Add a compact state-reference section below: loading, no other members,
+   read-only current user, invitation expired, permission denied, session
+   expired, role update failure and remove-member confirmation.
 
 **REQUIRED STATES:**
 
-- Ready, loading, empty/no records, partial/offline data, error with retry,
-  forbidden/read-only and session expired.
-- Never infer diagnosis or recommendations. Never leak private baby data in
-  signed-out or forbidden states; explain the safe next action.
+- Ready, loading, only-member empty state, read-only, invitation ready,
+  invitation expired, role update failure, forbidden, session expired and
+  destructive removal confirmation.
+- Never expose family membership or invitation codes to signed-out or
+  forbidden users; explain the safe next action.
 
 **ANTI-SLOP CONSTRAINTS:**
 
-- No bottom navigation, native status bar, admin table density, purple
+- No bottom navigation, native status bar, Admin table density, purple
   gradients, glassmorphism, giant hero metrics, fake testimonials, emoji icons,
-  lorem ipsum or stock photography.
+  lorem ipsum, stock photography or realtime presence.
+- No SMS/email/contact integration, public registration, AI recommendations or
+  external dependency.
 - Keep every visible label Chinese-first; no English navigation, state labels
   or footer text.
 - Generated HTML is visual reference only, not production React code.

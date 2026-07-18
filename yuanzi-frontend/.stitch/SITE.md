@@ -14,12 +14,10 @@ application architecture.
 - Visibility: private
 - Design system asset: `assets/f56839ef90a64ca1898687653ea64867`
 - Current status: Product Web login, resilient home, first-family setup,
-  quick-record, records-list and record-detail desktop/mobile masters are generated.
-  The first records-list mobile draft was superseded because it introduced App
-  navigation; a refined Web-only variant is now generated. Record detail
-  desktop/mobile masters are now generated; the next baton is baby profile
-  desktop. Baby profile desktop is now generated with a Chinese refinement;
-  the next baton is statistics desktop.
+  quick-record, records-list and record-detail desktop/mobile masters are
+  generated. Baby profile and statistics desktop masters are also generated
+  with Chinese refinements. Superseded drafts remain recorded for review
+  traceability. The next baton is family members desktop.
 
 The project and screen identifiers are persisted in `.stitch/metadata.json`.
 Refresh that file after every accepted Stitch generation.
@@ -47,7 +45,7 @@ not count as the desktop Product or Admin masters required by issue #84.
 - [ ] `/records` — record list, 390px mobile-browser variant (Web-only refined)
 - [ ] `/record-detail/:id` — 1440px desktop master
 - [ ] `/record-detail/:id` — 390px mobile-browser variant generated; final review pending
-- [ ] `/stats` — core statistics (next baton: desktop)
+- [ ] `/stats` — core statistics desktop generated and refined; final review pending
 - [ ] `/family` — members and invitation
 - [ ] `/settings` — account and product settings
 
@@ -76,8 +74,8 @@ not count as the desktop Product or Admin masters required by issue #84.
 3. First-family setup desktop/390px masters — generated; review pending.
 4. Quick-record desktop/mobile vertical slice for feeding, sleep and diaper —
    generated; review pending.
-5. Product records list and detail desktop/mobile masters are generated, and
-   baby profile desktop is generated pending review; next produce statistics,
+5. Product records list and detail desktop/mobile masters, baby profile
+   desktop and statistics desktop are generated pending review; next produce
    family and settings masters.
 6. Admin shell, dashboard and account provisioning.
 7. Remaining Admin P0 masters and 1024px compact anchors.
