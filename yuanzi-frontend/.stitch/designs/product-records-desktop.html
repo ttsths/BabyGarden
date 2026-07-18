@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html lang="zh"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BabyGarden - 历史记录</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-container": "#c84b42",
+                      "on-secondary-fixed-variant": "#792f26",
+                      "on-error": "#ffffff",
+                      "tertiary-fixed-dim": "#9ed1c2",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "on-surface-variant": "#58413f",
+                      "on-primary-container": "#fffcff",
+                      "on-background": "#1c1c19",
+                      "on-primary": "#ffffff",
+                      "surface-container": "#f1ede9",
+                      "inverse-on-surface": "#f4f0ec",
+                      "surface": "#fdf9f5",
+                      "primary-fixed": "#ffdad6",
+                      "primary": "#a7332c",
+                      "on-secondary-fixed": "#3e0402",
+                      "surface-bright": "#fdf9f5",
+                      "on-tertiary-fixed-variant": "#1d4f44",
+                      "focus-blue": "#2E90FA",
+                      "surface-tint": "#aa352e",
+                      "outline-variant": "#dfbfbb",
+                      "inverse-primary": "#ffb4ab",
+                      "secondary-fixed": "#ffdad5",
+                      "deep-cocoa": "#23110F",
+                      "error": "#ba1a1a",
+                      "on-tertiary-container": "#f6fffa",
+                      "secondary-fixed-dim": "#ffb4a8",
+                      "secondary": "#97463b",
+                      "primary-fixed-dim": "#ffb4ab",
+                      "on-tertiary-fixed": "#00201a",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed": "#b9edde",
+                      "on-secondary-container": "#772e24",
+                      "outline": "#8b716e",
+                      "surface-container-high": "#ebe7e4",
+                      "on-primary-fixed-variant": "#891d1a",
+                      "secondary-container": "#fe9889",
+                      "surface-dim": "#ddd9d6",
+                      "inverse-surface": "#31302e",
+                      "surface-container-lowest": "#ffffff",
+                      "quiet-border": "#E7D8D2",
+                      "surface-container-highest": "#e5e2de",
+                      "surface-variant": "#e5e2de",
+                      "surface-container-low": "#f7f3ef",
+                      "slate-graphite": "#344054",
+                      "tertiary": "#346559",
+                      "tertiary-container": "#4d7e71",
+                      "on-surface": "#1c1c19",
+                      "background": "#fdf9f5",
+                      "error-container": "#ffdad6",
+                      "on-primary-fixed": "#410002",
+                      "soft-mint": "#E8F5E9"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px",
+                      "card": "16px",
+                      "control": "12px"
+              },
+              "spacing": {
+                      "control-min-height": "44px",
+                      "admin-margin": "16px",
+                      "admin-gutter": "8px",
+                      "admin-control-height": "36px",
+                      "product-gutter": "16px",
+                      "product-margin": "24px"
+              },
+              "fontFamily": {
+                      "section-title": ["Noto Sans"],
+                      "headline-lg": ["Noto Sans"],
+                      "label-caps": ["Noto Sans"],
+                      "headline-lg-mobile": ["Noto Sans"],
+                      "supporting-text": ["Noto Sans"],
+                      "product-body": ["Noto Sans"]
+              },
+              "fontSize": {
+                      "section-title": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                      "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "supporting-text": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                      "product-body": ["16px", {"lineHeight": "26px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Noto Sans', sans-serif; background-color: #FFFBF7; color: #23110F; }
+        .focus-ring:focus-visible { outline: 2px solid #FFFBF7; outline-offset: 2px; box-shadow: 0 0 0 4px #2E90FA; }
+        .soft-shadow { box-shadow: 0 4px 12px rgba(35, 17, 15, 0.04); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+<!-- TopNavBar -->
+<header class="bg-surface border-b border-quiet-border shadow-sm w-full top-0 sticky z-50">
+<div class="flex justify-between items-center h-control-min-height px-product-margin max-w-[1440px] mx-auto">
+<div class="flex items-center gap-8">
+<h1 class="font-headline-lg text-headline-lg text-primary font-bold">BabyGarden</h1>
+<nav class="hidden md:flex gap-6 h-full items-center">
+<a class="text-on-surface-variant hover:text-primary-container transition-colors font-product-body text-product-body py-2" href="#">Dashboard</a>
+<a class="text-primary border-b-2 border-primary pb-1 font-semibold font-product-body text-product-body py-2" href="#">History</a>
+<a class="text-on-surface-variant hover:text-primary-container transition-colors font-product-body text-product-body py-2" href="#">Growth</a>
+<a class="text-on-surface-variant hover:text-primary-container transition-colors font-product-body text-product-body py-2" href="#">Insights</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 cursor-pointer hover:bg-surface-container-low px-3 py-1 rounded-control transition-colors focus-ring" tabindex="0">
+<span class="font-product-body text-product-body text-deep-cocoa font-medium">Xiao Man, 8 months</span>
+<span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+</div>
+<button class="bg-primary-container text-on-primary hover:bg-surface-tint transition-colors rounded-control h-control-min-height px-4 font-product-body text-product-body font-medium flex items-center gap-2 focus-ring shadow-sm">
+                    Record
+                </button>
+<button aria-label="Settings" class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center hover:bg-surface-container-high transition-colors focus-ring">
+<span class="material-symbols-outlined text-on-surface-variant">settings</span>
+</button>
+<img alt="Parent Profile" class="w-10 h-10 rounded-full object-cover border border-quiet-border cursor-pointer focus-ring" data-alt="A small, circular avatar portrait of a modern parent in a softly lit, warm environment, neutral tones, photorealistic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqOaG1EifSWdhx8XTgRXFVH718Zeu7gIVDi5IKHXGRDqjgA5BitVaY6E-pTIyT6ys8BA1kwNhSfTH4EAqjJyypMD4btGJ4M19IBL943pXBz_6J0dFwh1JHbJlAmXgSG6QPppdBy6lSC3DZzCCbQQ5COoSEqizFjDtB75Mh8EqGuYjJcTcZ2MQq4xX54PTqTmBSSjkkHV3cCylQRVeDW1RBETv-7B09smXyNFDpHsgqUBBfX8HbWtrKV6djwS2qiZLy78rS0QagW4s" tabindex="0"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow w-full max-w-[1024px] mx-auto px-product-margin py-8 flex flex-col gap-8">
+<!-- Header Section -->
+<section class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-deep-cocoa">最近记录</h2>
+<p class="font-supporting-text text-supporting-text text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[16px]">sync</span>
+                    最后同步：今天 09:42
+                </p>
+</div>
+<button class="bg-primary-container text-on-primary hover:bg-surface-tint transition-colors rounded-control h-control-min-height px-6 font-product-body text-product-body font-medium focus-ring shadow-sm flex items-center gap-2 w-full sm:w-auto justify-center">
+<span class="material-symbols-outlined">add</span>
+                记录一笔
+            </button>
+</section>
+<!-- Filters Section -->
+<section class="flex flex-col md:flex-row gap-4 items-start md:items-center bg-white p-4 rounded-card border border-quiet-border soft-shadow">
+<div class="relative w-full md:w-auto">
+<input class="w-full md:w-[200px] h-control-min-height pl-10 pr-4 rounded-control border border-quiet-border bg-white text-deep-cocoa font-product-body text-product-body focus-ring" type="date" value="2023-10-24"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">calendar_today</span>
+</div>
+<div class="flex gap-2 flex-wrap">
+<button class="bg-soft-mint text-slate-graphite px-4 py-2 rounded-full font-supporting-text text-supporting-text font-medium border border-transparent hover:border-quiet-border transition-all focus-ring">全部</button>
+<button class="bg-surface text-deep-cocoa px-4 py-2 rounded-full font-supporting-text text-supporting-text border border-quiet-border hover:bg-surface-container-low transition-all focus-ring">喂养</button>
+<button class="bg-surface text-deep-cocoa px-4 py-2 rounded-full font-supporting-text text-supporting-text border border-quiet-border hover:bg-surface-container-low transition-all focus-ring">睡眠</button>
+<button class="bg-surface text-deep-cocoa px-4 py-2 rounded-full font-supporting-text text-supporting-text border border-quiet-border hover:bg-surface-container-low transition-all focus-ring">尿布</button>
+</div>
+</section>
+<!-- Records List -->
+<section class="flex flex-col gap-6">
+<!-- Date Group -->
+<div class="flex flex-col gap-3">
+<h3 class="font-section-title text-section-title text-deep-cocoa sticky top-[60px] bg-background py-2 z-10 border-b border-quiet-border">今天, 10月24日</h3>
+<div class="flex flex-col gap-3">
+<!-- Record Card 1: Feeding -->
+<article class="bg-white rounded-card p-5 border border-quiet-border soft-shadow flex flex-col sm:flex-row gap-4 sm:items-center hover:-translate-y-0.5 transition-transform cursor-pointer focus-ring" tabindex="0">
+<div class="flex items-center gap-4 min-w-[200px]">
+<div class="w-12 h-12 rounded-full bg-soft-mint flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-tertiary-container">water_drop</span>
+</div>
+<div>
+<p class="font-section-title text-[16px] leading-[24px] text-deep-cocoa font-medium">10:30</p>
+<p class="font-supporting-text text-supporting-text text-on-surface-variant">喂养 · 配方奶</p>
+</div>
+</div>
+<div class="flex-grow flex items-center justify-between sm:justify-start gap-6">
+<div class="font-headline-lg-mobile text-headline-lg-mobile text-primary-container font-semibold">120<span class="text-supporting-text font-normal text-on-surface-variant ml-1">ml</span></div>
+<p class="font-product-body text-product-body text-deep-cocoa bg-surface-container-low px-3 py-1 rounded-lg">宝宝胃口很好</p>
+</div>
+<button aria-label="Edit" class="text-on-surface-variant hover:text-primary-container transition-colors hidden sm:block p-2 rounded-full hover:bg-surface-container-lowest focus-ring">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</article>
+<!-- Record Card 2: Sleep -->
+<article class="bg-white rounded-card p-5 border border-quiet-border soft-shadow flex flex-col sm:flex-row gap-4 sm:items-center hover:-translate-y-0.5 transition-transform cursor-pointer focus-ring" tabindex="0">
+<div class="flex items-center gap-4 min-w-[200px]">
+<div class="w-12 h-12 rounded-full bg-[#E5E0FF] flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[#5D4E8C]">bedtime</span>
+</div>
+<div>
+<p class="font-section-title text-[16px] leading-[24px] text-deep-cocoa font-medium">08:45 – 10:00</p>
+<p class="font-supporting-text text-supporting-text text-on-surface-variant">小睡</p>
+</div>
+</div>
+<div class="flex-grow flex items-center justify-between sm:justify-start gap-6">
+<div class="font-headline-lg-mobile text-headline-lg-mobile text-deep-cocoa font-semibold">1<span class="text-supporting-text font-normal text-on-surface-variant mx-1">h</span>15<span class="text-supporting-text font-normal text-on-surface-variant ml-1">m</span></div>
+<p class="font-product-body text-product-body text-deep-cocoa bg-surface-container-low px-3 py-1 rounded-lg">自主入睡</p>
+</div>
+<button aria-label="Edit" class="text-on-surface-variant hover:text-primary-container transition-colors hidden sm:block p-2 rounded-full hover:bg-surface-container-lowest focus-ring">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</article>
+<!-- Record Card 3: Diaper -->
+<article class="bg-white rounded-card p-5 border border-quiet-border soft-shadow flex flex-col sm:flex-row gap-4 sm:items-center hover:-translate-y-0.5 transition-transform cursor-pointer focus-ring" tabindex="0">
+<div class="flex items-center gap-4 min-w-[200px]">
+<div class="w-12 h-12 rounded-full bg-[#FFF0E5] flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[#A66C40]">baby_changing_station</span>
+</div>
+<div>
+<p class="font-section-title text-[16px] leading-[24px] text-deep-cocoa font-medium">08:30</p>
+<p class="font-supporting-text text-supporting-text text-on-surface-variant">尿布 · 嘘嘘</p>
+</div>
+</div>
+<div class="flex-grow flex items-center justify-between sm:justify-start gap-6">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+<span class="font-product-body text-product-body text-deep-cocoa">少量</span>
+</div>
+<p class="font-product-body text-product-body text-deep-cocoa bg-surface-container-low px-3 py-1 rounded-lg">正常状态</p>
+</div>
+<button aria-label="Edit" class="text-on-surface-variant hover:text-primary-container transition-colors hidden sm:block p-2 rounded-full hover:bg-surface-container-lowest focus-ring">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</article>
+</div>
+</div>
+<!-- State Demonstrations Section (As requested) -->
+<div class="mt-12 pt-8 border-t border-quiet-border">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-4">UI States Demonstration</h4>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Loading State -->
+<div class="bg-white rounded-card p-5 border border-quiet-border soft-shadow animate-pulse flex flex-col gap-3">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container-high"></div>
+<div class="flex flex-col gap-2 flex-grow">
+<div class="h-4 bg-surface-container-high rounded w-24"></div>
+<div class="h-3 bg-surface-container-high rounded w-32"></div>
+</div>
+</div>
+<div class="h-8 bg-surface-container-high rounded w-1/2 ml-16 mt-2"></div>
+</div>
+<!-- Empty State -->
+<div class="bg-surface-container-low rounded-card p-8 border border-dashed border-outline-variant flex flex-col items-center justify-center text-center gap-3">
+<span class="material-symbols-outlined text-4xl text-outline">inbox</span>
+<p class="font-product-body text-product-body text-deep-cocoa">这段时间没有记录哦</p>
+<button class="mt-2 text-primary hover:underline font-product-body text-product-body focus-ring rounded">添加第一笔记录</button>
+</div>
+<!-- Partial/Stale Data State -->
+<div class="bg-white rounded-card p-5 border border-quiet-border soft-shadow opacity-70 relative overflow-hidden">
+<div class="absolute inset-0 bg-surface-container-low/20 z-10 flex items-center justify-center">
+<span class="bg-white/90 px-3 py-1 rounded-full font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]">cloud_off</span> 离线数据
+                            </span>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-soft-mint flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary-container">water_drop</span>
+</div>
+<div>
+<p class="font-section-title text-[16px] text-deep-cocoa font-medium">10:30</p>
+<p class="font-supporting-text text-supporting-text text-on-surface-variant">喂养 · 配方奶</p>
+</div>
+</div>
+</div>
+<!-- Error State -->
+<div class="bg-error-container rounded-card p-5 border border-error/20 flex flex-col items-start gap-3">
+<div class="flex items-center gap-2 text-error">
+<span class="material-symbols-outlined">error</span>
+<p class="font-section-title text-[16px] font-medium">加载失败</p>
+</div>
+<p class="font-supporting-text text-supporting-text text-on-error-container">无法连接到服务器，请检查网络后重试。</p>
+<button class="mt-2 bg-white text-error border border-error/30 px-4 py-2 rounded-control font-supporting-text text-supporting-text hover:bg-error-container transition-colors focus-ring">
+                            重新加载
+                        </button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low py-8 border-t border-quiet-border mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center px-product-margin max-w-[1440px] mx-auto gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">© 2024 Baby Tracker. All rights reserved.</span>
+<div class="flex gap-4">
+<a class="font-supporting-text text-supporting-text text-secondary hover:underline decoration-primary cursor-pointer transition-all focus-ring rounded" href="#">Privacy Policy</a>
+<a class="font-supporting-text text-supporting-text text-secondary hover:underline decoration-primary cursor-pointer transition-all focus-ring rounded" href="#">Support</a>
+<a class="font-supporting-text text-supporting-text text-secondary hover:underline decoration-primary cursor-pointer transition-all focus-ring rounded" href="#">Terms of Service</a>
+</div>
+</div>
+</footer>
+</body></html>

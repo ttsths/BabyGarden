@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BabyGarden - Quick Record</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "focus-blue": "#2E90FA",
+                    "on-error": "#ffffff",
+                    "primary-container": "#c84b42",
+                    "inverse-primary": "#ffb4ab",
+                    "error": "#ba1a1a",
+                    "on-tertiary-container": "#f6fffa",
+                    "secondary": "#97463b",
+                    "on-primary-fixed-variant": "#891d1a",
+                    "on-error-container": "#93000a",
+                    "surface-container": "#f1ede9",
+                    "surface": "#fdf9f5",
+                    "error-container": "#ffdad6",
+                    "on-secondary-container": "#772e24",
+                    "inverse-on-surface": "#f4f0ec",
+                    "on-background": "#1c1c19",
+                    "on-tertiary-fixed": "#00201a",
+                    "slate-graphite": "#344054",
+                    "surface-bright": "#fdf9f5",
+                    "tertiary-fixed-dim": "#9ed1c2",
+                    "surface-variant": "#e5e2de",
+                    "secondary-fixed-dim": "#ffb4a8",
+                    "on-primary": "#ffffff",
+                    "tertiary-container": "#4d7e71",
+                    "primary-fixed-dim": "#ffb4ab",
+                    "primary": "#a7332c",
+                    "quiet-border": "#E7D8D2",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed": "#ffdad6",
+                    "inverse-surface": "#31302e",
+                    "outline-variant": "#dfbfbb",
+                    "on-primary-fixed": "#410002",
+                    "outline": "#8b716e",
+                    "deep-cocoa": "#23110F",
+                    "secondary-container": "#fe9889",
+                    "surface-dim": "#ddd9d6",
+                    "on-primary-container": "#fffcff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "surface-container-low": "#f7f3ef",
+                    "on-secondary-fixed": "#3e0402",
+                    "tertiary-fixed": "#b9edde",
+                    "tertiary": "#346559",
+                    "surface-container-highest": "#e5e2de",
+                    "on-surface-variant": "#58413f",
+                    "on-secondary-fixed-variant": "#792f26",
+                    "background": "#fdf9f5",
+                    "on-tertiary-fixed-variant": "#1d4f44",
+                    "on-surface": "#1c1c19",
+                    "secondary-fixed": "#ffdad5",
+                    "surface-container-high": "#ebe7e4",
+                    "surface-tint": "#aa352e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px",
+                    "modal": "20px",
+                    "control": "12px"
+            },
+            "spacing": {
+                    "product-gutter": "16px",
+                    "admin-gutter": "8px",
+                    "admin-control-height": "36px",
+                    "admin-margin": "16px",
+                    "product-margin": "24px",
+                    "control-min-height": "44px"
+            },
+            "fontFamily": {
+                    "supporting-text": [
+                            "Noto Sans", "sans-serif"
+                    ],
+                    "product-body": [
+                            "Noto Sans", "sans-serif"
+                    ],
+                    "label-caps": [
+                            "Noto Sans", "sans-serif"
+                    ],
+                    "headline-lg-mobile": [
+                            "Noto Sans", "sans-serif"
+                    ],
+                    "headline-lg": [
+                            "Noto Sans", "sans-serif"
+                    ],
+                    "section-title": [
+                            "Noto Sans", "sans-serif"
+                    ]
+            },
+            "fontSize": {
+                    "supporting-text": [
+                            "14px",
+                            {
+                                    "lineHeight": "22px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "product-body": [
+                            "16px",
+                            {
+                                    "lineHeight": "26px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-caps": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "section-title": [
+                            "20px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "600"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background-color: #fdf9f5; /* surface */
+        }
+        
+        /* Custom modal shadow for depth */
+        .modal-shadow {
+            box-shadow: 0 4px 24px rgba(35, 17, 15, 0.08);
+        }
+        
+        /* Focus ring utility */
+        .focus-ring:focus-visible {
+            outline: 2px solid #fdf9f5; /* surface gap */
+            box-shadow: 0 0 0 4px #2E90FA; /* focus-blue */
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen relative overflow-hidden font-product-body text-product-body antialiased">
+<!-- TopNavBar (Shared Component Placeholder mapped to spec) -->
+<header class="w-full top-0 sticky border-b border-quiet-border bg-surface shadow-sm z-10 hidden md:block">
+<div class="flex justify-between items-center h-[72px] px-product-margin max-w-[1440px] mx-auto w-full">
+<div class="flex items-center gap-8">
+<div class="font-headline-lg text-headline-lg font-bold text-primary">BabyGarden</div>
+<nav class="flex gap-6">
+<a class="text-primary border-b-2 border-primary pb-1 font-bold cursor-pointer active:scale-95 transition-transform hover:text-primary transition-colors duration-200" href="#">Overview</a>
+<a class="text-on-surface-variant pb-1 cursor-pointer active:scale-95 transition-transform hover:text-primary transition-colors duration-200" href="#">History</a>
+<a class="text-on-surface-variant pb-1 cursor-pointer active:scale-95 transition-transform hover:text-primary transition-colors duration-200" href="#">Growth</a>
+<a class="text-on-surface-variant pb-1 cursor-pointer active:scale-95 transition-transform hover:text-primary transition-colors duration-200" href="#">Insights</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary-container text-on-primary-container px-6 h-control-min-height rounded-control font-medium hover:bg-primary transition-colors focus-ring">Quick Record</button>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">calendar_today</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-variant border border-quiet-border overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A detailed profile picture of a young parent and a baby avatar, rendered in a warm, inviting style with soft lighting, set against a calm, minimal background. The aesthetic is clean, professional, and sophisticated, avoiding overly childish tropes, utilizing a warm porcelain and coral palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBp5F9KJOqEsL3QNio5DW2sBKhsR1qFaNzXATBlNouaoNV8Ebem2FW5SF8sJLZIZE05UWy8svxc4TNnyCpSN4zy2GLg8xL2jJe3zaJLju8m30hOjfyjlh-xcWcZFSjovGDg85_q4wNiGTdDZZJBscmnfKWk75GnVs1PymuAv343o08uP_TijwL0SCHGxyFy_yYq3kWakFKwRs4fW7U8FOI7gU6JXQsbcP2qLYJTx0g-ECvDilZUwAbtiD0sGJcPxcLd_MLJqjDTrK0"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Faded Background Content -->
+<main class="max-w-[1440px] mx-auto px-product-margin py-8 opacity-40 transition-opacity duration-300 grid grid-cols-1 md:grid-cols-3 gap-6 pointer-events-none select-none">
+<!-- Dashboard Mockup -->
+<div class="col-span-1 md:col-span-2 space-y-6">
+<div class="bg-white rounded-modal border border-quiet-border p-6 shadow-sm">
+<h2 class="font-section-title text-section-title text-deep-cocoa mb-4">今日概览</h2>
+<div class="grid grid-cols-3 gap-4">
+<div class="bg-surface-container-low p-4 rounded-control text-center">
+<span class="material-symbols-outlined text-tertiary-container block mb-2" style="font-variation-settings: 'FILL' 1;">baby_changing_station</span>
+<div class="font-bold text-deep-cocoa text-xl">4</div>
+<div class="text-supporting-text font-supporting-text text-on-surface-variant">次喂奶</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-control text-center">
+<span class="material-symbols-outlined text-secondary block mb-2" style="font-variation-settings: 'FILL' 1;">bedtime</span>
+<div class="font-bold text-deep-cocoa text-xl">2.5h</div>
+<div class="text-supporting-text font-supporting-text text-on-surface-variant">睡眠时长</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-control text-center">
+<span class="material-symbols-outlined text-focus-blue block mb-2" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+<div class="font-bold text-deep-cocoa text-xl">3</div>
+<div class="text-supporting-text font-supporting-text text-on-surface-variant">次换尿布</div>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-modal border border-quiet-border p-6 shadow-sm h-64">
+<h2 class="font-section-title text-section-title text-deep-cocoa mb-4">最近记录</h2>
+<div class="space-y-4">
+<div class="flex justify-between border-b border-quiet-border pb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container"><span class="material-symbols-outlined">baby_changing_station</span></div>
+<div>
+<div class="font-medium text-deep-cocoa">母乳喂养</div>
+<div class="text-supporting-text font-supporting-text text-on-surface-variant">10:30 AM</div>
+</div>
+</div>
+<div class="font-medium text-deep-cocoa">120 ml</div>
+</div>
+</div>
+</div>
+</div>
+<div class="col-span-1 space-y-6">
+<div class="bg-white rounded-modal border border-quiet-border p-6 shadow-sm text-center">
+<img class="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-surface-container-low" data-alt="A beautiful, soft-focus illustration of a sleeping baby wrapped in warm coral and porcelain tones. The style is modern, editorial, and tactile, conveying a sense of calm and trustworthiness. It avoids bright primary colors in favor of sophisticated muted shades." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBapniKa6rxrUGXKtLvXXsNW3weA_s_dVg-HY5NjTzcUWGOZd9RHqdCEvBxf94wAieIzosEjTVUXHZJSTxCHuouBKU8GHqX5bXoZI4PjQQuMf5ohLEMBAlir3dCB9i72cU_Kf7s7aWhX1BgI6HeOffqS-skCy9dZM4qPQ45ppYNjeNuMBw0HQoG6OR4P2BP5N0VHB_YouFtUF3gCqs72Urof5od009jHvXVZarllLf4sYjmG2wtJV9Y6FNM3evuXLn78gzMkBjnkfY"/>
+<h3 class="font-section-title text-section-title text-deep-cocoa">小满 (Xiao Man)</h3>
+<p class="text-supporting-text font-supporting-text text-on-surface-variant">6 个月 12 天</p>
+</div>
+</div>
+</main>
+<!-- Overlay -->
+<div class="fixed inset-0 bg-deep-cocoa/40 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+<!-- Central Modal -->
+<div class="bg-white w-full max-w-lg rounded-modal modal-shadow border border-quiet-border overflow-hidden flex flex-col max-h-[921px]">
+<!-- Modal Header -->
+<div class="flex justify-between items-center p-6 border-b border-quiet-border bg-white">
+<h2 class="font-section-title text-section-title text-deep-cocoa m-0 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container">edit_note</span>
+                    记录小满的喂养
+                </h2>
+<button aria-label="Close" class="text-slate-graphite hover:text-deep-cocoa transition-colors p-2 rounded-full hover:bg-surface-container-low focus-ring">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Modal Content Body -->
+<div class="p-6 overflow-y-auto flex-1 space-y-8 bg-white">
+<!-- Mode Switcher -->
+<div class="flex bg-surface-container-low rounded-control p-1">
+<button class="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-[10px] bg-white text-deep-cocoa shadow-sm font-medium focus-ring transition-all">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">baby_changing_station</span>
+                        喂养
+                    </button>
+<button class="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-[10px] text-slate-graphite hover:text-deep-cocoa font-medium focus-ring transition-all">
+<span class="material-symbols-outlined text-secondary">bedtime</span>
+                        睡眠
+                    </button>
+<button class="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-[10px] text-slate-graphite hover:text-deep-cocoa font-medium focus-ring transition-all">
+<span class="material-symbols-outlined text-focus-blue">water_drop</span>
+                        尿布
+                    </button>
+</div>
+<!-- Form Fields -->
+<form class="space-y-6">
+<!-- Record Time -->
+<div class="space-y-2">
+<label class="block text-supporting-text font-supporting-text font-medium text-deep-cocoa">记录时间</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-graphite">schedule</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-3 border border-quiet-border rounded-control focus:ring-2 focus:ring-focus-blue focus:border-focus-blue text-deep-cocoa h-control-min-height focus-ring" type="text" value="刚刚"/>
+</div>
+</div>
+<!-- Feeding Type -->
+<div class="space-y-2">
+<label class="block text-supporting-text font-supporting-text font-medium text-deep-cocoa">喂养类型</label>
+<div class="flex flex-wrap gap-3">
+<label class="flex-1 min-w-[100px] cursor-pointer">
+<input checked="" class="peer sr-only" name="feeding_type" type="radio"/>
+<div class="px-4 py-3 border border-primary-container bg-primary-fixed-dim/10 text-primary-container rounded-control text-center font-medium peer-focus-visible:ring-2 peer-focus-visible:ring-focus-blue peer-focus-visible:ring-offset-2 transition-all">
+                                    母乳
+                                </div>
+</label>
+<label class="flex-1 min-w-[100px] cursor-pointer">
+<input class="peer sr-only" name="feeding_type" type="radio"/>
+<div class="px-4 py-3 border border-quiet-border bg-white text-slate-graphite rounded-control text-center font-medium hover:bg-surface-container-low peer-focus-visible:ring-2 peer-focus-visible:ring-focus-blue peer-focus-visible:ring-offset-2 transition-all">
+                                    配方奶
+                                </div>
+</label>
+<label class="flex-1 min-w-[100px] cursor-pointer">
+<input class="peer sr-only" name="feeding_type" type="radio"/>
+<div class="px-4 py-3 border border-quiet-border bg-white text-slate-graphite rounded-control text-center font-medium hover:bg-surface-container-low peer-focus-visible:ring-2 peer-focus-visible:ring-focus-blue peer-focus-visible:ring-offset-2 transition-all">
+                                    辅食
+                                </div>
+</label>
+</div>
+</div>
+<!-- Amount -->
+<div class="space-y-2">
+<label class="block text-supporting-text font-supporting-text font-medium text-deep-cocoa flex justify-between">
+                            喂奶量
+                            <span class="text-primary font-bold">120 ml</span>
+</label>
+<input class="w-full h-2 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-primary-container focus-ring focus:outline-none" max="300" min="0" type="range" value="120"/>
+<div class="flex justify-between text-label-caps font-label-caps text-on-surface-variant mt-1">
+<span>0</span>
+<span>300ml</span>
+</div>
+</div>
+<!-- Notes -->
+<div class="space-y-2">
+<label class="block text-supporting-text font-supporting-text font-medium text-deep-cocoa">备注 (选填)</label>
+<textarea class="block w-full p-3 border border-quiet-border rounded-control focus:ring-2 focus:ring-focus-blue focus:border-focus-blue text-deep-cocoa resize-none focus-ring" placeholder="添加一些关于这次喂养的细节..." rows="3"></textarea>
+</div>
+</form>
+</div>
+<!-- Modal Footer -->
+<div class="p-6 border-t border-quiet-border bg-surface-container-lowest flex flex-col gap-4">
+<div class="flex justify-end gap-3">
+<button class="px-6 py-2 h-control-min-height border border-quiet-border text-deep-cocoa bg-white rounded-control font-medium hover:bg-surface-container-low transition-colors focus-ring">取消</button>
+<button class="px-8 py-2 h-control-min-height bg-primary-container text-white rounded-control font-medium hover:bg-primary transition-colors focus-ring shadow-sm flex items-center justify-center gap-2">
+                        保存记录
+                    </button>
+</div>
+<div class="flex justify-between items-center text-label-caps font-label-caps">
+<div class="flex items-center gap-1 text-slate-graphite">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+                        此记录对家庭成员可见
+                    </div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">cloud_sync</span>
+                        本地已保存，等待同步
+                    </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Reference States Container (Absolutely positioned off-screen or clearly separated for demonstration) -->
+<div class="fixed bottom-0 left-0 w-full p-6 bg-surface border-t border-quiet-border z-50 overflow-x-auto">
+<h3 class="font-section-title text-section-title text-deep-cocoa mb-4">Required States UI (Reference)</h3>
+<div class="flex gap-8 items-end min-w-max">
+<!-- Validation Error -->
+<div class="space-y-2 w-64">
+<label class="block text-supporting-text font-supporting-text font-medium text-error">喂奶量 (ml)</label>
+<input class="block w-full p-3 border-2 border-error rounded-control bg-error-container/20 text-deep-cocoa focus-ring" placeholder="0" type="text"/>
+<p class="text-label-caps font-label-caps text-error flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">error</span> 请输入喂奶量
+                </p>
+</div>
+<!-- Saving State -->
+<div>
+<button class="px-8 py-2 h-control-min-height bg-primary-container/80 text-white rounded-control font-medium cursor-wait shadow-sm flex items-center justify-center gap-2 focus-ring" disabled="">
+<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+<path class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" fill="currentColor"></path>
+</svg>
+                    保存中...
+                </button>
+</div>
+<!-- Success Toast -->
+<div class="bg-surface-container-high border border-quiet-border rounded-full px-4 py-2 flex items-center gap-2 shadow-sm">
+<div class="w-6 h-6 rounded-full bg-tertiary-container flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<span class="text-supporting-text font-supporting-text text-deep-cocoa font-medium">记录已成功保存</span>
+</div>
+<!-- Network Error -->
+<div class="bg-error-container border border-error/20 rounded-full px-4 py-2 flex items-center gap-3 shadow-sm">
+<span class="material-symbols-outlined text-error text-[18px]">cloud_off</span>
+<span class="text-supporting-text font-supporting-text text-on-error-container font-medium">同步失败</span>
+<button class="text-label-caps font-label-caps text-error hover:text-on-error-container font-bold ml-2 underline focus-ring">重试</button>
+</div>
+</div>
+</div>
+</body></html>
